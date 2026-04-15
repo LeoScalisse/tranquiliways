@@ -60,9 +60,9 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
           {collapsed ? (
             <ShimmerText
               active={shimmerActive}
-              duration={1.5}
-              delay={2}
-              className="text-6xl sm:text-7xl md:text-8xl font-bold"
+              duration={1}
+              delay={0.8}
+              className="text-5xl sm:text-6xl md:text-7xl font-bold"
             >
               <span style={{ color: "#ffdb58" }}>
                 {waysChars.map((char, i) => (
