@@ -49,7 +49,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="text-6xl sm:text-7xl md:text-8xl font-bold text-white"
+                className="text-5xl sm:text-6xl md:text-7xl font-bold text-white"
               >
                 {char}
               </motion.span>
