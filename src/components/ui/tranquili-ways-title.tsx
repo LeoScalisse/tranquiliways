@@ -29,7 +29,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   };
 
   return (
-    <div className="flex justify-center mb-20 mt-[-100px]">
+    <div className="flex justify-center mb-20 mt-[-130px]">
       <div className="relative flex items-center justify-center min-h-[100px]">
         <div className="flex items-center">
           {/* Tranquili — collapses smoothly */}
@@ -49,7 +49,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="text-6xl sm:text-7xl md:text-8xl font-bold text-white"
+                className="text-5xl sm:text-6xl md:text-7xl font-bold text-white"
               >
                 {char}
               </motion.span>
@@ -60,9 +60,9 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
           {collapsed ? (
             <ShimmerText
               active={shimmerActive}
-              duration={1.5}
-              delay={2}
-              className="text-6xl sm:text-7xl md:text-8xl font-bold"
+              duration={1}
+              delay={0.8}
+              className="text-5xl sm:text-6xl md:text-7xl font-bold"
             >
               <span style={{ color: "#ffdb58" }}>
                 {waysChars.map((char, i) => (
@@ -84,7 +84,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="text-6xl sm:text-7xl md:text-8xl font-bold"
+                className="text-5xl sm:text-6xl md:text-7xl font-bold"
                 style={{ color: "#ffdb58" }}
               >
                 {char}
