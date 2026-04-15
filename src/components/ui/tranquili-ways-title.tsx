@@ -19,7 +19,7 @@ export const TranquiliWaysTitle: React.FC = () => {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.03, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.02, delayChildren: 0 },
     },
   };
 
