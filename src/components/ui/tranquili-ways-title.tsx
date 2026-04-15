@@ -2,8 +2,8 @@ import * as React from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 const blurIn = {
-  hidden: { opacity: 0, filter: "blur(12px)" },
-  show: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.5 } },
+  hidden: { opacity: 0, filter: "blur(8px)" },
+  show: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.3 } },
 };
 
 export const TranquiliWaysTitle: React.FC = () => {
@@ -19,7 +19,7 @@ export const TranquiliWaysTitle: React.FC = () => {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.03, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.02, delayChildren: 0 },
     },
   };
 
