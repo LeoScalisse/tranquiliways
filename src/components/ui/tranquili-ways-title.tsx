@@ -1,7 +1,14 @@
 import * as React from "react";
 import { motion } from "motion/react";
+import { ShimmerText } from "./shimmer-text";
 
-export const TranquiliWaysTitle: React.FC = () => {
+interface TranquiliWaysTitleProps {
+  shimmerActive?: boolean;
+}
+
+export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
+  shimmerActive = true,
+}) => {
   const [collapsed, setCollapsed] = React.useState(false);
 
   const tranquiliChars = "Tranquili".split("");
@@ -22,8 +29,8 @@ export const TranquiliWaysTitle: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center mb-20 mt-[-60px]">
-      <div className="relative flex items-center justify-center min-h-[90px]">
+    <div className="flex justify-center mb-20 mt-[-100px]">
+      <div className="relative flex items-center justify-center min-h-[100px]">
         <div className="flex items-center">
           {/* Tranquili — collapses smoothly */}
           <motion.span
@@ -42,27 +49,48 @@ export const TranquiliWaysTitle: React.FC = () => {
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="text-5xl sm:text-6xl md:text-7xl font-bold text-white"
+                className="text-6xl sm:text-7xl md:text-8xl font-bold text-white"
               >
                 {char}
               </motion.span>
             ))}
           </motion.span>
 
-          {/* Ways — always visible, never unmounts */}
-          {waysChars.map((char, i) => (
-            <motion.span
-              key={`w-${i}`}
-              custom={tranquiliChars.length + i}
-              initial="hidden"
-              animate="show"
-              variants={charStagger}
-              className="text-5xl sm:text-6xl md:text-7xl font-bold"
-              style={{ color: "#ffdb58" }}
+          {/* Ways — always visible, shimmer after collapse */}
+          {collapsed ? (
+            <ShimmerText
+              active={shimmerActive}
+              duration={1.5}
+              delay={2}
+              className="text-6xl sm:text-7xl md:text-8xl font-bold"
             >
-              {char}
-            </motion.span>
-          ))}
+              <span style={{ color: "#ffdb58" }}>
+                {waysChars.map((char, i) => (
+                  <motion.span
+                    key={`ws-${i}`}
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    {char}
+                  </motion.span>
+                ))}
+              </span>
+            </ShimmerText>
+          ) : (
+            waysChars.map((char, i) => (
+              <motion.span
+                key={`w-${i}`}
+                custom={tranquiliChars.length + i}
+                initial="hidden"
+                animate="show"
+                variants={charStagger}
+                className="text-6xl sm:text-7xl md:text-8xl font-bold"
+                style={{ color: "#ffdb58" }}
+              >
+                {char}
+              </motion.span>
+            ))
+          )}
         </div>
       </div>
     </div>
