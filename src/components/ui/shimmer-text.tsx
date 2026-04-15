@@ -27,7 +27,7 @@ export function ShimmerText({
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundImage:
-              "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)",
+              "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.85) 50%, transparent 100%)",
             backgroundSize: "200% 100%",
           }}
           animate={
