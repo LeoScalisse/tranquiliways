@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PromptInputBox } from "@/components/ui/ai-prompt-box";
+import { TranquiliWaysTitle } from "@/components/ui/tranquili-ways-title";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -12,6 +13,7 @@ function Index() {
       style={{ background: "linear-gradient(135deg, #5cc3ff 0%, #ffffff 100%)" }}
     >
       <div className="w-full max-w-2xl">
+        <TranquiliWaysTitle />
         <PromptInputBox
           onSend={(message, files) => {
             console.log("Message:", message);
