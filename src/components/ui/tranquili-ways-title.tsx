@@ -2,7 +2,7 @@ import * as React from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 const blurIn = {
-  hidden: { opacity: 0, filter: "blur(12px)" },
+  hidden: { opacity: 0, filter: "blur(8px)" },
   show: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.5 } },
 };
 
