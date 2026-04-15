@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 const blurIn = {
   hidden: { opacity: 0, filter: "blur(8px)" },
-  show: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.5 } },
+  show: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.3 } },
 };
 
 export const TranquiliWaysTitle: React.FC = () => {
