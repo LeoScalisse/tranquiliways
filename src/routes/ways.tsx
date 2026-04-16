@@ -43,7 +43,7 @@ function WaysPage() {
               <ArrowLeft size={18} style={{ color: "rgba(255,255,255,0.9)" }} />
             </motion.div>
           </Link>
-          <h1 className="text-2xl font-bold" style={{ color: "#ffdb58" }}>
+          <h1 className="text-2xl font-bold text-slate-50">
             Meus Ways
           </h1>
           <Cloud size={20} style={{ color: "rgba(255,255,255,0.7)" }} />
