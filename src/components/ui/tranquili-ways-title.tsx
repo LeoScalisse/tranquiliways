@@ -10,6 +10,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   shimmerActive = true,
 }) => {
   const [collapsed, setCollapsed] = React.useState(false);
+  const [animKey, setAnimKey] = React.useState(0);
 
   const tranquiliChars = "Tranquili".split("");
   const waysChars = "Ways".split("");
@@ -17,7 +18,14 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   React.useEffect(() => {
     const timer = setTimeout(() => setCollapsed(true), 2800);
     return () => clearTimeout(timer);
-  }, []);
+  }, [animKey]);
+
+  const handleRestart = () => {
+    if (collapsed) {
+      setCollapsed(false);
+      setAnimKey((k) => k + 1);
+    }
+  };
 
   const charStagger = {
     hidden: { opacity: 0, filter: "blur(10px)" },
@@ -31,7 +39,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   return (
     <div className="flex justify-center mb-20 mt-[-130px]">
       <div className="relative flex items-center justify-center min-h-[100px]">
-        <div className="flex items-center">
+        <div key={animKey} className="flex items-center cursor-pointer" onClick={handleRestart}>
           {/* Tranquili — collapses smoothly */}
           <motion.span
             className="flex overflow-hidden whitespace-nowrap"
