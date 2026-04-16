@@ -10,6 +10,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   shimmerActive = true,
 }) => {
   const [collapsed, setCollapsed] = React.useState(false);
+  const [animKey, setAnimKey] = React.useState(0);
 
   const tranquiliChars = "Tranquili".split("");
   const waysChars = "Ways".split("");
@@ -17,7 +18,14 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   React.useEffect(() => {
     const timer = setTimeout(() => setCollapsed(true), 2800);
     return () => clearTimeout(timer);
-  }, []);
+  }, [animKey]);
+
+  const handleRestart = () => {
+    if (collapsed) {
+      setCollapsed(false);
+      setAnimKey((k) => k + 1);
+    }
+  };
 
   const charStagger = {
     hidden: { opacity: 0, filter: "blur(10px)" },
