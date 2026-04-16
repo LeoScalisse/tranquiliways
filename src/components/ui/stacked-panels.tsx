@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { motion, useSpring, type SpringOptions } from "motion/react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PANEL_COUNT = 22;
 const WAVE_SPRING: SpringOptions = { stiffness: 160, damping: 22, mass: 0.6 };
@@ -141,6 +142,7 @@ function Panel({
 export default function StackedPanels() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isHovering = useRef(false);
+  const isMobile = useIsMobile();
 
   const waveYSprings = Array.from({ length: PANEL_COUNT }, () =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -155,8 +157,8 @@ export default function StackedPanels() {
   const rotY = useSpring(-42, SCENE_SPRING);
   const rotX = useSpring(18, SCENE_SPRING);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
       isHovering.current = true;
@@ -164,15 +166,15 @@ export default function StackedPanels() {
       const cx = (e.clientX - rect.left) / rect.width;
       const cy = (e.clientY - rect.top) / rect.height;
 
-      rotY.set(-42 + (cx - 0.5) * 14);
-      rotX.set(18 + (cy - 0.5) * -10);
+      rotY.set(-42 + (cx - 0.5) * (isMobile ? 8 : 14));
+      rotX.set(18 + (cy - 0.5) * (isMobile ? -6 : -10));
 
       const cursorCardPos = cx * (PANEL_COUNT - 1);
 
       waveYSprings.forEach((spring, i) => {
         const dist = Math.abs(i - cursorCardPos);
         const influence = Math.exp(-(dist * dist) / (2 * SIGMA * SIGMA));
-        spring.set(-influence * 70);
+        spring.set(-influence * (isMobile ? 42 : 70));
       });
 
       scaleYSprings.forEach((spring, i) => {
@@ -181,10 +183,10 @@ export default function StackedPanels() {
         spring.set(0.35 + influence * 0.65);
       });
     },
-    [rotY, rotX, waveYSprings, scaleYSprings]
+    [isMobile, rotY, rotX, waveYSprings, scaleYSprings]
   );
 
-  const handleMouseLeave = useCallback(() => {
+  const handlePointerLeave = useCallback(() => {
     isHovering.current = false;
     rotY.set(-42);
     rotX.set(18);
@@ -195,8 +197,8 @@ export default function StackedPanels() {
   return (
     <div
       ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
       style={{
         width: "100%",
         height: "100%",
@@ -215,6 +217,7 @@ export default function StackedPanels() {
           transformStyle: "preserve-3d",
           rotateY: rotY,
           rotateX: rotX,
+          scale: isMobile ? 0.76 : 1,
         }}
       >
         {Array.from({ length: PANEL_COUNT }).map((_, i) => (

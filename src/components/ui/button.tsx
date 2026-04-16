@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -16,12 +16,16 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        glass:
+          "border border-white/35 bg-white/18 text-white shadow-[0_16px_36px_rgba(29,86,128,0.14),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-xl supports-[backdrop-filter]:bg-white/16 hover:border-white/50 hover:bg-white/24 hover:shadow-[0_18px_44px_rgba(29,86,128,0.2),inset_0_1px_0_rgba(255,255,255,0.56)]",
+        glassProminent:
+          "border border-white/45 bg-white/26 text-sky-950 shadow-[0_20px_48px_rgba(29,86,128,0.18),inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-xl supports-[backdrop-filter]:bg-white/22 hover:border-white/60 hover:bg-white/32 hover:shadow-[0_22px_54px_rgba(29,86,128,0.22),inset_0_1px_0_rgba(255,255,255,0.7)]",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        icon: "h-9 w-9 rounded-full",
       },
     },
     defaultVariants: {

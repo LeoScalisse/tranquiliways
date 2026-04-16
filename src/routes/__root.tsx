@@ -28,15 +28,25 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { title: "TranquiliWays" },
+      {
+        name: "description",
+        content: "TranquiliWays oferece uma jornada mobile calma para explorar ideias, registrar sentimentos e navegar seus ways.",
+      },
+      { name: "author", content: "TranquiliWays" },
+      { name: "theme-color", content: "#d8f0ff" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "TranquiliWays" },
+      { property: "og:title", content: "TranquiliWays" },
+      {
+        property: "og:description",
+        content: "Uma interface híbrida pensada para Android e iOS com visual fluido e botões em estilo Liquid Glass.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "TranquiliWays" },
     ],
     links: [
       {
@@ -52,7 +62,7 @@ export const Route = createRootRoute({
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>

@@ -37,8 +37,8 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   };
 
   return (
-    <div className="flex justify-center mb-20 mt-[-130px]">
-      <div className="relative flex items-center justify-center min-h-[100px]">
+    <div className="flex justify-start">
+      <div className="relative flex min-h-[88px] items-center justify-center sm:min-h-[100px]">
         <div key={animKey} className="flex items-center cursor-pointer" onClick={handleRestart}>
           {/* Tranquili — collapses smoothly */}
           <motion.span
@@ -57,7 +57,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="text-5xl sm:text-6xl md:text-7xl font-bold text-white"
+                className="app-heading text-4xl font-bold text-white sm:text-6xl md:text-7xl"
               >
                 {char}
               </motion.span>
@@ -66,12 +66,12 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
 
           {/* Ways — always visible, shimmer after collapse */}
           {collapsed ? (
-            <ShimmerText
-              active={shimmerActive}
-              duration={1}
-              delay={0.8}
-              className="text-5xl sm:text-6xl md:text-7xl font-bold"
-            >
+              <ShimmerText
+                active={shimmerActive}
+                duration={1}
+                delay={0.8}
+                className="app-heading text-4xl font-bold sm:text-6xl md:text-7xl"
+              >
               <span style={{ color: "#ffdb58" }}>
                 {waysChars.map((char, i) => (
                   <motion.span
@@ -92,7 +92,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="text-5xl sm:text-6xl md:text-7xl font-bold"
+                className="app-heading text-4xl font-bold sm:text-6xl md:text-7xl"
                 style={{ color: "#ffdb58" }}
               >
                 {char}

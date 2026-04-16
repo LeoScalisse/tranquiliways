@@ -1,34 +1,57 @@
 import { motion } from "motion/react";
 import { Cloud } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
+import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function LiquidGlassButton() {
+interface LiquidGlassButtonProps {
+  to: LinkProps["to"];
+  icon?: LucideIcon;
+  label?: string;
+  className?: string;
+  prominent?: boolean;
+  compact?: boolean;
+}
+
+export function LiquidGlassButton({
+  to,
+  icon: Icon = Cloud,
+  label,
+  className,
+  prominent = false,
+  compact = false,
+}: LiquidGlassButtonProps) {
   return (
-    <Link to="/ways">
+    <Link to={to} className="inline-flex">
       <motion.div
-        className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer relative"
+        className={cn(
+          "relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full border text-sm font-medium text-white",
+          compact ? "h-11 min-w-11 px-3" : "h-12 min-w-12 px-4",
+          prominent
+            ? "border-white/50 bg-white/26 text-sky-950 shadow-[0_18px_44px_rgba(24,74,116,0.18),inset_0_1px_0_rgba(255,255,255,0.6)]"
+            : "border-white/35 bg-white/18 shadow-[0_14px_34px_rgba(24,74,116,0.14),inset_0_1px_0_rgba(255,255,255,0.48)]",
+          className,
+        )}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         style={{
-          background: "linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 100%)",
-          backdropFilter: "blur(16px) saturate(1.8)",
-          WebkitBackdropFilter: "blur(16px) saturate(1.8)",
-          border: "1px solid rgba(255,255,255,0.35)",
-          boxShadow: "0 4px 24px rgba(92,195,255,0.15), inset 0 1px 0 rgba(255,255,255,0.4)",
+          backdropFilter: "blur(18px) saturate(1.7)",
+          WebkitBackdropFilter: "blur(18px) saturate(1.7)",
         }}
       >
-        <Cloud
-          size={18}
-          strokeWidth={1.8}
-          style={{ color: "rgba(255,255,255,0.9)" }}
+        <span className="glass-orb h-8 w-8 left-1 top-1 opacity-90" />
+        <Icon
+          size={compact ? 18 : 19}
+          strokeWidth={1.9}
+          className={prominent ? "text-sky-950" : "text-white"}
         />
-        {/* Thought bubble dots */}
+        {label ? <span className="relative z-10 pr-1">{label}</span> : null}
         <div
+          className="pointer-events-none absolute"
           style={{
-            position: "absolute",
             bottom: -8,
-            left: "50%",
-            transform: "translateX(-50%)",
+            left: compact ? "50%" : 22,
+            transform: compact ? "translateX(-50%)" : "none",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -40,7 +63,7 @@ export function LiquidGlassButton() {
               width: 4,
               height: 4,
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.6)",
+              background: prominent ? "rgba(3, 105, 161, 0.42)" : "rgba(255,255,255,0.6)",
             }}
           />
           <div
@@ -48,7 +71,7 @@ export function LiquidGlassButton() {
               width: 2.5,
               height: 2.5,
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.4)",
+              background: prominent ? "rgba(3, 105, 161, 0.28)" : "rgba(255,255,255,0.4)",
             }}
           />
         </div>
