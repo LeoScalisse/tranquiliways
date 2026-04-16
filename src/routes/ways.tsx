@@ -21,7 +21,7 @@ function WaysPage() {
     <div
       className="min-h-screen px-4 py-6"
       style={{
-        background: "linear-gradient(135deg, #5cc3ff 0%, #fffef5 100%)",
+        background: "linear-gradient(135deg, #5cc3ff 0%, #4ab8f0 35%, #a8d8f0 60%, #f5e6a3 100%)",
       }}
     >
       {/* Header */}
