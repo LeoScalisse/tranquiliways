@@ -78,6 +78,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                     key={`ws-${i}`}
                     initial={{ opacity: 1 }}
                     animate={{ opacity: 1 }}
+                    className="text-7xl font-semibold"
                   >
                     {char}
                   </motion.span>
