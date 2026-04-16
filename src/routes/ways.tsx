@@ -9,30 +9,16 @@ export const Route = createFileRoute("/ways")({
 });
 
 function WaysPage() {
-  const ways = [
-    { id: 1, title: "Meditação guiada matinal", date: "15 Abr 2026", preview: "Uma sessão de 10 minutos para começar o dia com calma..." },
-    { id: 2, title: "Exercício de respiração 4-7-8", date: "14 Abr 2026", preview: "Técnica de respiração para reduzir ansiedade..." },
-    { id: 3, title: "Gratidão do dia", date: "13 Abr 2026", preview: "Liste três coisas pelas quais você é grato hoje..." },
-    { id: 4, title: "Visualização positiva", date: "12 Abr 2026", preview: "Imagine seu lugar seguro e tranquilo..." },
-    { id: 5, title: "Body scan relaxante", date: "11 Abr 2026", preview: "Relaxamento progressivo dos pés à cabeça..." },
-  ];
-
   return (
     <div
-      className="min-h-screen px-4 py-6 relative overflow-hidden"
+      className="min-h-screen px-4 py-6 flex flex-col"
       style={{
         background: "linear-gradient(135deg, #5cc3ff 0%, #4ab8f0 35%, #a8d8f0 60%, #f5e6a3 100%)",
       }}
     >
-      {/* Stacked Panels Background */}
-      <div className="absolute inset-0 opacity-15 pointer-events-none">
-        <StackedPanels />
-      </div>
-
-      {/* Content */}
-      <div className="max-w-2xl mx-auto relative z-10">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
+      {/* Header */}
+      <div className="max-w-2xl mx-auto w-full">
+        <div className="flex items-center gap-3 mb-6">
           <Link to="/">
             <motion.div
               className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
@@ -54,41 +40,17 @@ function WaysPage() {
           </h1>
           <Cloud size={20} style={{ color: "rgba(255,255,255,0.7)" }} />
         </div>
+      </div>
 
-        {/* Ways list */}
-        <div className="flex flex-col gap-4">
-          {ways.map((way, index) => (
-            <motion.div
-              key={way.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08, duration: 0.4 }}
-              className="rounded-2xl p-5 cursor-pointer"
-              whileHover={{ scale: 1.01, y: -2 }}
-              style={{
-                background: "linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 100%)",
-                backdropFilter: "blur(20px) saturate(1.6)",
-                WebkitBackdropFilter: "blur(20px) saturate(1.6)",
-                border: "1px solid rgba(255,255,255,0.4)",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)",
-              }}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-lg font-semibold text-black/80">{way.title}</h3>
-                <span className="text-xs text-black/40 whitespace-nowrap ml-3 mt-1">{way.date}</span>
-              </div>
-              <p className="text-sm text-black/55 leading-relaxed">{way.preview}</p>
-            </motion.div>
-          ))}
+      {/* Interactive Stacked Panels as Ways */}
+      <div className="flex-1 flex items-center justify-center">
+        <div style={{ width: "min(100%, 500px)", height: "min(70vh, 500px)" }}>
+          <StackedPanels />
         </div>
+      </div>
 
-        {/* Empty state */}
-        {ways.length === 0 && (
-          <div className="text-center py-20">
-            <Cloud size={48} className="mx-auto mb-4" style={{ color: "rgba(255,255,255,0.5)" }} />
-            <p className="text-black/40">Nenhum Way gerado ainda</p>
-          </div>
-        )}
+      <div className="text-center pb-4">
+        <p className="text-sm text-white/50">Deslize para explorar seus Ways</p>
       </div>
     </div>
   );
