@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Cloud } from "lucide-react";
 import { motion } from "motion/react";
+import StackedPanels from "@/components/ui/stacked-panels";
 
 export const Route = createFileRoute("/ways")({
   component: WaysPage,
 });
 
 function WaysPage() {
-  // Placeholder data for previously generated ways
   const ways = [
     { id: 1, title: "Meditação guiada matinal", date: "15 Abr 2026", preview: "Uma sessão de 10 minutos para começar o dia com calma..." },
     { id: 2, title: "Exercício de respiração 4-7-8", date: "14 Abr 2026", preview: "Técnica de respiração para reduzir ansiedade..." },
@@ -19,13 +19,19 @@ function WaysPage() {
 
   return (
     <div
-      className="min-h-screen px-4 py-6"
+      className="min-h-screen px-4 py-6 relative overflow-hidden"
       style={{
         background: "linear-gradient(135deg, #5cc3ff 0%, #4ab8f0 35%, #a8d8f0 60%, #f5e6a3 100%)",
       }}
     >
-      {/* Header */}
-      <div className="max-w-2xl mx-auto">
+      {/* Stacked Panels Background */}
+      <div className="absolute inset-0 opacity-15 pointer-events-none">
+        <StackedPanels />
+      </div>
+
+      {/* Content */}
+      <div className="max-w-2xl mx-auto relative z-10">
+        {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <Link to="/">
             <motion.div
@@ -76,7 +82,7 @@ function WaysPage() {
           ))}
         </div>
 
-        {/* Empty state hint */}
+        {/* Empty state */}
         {ways.length === 0 && (
           <div className="text-center py-20">
             <Cloud size={48} className="mx-auto mb-4" style={{ color: "rgba(255,255,255,0.5)" }} />
