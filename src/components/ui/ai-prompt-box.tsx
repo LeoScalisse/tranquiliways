@@ -105,9 +105,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const PromptButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", ...props }, ref) => {
     const variantClasses = {
-      default: "bg-white hover:bg-white/80 text-black",
-      outline: "border border-[#444444] bg-transparent hover:bg-[#3A3A40]",
-      ghost: "bg-transparent hover:bg-[#3A3A40]",
+      default: "",
+      outline: "border border-black/10 bg-transparent hover:bg-black/5",
+      ghost: "bg-transparent hover:bg-black/5",
     };
     const sizeClasses = {
       default: "h-10 px-4 py-2",
