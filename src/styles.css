@@ -141,9 +141,7 @@
 
   html {
     min-height: 100%;
-    background:
-      radial-gradient(circle at top, rgba(255, 255, 255, 0.85), transparent 35%),
-      linear-gradient(180deg, #84d7ff 0%, #7bcaee 28%, #a7d8e9 54%, #f3dc9b 100%);
+    background: linear-gradient(180deg, #5cc3ff 0%, #a8dcff 55%, #ffffff 100%);
   }
 
   body {
@@ -153,9 +151,7 @@
     color: var(--color-foreground);
     font-family: var(--font-body);
     overscroll-behavior-y: none;
-    background:
-      radial-gradient(circle at top, rgba(255, 255, 255, 0.85), transparent 35%),
-      linear-gradient(180deg, #84d7ff 0%, #7bcaee 28%, #a7d8e9 54%, #f3dc9b 100%);
+    background: linear-gradient(180deg, #5cc3ff 0%, #a8dcff 55%, #ffffff 100%);
   }
 
   #root {
