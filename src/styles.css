@@ -141,7 +141,7 @@
 
   html {
     min-height: 100%;
-    background: linear-gradient(180deg, #5cc3ff 0%, #a8dcff 55%, #ffffff 100%);
+    background: linear-gradient(180deg, #5cc3ff 0%, #a8dcff 50%, #ffffff 80%, #fff4c2 100%);
   }
 
   body {
@@ -151,7 +151,7 @@
     color: var(--color-foreground);
     font-family: var(--font-body);
     overscroll-behavior-y: none;
-    background: linear-gradient(180deg, #5cc3ff 0%, #a8dcff 55%, #ffffff 100%);
+    background: linear-gradient(180deg, #5cc3ff 0%, #a8dcff 50%, #ffffff 80%, #fff4c2 100%);
   }
 
   #root {
