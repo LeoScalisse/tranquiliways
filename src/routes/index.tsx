@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { TranquiliWaysTitle } from "@/components/ui/tranquili-ways-title";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
+import { useWays } from "@/hooks/use-ways";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -10,6 +11,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [interacting, setInteracting] = useState(false);
+  const { addWay } = useWays();
+  const navigate = useNavigate();
 
   return (
     <div className="safe-screen relative overflow-hidden">
@@ -28,9 +31,11 @@ function Index() {
           <PromptInputBox
             placeholder="Como você quer se sentir hoje?"
             className="rounded-[1.75rem] border-white/30 bg-white/75 shadow-[0_18px_44px_rgba(30,76,112,0.12)]"
-            onSend={(message, files) => {
-              console.log("Message:", message);
-              console.log("Files:", files);
+            onSend={(message) => {
+              const text = message.trim();
+              if (!text) return;
+              addWay(text);
+              navigate({ to: "/ways" });
             }}
           />
         </div>
