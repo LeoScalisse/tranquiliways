@@ -32,14 +32,25 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
     show: (i: number) => ({
       opacity: 1,
       filter: "blur(0px)",
-      transition: { duration: 0.3, delay: i * 0.025 },
+      transition: { duration: 0.35, delay: i * 0.03, ease: "easeOut" as const },
     }),
   };
 
+  const headingClass =
+    "app-heading text-4xl font-bold sm:text-5xl md:text-6xl";
+
   return (
     <div className="flex w-full justify-center">
-      <div className="relative flex min-h-[88px] items-center justify-center sm:min-h-[100px]">
-        <div key={animKey} className="flex items-center justify-center cursor-pointer" onClick={handleRestart}>
+      <div
+        className="relative flex min-h-[72px] items-center justify-center sm:min-h-[88px] cursor-pointer"
+        onClick={handleRestart}
+      >
+        <motion.div
+          key={animKey}
+          className="flex items-center justify-center"
+          layout
+          transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
+        >
           {/* Tranquili — collapses smoothly */}
           <motion.span
             className="flex overflow-hidden whitespace-nowrap"
@@ -48,7 +59,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 ? { width: 0, opacity: 0 }
                 : { width: "auto", opacity: 1 }
             }
-            transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
           >
             {tranquiliChars.map((char, i) => (
               <motion.span
@@ -57,7 +68,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="app-heading text-4xl font-bold text-white sm:text-6xl md:text-7xl"
+                className={`${headingClass} text-white`}
               >
                 {char}
               </motion.span>
@@ -66,19 +77,18 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
 
           {/* Ways — always visible, shimmer after collapse */}
           {collapsed ? (
-              <ShimmerText
-                active={shimmerActive}
-                duration={1}
-                delay={0.8}
-                className="app-heading text-4xl font-bold sm:text-6xl md:text-7xl"
-              >
+            <ShimmerText
+              active={shimmerActive}
+              duration={1}
+              delay={0.8}
+              className={headingClass}
+            >
               <span style={{ color: "#ffdb58" }}>
                 {waysChars.map((char, i) => (
                   <motion.span
                     key={`ws-${i}`}
                     initial={{ opacity: 1 }}
                     animate={{ opacity: 1 }}
-                    className="text-7xl font-semibold"
                   >
                     {char}
                   </motion.span>
@@ -93,14 +103,14 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
                 initial="hidden"
                 animate="show"
                 variants={charStagger}
-                className="app-heading text-4xl font-bold sm:text-6xl md:text-7xl"
+                className={headingClass}
                 style={{ color: "#ffdb58" }}
               >
                 {char}
               </motion.span>
             ))
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

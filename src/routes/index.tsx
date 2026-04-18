@@ -17,7 +17,7 @@ function Index() {
         <LiquidGlassButton to="/ways" />
       </div>
 
-      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-center gap-10 px-4">
+      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-start gap-12 px-4 pt-[22svh]">
         <TranquiliWaysTitle shimmerActive={!interacting} />
 
         <div
