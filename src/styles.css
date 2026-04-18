@@ -194,3 +194,99 @@
     letter-spacing: -0.04em;
   }
 }
+
+/* Way card (landscape postcard) */
+.way-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 220px;
+  height: 350px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+.way-card:hover { transform: translateY(-4px); }
+
+.way-landscape { position: relative; width: 100%; height: 70%; overflow: hidden; }
+.way-landscape * { position: absolute; }
+
+.way-sky {
+  width: 100%; height: 100%;
+  background: linear-gradient(0deg, rgba(247,225,87,1) 0%, rgba(233,101,148,1) 100%);
+}
+.way-sun {
+  display: flex; align-items: center; justify-content: center;
+  width: 45px; height: 45px; border-radius: 50%;
+  background-color: white; bottom: 40%; left: 23%;
+  filter: drop-shadow(0px 0px 10px white);
+}
+.way-sun::after {
+  position: absolute; content: ""; width: 118%; height: 118%;
+  border-radius: 50%; background-color: white; opacity: 0.5;
+}
+.way-sun::before {
+  position: absolute; content: ""; width: 134%; height: 134%;
+  border-radius: 50%; background-color: white; opacity: 0.1;
+}
+.way-ocean {
+  overflow: hidden; bottom: 0; width: 100%; height: 28%;
+  background: linear-gradient(0deg, rgba(241,192,125,1) 0%, rgba(247,218,150,1) 100%);
+}
+.way-reflection { position: absolute; background-color: white; opacity: 0.5; z-index: 1; }
+.way-reflection:nth-child(1) { width: 40px; height: 10px; clip-path: polygon(0% 0%, 100% 0%, 50% 20%); top: 5%; left: 32%; }
+.way-reflection:nth-child(2) { width: 80px; height: 15px; clip-path: polygon(0% 0%, 100% 0%, 60% 20%, 40% 20%); top: 15%; left: 39%; }
+.way-reflection:nth-child(3) { width: 60px; height: 2px; clip-path: polygon(0% 50%, 40% 0%, 60% 0%, 100% 50%, 60% 100%, 40% 100%); top: 27%; right: 15%; }
+.way-reflection:nth-child(4) { width: 70px; height: 2px; clip-path: polygon(0% 50%, 40% 0%, 60% 0%, 100% 50%, 60% 100%, 40% 100%); top: 37%; right: 28%; }
+.way-reflection:nth-child(5) { width: 70px; height: 3px; clip-path: polygon(0% 50%, 40% 0%, 60% 0%, 100% 50%, 60% 100%, 40% 100%); top: 46%; right: 8%; }
+
+.way-hill-1 { right: -25%; bottom: 20%; width: 150px; height: 40px; border-radius: 50%; background-color: #e6b29d; }
+.way-shadow-hill-1 { right: -25%; top: -30%; width: 150px; height: 40px; border-radius: 50%; background-color: #f1c7a0; }
+.way-hill-2 { right: -36%; bottom: 10%; width: 150px; height: 80px; border-radius: 50%; background-color: #c29182; }
+.way-shadow-hill-2 { right: -36%; top: -65%; width: 150px; height: 80px; border-radius: 50%; background-color: #e5bb96; }
+.way-hill-3 { left: -100%; bottom: -28%; width: 350px; height: 150px; border-radius: 50%; background-color: #b77873; z-index: 3; }
+.way-tree-1 { bottom: 20%; left: 3%; width: 50px; height: 70px; z-index: 3; }
+.way-tree-2 { bottom: 14%; left: 25%; width: 50px; height: 70px; z-index: 3; }
+.way-hill-4 { right: -100%; bottom: -40%; width: 350px; height: 150px; border-radius: 50%; background-color: #a16773; z-index: 3; }
+.way-tree-3 { bottom: 10%; right: 1%; width: 65px; height: 80px; z-index: 3; }
+
+.way-filter {
+  height: 100%; width: 100%;
+  background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 40%);
+  z-index: 5; opacity: 0.2;
+}
+
+.way-content {
+  width: 100%; height: 30%;
+  display: flex; flex-direction: column; align-items: center;
+}
+.way-weather-info {
+  display: flex; align-items: center; justify-content: space-around;
+  position: absolute; text-align: center; top: 0; right: 0;
+  width: 100%; padding-top: 15px; color: white; z-index: 10;
+}
+.way-left-side { width: 20%; font-size: 11pt; font-weight: 600; align-self: baseline; display: flex; flex-direction: column; align-items: center; }
+.way-icon { display: flex; align-items: center; justify-content: center; }
+.way-icon svg { width: 40px; }
+.way-right-side { display: flex; flex-direction: column; align-items: flex-end; }
+.way-right-side p:nth-child(2) { font-size: 9pt; margin: 0; padding: 0; }
+.way-location { display: flex; align-items: center; justify-content: flex-end; width: 100%; padding: 0; margin: 0; }
+.way-location span { font-size: 11pt; font-weight: 700; text-transform: uppercase; }
+.way-location svg { width: 14px; height: auto; }
+.way-temperature { font-size: 20pt; font-weight: 700; line-height: 30px; }
+
+.way-forecast {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-evenly; height: 100%; width: 100%;
+  padding: 10px 25px;
+}
+.way-forecast > div > div:first-child,
+.way-forecast > div > div:not(.way-separator) {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  color: lightslategray; font-size: 9pt;
+}
+.way-separator { width: 100%; height: 2px; background-color: rgb(233,233,233); border-radius: 1px; }
