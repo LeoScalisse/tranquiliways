@@ -1,9 +1,9 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Cloud, Sparkles } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Cloud, Sparkles, ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 
-import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import StackedPanels from "@/components/ui/stacked-panels";
+import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 
 export const Route = createFileRoute("/ways")({
   component: WaysPage,
@@ -36,15 +36,15 @@ function WaysPage() {
               Minhas TranquiliWays chegam com calma, uma chama de cada vez.
             </motion.h1>
             <p className="max-w-md text-base leading-7 text-sky-950/72">
-              Nesta fase, esta area funciona como um espaco de preparacao visual da marca. O
-              historico real das jornadas entra na proxima chama.
+              Nesta fase, esta área funciona como um espaço de preparação visual da marca. O
+              histórico real das jornadas entra na próxima chama.
             </p>
             <div className="flex flex-wrap gap-3">
               <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
                 Placeholder elegante
               </div>
               <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
-                Historico chega na Fase 2
+                Histórico chega na Fase 2
               </div>
             </div>
           </div>

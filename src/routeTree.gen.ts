@@ -9,13 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ApiSessionsIdRouteImport } from './routes/api/sessions/$id'
+import { Route as ApiSessionsRouteImport } from './routes/api/sessions'
 import { Route as WaysRouteImport } from './routes/ways'
+import { Route as WaysSessionIdRouteImport } from './routes/ways/$sessionId'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ApiSessionsRoute = ApiSessionsRouteImport.update({
+  id: '/api/sessions',
+  path: '/api/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSessionsIdRoute = ApiSessionsIdRouteImport.update({
+  id: '/api/sessions/$id',
+  path: '/$id',
+  getParentRoute: () => ApiSessionsRoute,
+} as any)
 const WaysRoute = WaysRouteImport.update({
   id: '/ways',
   path: '/ways',
   getParentRoute: () => rootRouteImport,
+} as any)
+const WaysSessionIdRoute = WaysSessionIdRouteImport.update({
+  id: '/ways/$sessionId',
+  path: '/$sessionId',
+  getParentRoute: () => WaysRoute,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +41,95 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+interface ApiSessionsRouteChildren {
+  ApiSessionsIdRoute: typeof ApiSessionsIdRoute
+}
+
+const ApiSessionsRouteChildren: ApiSessionsRouteChildren = {
+  ApiSessionsIdRoute: ApiSessionsIdRoute,
+}
+
+const ApiSessionsRouteWithChildren =
+  ApiSessionsRoute._addFileChildren(ApiSessionsRouteChildren)
+
+interface WaysRouteChildren {
+  WaysSessionIdRoute: typeof WaysSessionIdRoute
+}
+
+const WaysRouteChildren: WaysRouteChildren = {
+  WaysSessionIdRoute: WaysSessionIdRoute,
+}
+
+const WaysRouteWithChildren = WaysRoute._addFileChildren(WaysRouteChildren)
+
 export interface FileRoutesByFullPath {
+  '/api/sessions/$id': typeof ApiSessionsIdRoute
+  '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/': typeof IndexRoute
-  '/ways': typeof WaysRoute
+  '/ways/$sessionId': typeof WaysSessionIdRoute
+  '/ways': typeof WaysRouteWithChildren
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/ways': typeof WaysRoute
+  '/ways/$sessionId': typeof WaysSessionIdRoute
+  '/ways': typeof WaysRouteWithChildren
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/api/sessions/$id': typeof ApiSessionsIdRoute
+  '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/': typeof IndexRoute
-  '/ways': typeof WaysRoute
+  '/ways/$sessionId': typeof WaysSessionIdRoute
+  '/ways': typeof WaysRouteWithChildren
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ways'
+  fullPaths:
+    | '/api/sessions/$id'
+    | '/api/sessions'
+    | '/'
+    | '/ways/$sessionId'
+    | '/ways'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ways'
-  id: '__root__' | '/' | '/ways'
+  to: '/' | '/ways/$sessionId' | '/ways'
+  id: '__root__' | '/api/sessions/$id' | '/api/sessions' | '/' | '/ways/$sessionId' | '/ways'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  ApiSessionsRoute: typeof ApiSessionsRouteWithChildren
   IndexRoute: typeof IndexRoute
-  WaysRoute: typeof WaysRoute
+  WaysRoute: typeof WaysRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/api/sessions/$id': {
+      id: '/api/sessions/$id'
+      path: '/$id'
+      fullPath: '/api/sessions/$id'
+      preLoaderRoute: typeof ApiSessionsIdRouteImport
+      parentRoute: typeof ApiSessionsRouteImport
+    }
+    '/api/sessions': {
+      id: '/api/sessions'
+      path: '/api/sessions'
+      fullPath: '/api/sessions'
+      preLoaderRoute: typeof ApiSessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ways': {
       id: '/ways'
       path: '/ways'
       fullPath: '/ways'
       preLoaderRoute: typeof WaysRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/ways/$sessionId': {
+      id: '/ways/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/ways/$sessionId'
+      preLoaderRoute: typeof WaysSessionIdRouteImport
+      parentRoute: typeof WaysRouteImport
     }
     '/': {
       id: '/'
@@ -69,8 +142,9 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  ApiSessionsRoute: ApiSessionsRouteWithChildren,
   IndexRoute: IndexRoute,
-  WaysRoute: WaysRoute,
+  WaysRoute: WaysRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
