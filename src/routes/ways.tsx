@@ -1,62 +1,60 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Cloud, Compass, ArrowLeft } from "lucide-react";
-import { motion } from "motion/react";
-import StackedPanels from "@/components/ui/stacked-panels";
+import { ArrowLeft } from "lucide-react";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
+import { WayCard } from "@/components/ui/way-card";
 
 export const Route = createFileRoute("/ways")({
   component: WaysPage,
 });
 
+const sampleWays = [
+  {
+    title: "Cloudy",
+    location: "Spain",
+    date: "Monday, 4th May",
+    temperature: "24°C",
+    forecast: [
+      { label: "Tuesday, 5th May", value: "24°C" },
+      { label: "Wednesday, 6th May", value: "26°C" },
+      { label: "Thursday, 7th May", value: "22°C" },
+    ],
+  },
+  {
+    title: "Sunny",
+    location: "Brasil",
+    date: "Friday, 8th May",
+    temperature: "28°C",
+    forecast: [
+      { label: "Saturday, 9th May", value: "29°C" },
+      { label: "Sunday, 10th May", value: "27°C" },
+      { label: "Monday, 11th May", value: "25°C" },
+    ],
+  },
+  {
+    title: "Calm",
+    location: "Portugal",
+    date: "Tuesday, 12th May",
+    temperature: "21°C",
+    forecast: [
+      { label: "Wednesday, 13th May", value: "22°C" },
+      { label: "Thursday, 14th May", value: "23°C" },
+      { label: "Friday, 15th May", value: "20°C" },
+    ],
+  },
+];
+
 function WaysPage() {
   return (
     <div className="safe-screen relative overflow-hidden">
-      <div className="glass-orb left-[8%] top-[12%] h-28 w-28 opacity-55" />
-      <div className="glass-orb bottom-[16%] right-[8%] h-36 w-36 opacity-60" />
+      <div className="absolute left-4 top-4 z-10">
+        <LiquidGlassButton to="/" icon={ArrowLeft} compact />
+      </div>
 
-      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col gap-6">
-        <header className="flex items-center justify-between gap-3">
-          <LiquidGlassButton to="/" icon={ArrowLeft} compact />
-          <div className="glass-panel flex items-center gap-3 rounded-full px-4 py-2 text-sky-950/75">
-            <Cloud className="h-4 w-4" />
-            Meus Ways
-          </div>
-          <LiquidGlassButton to="/" icon={Compass} label="Novo foco" compact prominent />
-        </header>
-
-        <section className="grid flex-1 gap-5 md:grid-cols-[0.8fr_1.2fr] md:items-center">
-          <div className="space-y-4">
-            <motion.h1
-              className="app-heading text-4xl font-semibold text-white sm:text-5xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-            >
-              Explore seus caminhos com gesto, profundidade e calma.
-            </motion.h1>
-            <p className="max-w-md text-base leading-7 text-sky-950/72">
-              A pilha responde ao toque e cria uma leitura espacial mais natural em celular, sem
-              depender só de hover.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
-                Toque ou arraste
-              </div>
-              <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
-                Responsivo no tablet
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel flex min-h-[24rem] items-center justify-center rounded-[2rem] p-4 sm:min-h-[28rem]">
-            <div style={{ width: "min(100%, 540px)", height: "min(72vh, 520px)" }}>
-              <StackedPanels />
-            </div>
-          </div>
-        </section>
-
-        <div className="pb-1 text-center">
-          <p className="text-sm text-sky-950/58">Deslize ou mova o dedo para explorar seus Ways</p>
+      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col items-center justify-center gap-10 px-4 pt-20">
+        <div className="grid w-full grid-cols-1 place-items-center gap-10 sm:grid-cols-2 lg:grid-cols-3">
+          {sampleWays.map((way, i) => (
+            <WayCard key={i} {...way} />
+          ))}
         </div>
       </div>
     </div>
