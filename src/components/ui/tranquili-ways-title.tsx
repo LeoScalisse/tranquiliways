@@ -37,9 +37,9 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
   };
 
   return (
-    <div className="flex justify-start">
+    <div className="flex w-full justify-center">
       <div className="relative flex min-h-[88px] items-center justify-center sm:min-h-[100px]">
-        <div key={animKey} className="flex items-center cursor-pointer" onClick={handleRestart}>
+        <div key={animKey} className="flex items-center justify-center cursor-pointer" onClick={handleRestart}>
           {/* Tranquili — collapses smoothly */}
           <motion.span
             className="flex overflow-hidden whitespace-nowrap"
