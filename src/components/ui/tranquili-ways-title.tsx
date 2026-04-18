@@ -32,7 +32,7 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
     show: (i: number) => ({
       opacity: 1,
       filter: "blur(0px)",
-      transition: { duration: 0.35, delay: i * 0.03, ease: [0.4, 0, 0.2, 1] },
+      transition: { duration: 0.35, delay: i * 0.03, ease: "easeOut" as const },
     }),
   };
 
