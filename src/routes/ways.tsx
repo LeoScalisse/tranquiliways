@@ -1,66 +1,123 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Cloud, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
-import StackedPanels from "@/components/ui/stacked-panels";
+import { WayCard } from "@/components/ui/way-card";
+import { useWays } from "@/hooks/use-ways";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/ways")({
   component: WaysPage,
 });
 
 function WaysPage() {
+  const { ways } = useWays();
+  const navigate = useNavigate();
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "center",
+    loop: false,
+    containScroll: "trimSnaps",
+  });
+  const [selected, setSelected] = useState(0);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    onSelect();
+
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
+
   return (
     <div className="safe-screen relative overflow-hidden">
-      <div className="glass-orb left-[8%] top-[12%] h-28 w-28 opacity-55" />
-      <div className="glass-orb bottom-[16%] right-[8%] h-36 w-36 opacity-60" />
+      <div className="absolute left-4 top-4 z-10">
+        <LiquidGlassButton to="/" icon={ArrowLeft} compact />
+      </div>
 
-      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-5xl flex-col gap-6">
-        <header className="flex items-center justify-between gap-3">
-          <LiquidGlassButton to="/" icon={ArrowLeft} compact />
-          <div className="glass-panel flex items-center gap-3 rounded-full px-4 py-2 text-sky-950/75">
-            <Cloud className="h-4 w-4" />
-            Meus Ways
-          </div>
-          <LiquidGlassButton to="/" icon={Sparkles} label="Nova forja" compact prominent />
-        </header>
-
-        <section className="grid flex-1 gap-5 md:grid-cols-[0.8fr_1.2fr] md:items-center">
-          <div className="space-y-4">
-            <motion.h1
-              className="app-heading text-4xl font-semibold text-white sm:text-5xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-            >
-              Minhas TranquiliWays chegam com calma, uma chama de cada vez.
-            </motion.h1>
-            <p className="max-w-md text-base leading-7 text-sky-950/72">
-              Nesta fase, esta area funciona como um espaco de preparacao visual da marca. O
-              historico real das jornadas entra na proxima chama.
+      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-center gap-8 px-4 pt-20">
+        {ways.length === 0 ? (
+          <div className="flex flex-col items-center gap-5 text-center">
+            <div className="glass-panel flex h-16 w-16 items-center justify-center rounded-full">
+              <Sparkles className="h-7 w-7 text-sky-950/70" />
+            </div>
+            <p className="max-w-xs text-base text-sky-950/75">
+              Voce ainda nao tem ways. Volte e diga como quer se sentir hoje.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
-                Placeholder elegante
-              </div>
-              <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
-                Historico chega na Fase 2
+            <button
+              onClick={() => navigate({ to: "/" })}
+              className="glass-panel rounded-full px-5 py-2 text-sm font-medium text-sky-950/80 transition hover:scale-105"
+            >
+              Criar meu primeiro way
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="w-full overflow-hidden" ref={emblaRef}>
+              <div className="flex">
+                {ways.map((way) => (
+                  <div
+                    key={way.id}
+                    className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
+                  >
+                    <WayCard
+                      title={way.title}
+                      location={way.location}
+                      date={way.date}
+                      temperature={way.temperature}
+                      forecast={way.forecast}
+                      palette={way.palette}
+                      weather={way.weather}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          <div className="glass-panel flex min-h-[24rem] items-center justify-center rounded-[2rem] p-4 sm:min-h-[28rem]">
-            <div style={{ width: "min(100%, 540px)", height: "min(72vh, 520px)" }}>
-              <StackedPanels />
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => emblaApi?.scrollPrev()}
+                disabled={selected === 0}
+                className="glass-panel flex h-10 w-10 items-center justify-center rounded-full text-sky-950/80 transition disabled:opacity-40"
+                aria-label="Way anterior"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center gap-2">
+                {ways.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => emblaApi?.scrollTo(index)}
+                    className={cn(
+                      "h-2 rounded-full transition-all",
+                      index === selected ? "w-6 bg-sky-950/70" : "w-2 bg-sky-950/30",
+                    )}
+                    aria-label={`Ir para way ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={() => emblaApi?.scrollNext()}
+                disabled={selected === ways.length - 1}
+                className="glass-panel flex h-10 w-10 items-center justify-center rounded-full text-sky-950/80 transition disabled:opacity-40"
+                aria-label="Proximo way"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
-          </div>
-        </section>
 
-        <div className="pb-1 text-center">
-          <p className="text-sm text-sky-950/58">
-            Por enquanto, cada jornada nasce na Home e acende o Unity.
-          </p>
-        </div>
+            <p className="text-center text-xs text-sky-950/60">
+              {selected + 1} de {ways.length} · {ways[selected]?.prompt}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

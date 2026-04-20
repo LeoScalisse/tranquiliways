@@ -1,69 +1,89 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Sparkles, Waves } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { JourneyForgeCard } from "@/components/journey-forge-card";
+import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { TranquiliWaysTitle } from "@/components/ui/tranquili-ways-title";
+import { useWays } from "@/hooks/use-ways";
+import { createJourneySession } from "@/lib/journey-api";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
+  const [interacting, setInteracting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const { addWay } = useWays();
+  const navigate = useNavigate();
+
+  async function handleSend(message: string) {
+    const rawInput = message.trim();
+
+    if (!rawInput || isSubmitting) {
+      return;
+    }
+
+    if (rawInput.startsWith("[Voice message -")) {
+      setFeedback("Use texto aqui por enquanto. A captura de voz continua no fluxo nativo do Android.");
+      return;
+    }
+
+    setFeedback(null);
+    setIsSubmitting(true);
+
+    try {
+      const session = await createJourneySession({
+        rawInput,
+        inputMode: "text",
+      });
+
+      addWay(rawInput);
+
+      navigate({
+        to: "/ways/$sessionId",
+        params: { sessionId: session.id },
+        search: { token: session.launchToken },
+      });
+    } catch (error) {
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : "Nao foi possivel preparar sua jornada agora. Tente novamente em instantes.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="safe-screen relative overflow-hidden">
-      <div className="glass-orb right-[10%] top-[8%] h-28 w-28 opacity-60" />
-      <div className="glass-orb bottom-[10%] left-[3%] h-36 w-36 opacity-55" />
-      <div className="glass-orb left-[14%] top-[14%] h-16 w-16 opacity-45" />
+      <div className="absolute left-4 top-4 z-10">
+        <LiquidGlassButton to="/ways" />
+      </div>
 
-      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-6xl flex-col justify-between gap-8">
-        <header className="flex items-center justify-between gap-3">
-          <div className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-950/80">
-            <Waves className="h-4 w-4" />
-            Primeira Chama em forja
-          </div>
-          <LiquidGlassButton to="/ways" icon={Sparkles} label="Minhas TranquiliWays" prominent />
-        </header>
+      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-start gap-12 px-4 pt-[22svh]">
+        <TranquiliWaysTitle shimmerActive={!interacting} />
 
-        <main className="grid flex-1 items-start gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="space-y-6 pt-3">
-            <div className="space-y-3">
-              <p className="app-heading text-sm font-semibold uppercase tracking-[0.24em] text-sky-950/60">
-                Tranquili+ para a travessia inicial
-              </p>
-              <TranquiliWaysTitle shimmerActive />
-              <p className="max-w-xl text-base leading-7 text-sky-950/72 sm:text-lg">
-                O primeiro loop esta aqui: voce escreve ou fala, o app forja uma sessao e abre o
-                caminho para um ambiente 3D simples, calmo e vivo no Android.
-              </p>
-            </div>
+        <div
+          className="w-full"
+          onFocusCapture={() => setInteracting(true)}
+          onBlurCapture={() => setInteracting(false)}
+        >
+          <PromptInputBox
+            isLoading={isSubmitting}
+            placeholder="Como voce quer se sentir hoje?"
+            className="rounded-[1.75rem] border-white/30 bg-white/75 shadow-[0_18px_44px_rgba(30,76,112,0.12)]"
+            onSend={(message) => {
+              void handleSend(message);
+            }}
+          />
 
-            <div className="flex flex-wrap gap-3">
-              {[
-                "Texto ou voz on-device",
-                "Sessao pronta para deep link",
-                "Fase 1 focada em Android + Unity",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <JourneyForgeCard />
-        </main>
-
-        <footer className="flex flex-col gap-3 pb-1 text-sm text-sky-950/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>Fase 1 focada em validar input, sessao compartilhada e abertura confiavel no Unity.</p>
-          <div className="flex items-center gap-2">
-            <span className="glass-panel rounded-full px-3 py-1.5">Android</span>
-            <span className="glass-panel rounded-full px-3 py-1.5">Unity app</span>
-          </div>
-        </footer>
+          {feedback ? (
+            <p className="mt-4 px-4 text-center text-sm text-sky-950/70">{feedback}</p>
+          ) : null}
+        </div>
       </div>
     </div>
   );
