@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "sync:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/lovable-sync.ps1 status",
+    "sync:now": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/lovable-sync.ps1 now",
     "mobile:sync": "npm run build && npx cap sync",
     "mobile:open:android": "npx cap open android",
     "mobile:open:ios": "npx cap open ios"
