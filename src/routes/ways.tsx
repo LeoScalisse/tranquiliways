@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
-import { WayCard } from "@/components/ui/way-card";
 import { useWays } from "@/hooks/use-ways";
 import { cn } from "@/lib/utils";
 
@@ -24,14 +23,10 @@ function WaysPage() {
 
   useEffect(() => {
     if (!emblaApi) return;
-
     const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
     emblaApi.on("select", onSelect);
     onSelect();
-
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
+    return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi]);
 
   return (
@@ -47,13 +42,13 @@ function WaysPage() {
               <Sparkles className="h-7 w-7 text-sky-950/70" />
             </div>
             <p className="max-w-xs text-base text-sky-950/75">
-              Voce ainda nao tem ways. Volte e diga como quer se sentir hoje.
+              Voce ainda nao explorou nenhum dilema. Comece descrevendo uma decisao que esta te pesando.
             </p>
             <button
               onClick={() => navigate({ to: "/" })}
               className="glass-panel rounded-full px-5 py-2 text-sm font-medium text-sky-950/80 transition hover:scale-105"
             >
-              Criar meu primeiro way
+              Explorar meu primeiro dilema
             </button>
           </div>
         ) : (
@@ -65,15 +60,62 @@ function WaysPage() {
                     key={way.id}
                     className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
                   >
-                    <WayCard
-                      title={way.title}
-                      location={way.location}
-                      date={way.date}
-                      temperature={way.temperature}
-                      forecast={way.forecast}
-                      palette={way.palette}
-                      weather={way.weather}
-                    />
+                    <div
+                      className="w-full max-w-sm rounded-[2rem] p-6 space-y-4"
+                      style={{
+                        background: `linear-gradient(140deg, ${way.world.caminhoParado.gradiente[0]}cc, ${way.world.caminhoMudanca.gradiente[0]}cc)`,
+                        border: "1px solid rgba(255,255,255,0.5)",
+                        boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
+                      }}
+                    >
+                      <p className="text-xs font-medium uppercase tracking-widest text-sky-950/45">
+                        Dilema
+                      </p>
+                      <p className="text-base font-medium text-sky-950/85 leading-6 line-clamp-3">
+                        {way.dilema}
+                      </p>
+
+                      <div className="flex gap-3">
+                        <div
+                          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
+                          style={{
+                            background: `${way.world.caminhoParado.corDominante}20`,
+                            border: `1px solid ${way.world.caminhoParado.corDominante}30`,
+                          }}
+                        >
+                          <p className="font-medium text-sky-950/70">{way.world.caminhoParado.nome}</p>
+                          <p
+                            className="mt-0.5 font-semibold"
+                            style={{ color: way.world.caminhoParado.corDominante }}
+                          >
+                            {way.world.caminhoParado.titulo}
+                          </p>
+                        </div>
+                        <div
+                          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
+                          style={{
+                            background: `${way.world.caminhoMudanca.corDominante}20`,
+                            border: `1px solid ${way.world.caminhoMudanca.corDominante}30`,
+                          }}
+                        >
+                          <p className="font-medium text-sky-950/70">{way.world.caminhoMudanca.nome}</p>
+                          <p
+                            className="mt-0.5 font-semibold"
+                            style={{ color: way.world.caminhoMudanca.corDominante }}
+                          >
+                            {way.world.caminhoMudanca.titulo}
+                          </p>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-sky-950/40">
+                        {new Date(way.savedAt).toLocaleDateString("pt-BR", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -84,7 +126,7 @@ function WaysPage() {
                 onClick={() => emblaApi?.scrollPrev()}
                 disabled={selected === 0}
                 className="glass-panel flex h-10 w-10 items-center justify-center rounded-full text-sky-950/80 transition disabled:opacity-40"
-                aria-label="Way anterior"
+                aria-label="Dilema anterior"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -98,7 +140,7 @@ function WaysPage() {
                       "h-2 rounded-full transition-all",
                       index === selected ? "w-6 bg-sky-950/70" : "w-2 bg-sky-950/30",
                     )}
-                    aria-label={`Ir para way ${index + 1}`}
+                    aria-label={`Ir para dilema ${index + 1}`}
                   />
                 ))}
               </div>
@@ -107,14 +149,14 @@ function WaysPage() {
                 onClick={() => emblaApi?.scrollNext()}
                 disabled={selected === ways.length - 1}
                 className="glass-panel flex h-10 w-10 items-center justify-center rounded-full text-sky-950/80 transition disabled:opacity-40"
-                aria-label="Proximo way"
+                aria-label="Próximo dilema"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
 
             <p className="text-center text-xs text-sky-950/60">
-              {selected + 1} de {ways.length} · {ways[selected]?.prompt}
+              {selected + 1} de {ways.length}
             </p>
           </>
         )}

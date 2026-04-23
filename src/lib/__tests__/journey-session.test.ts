@@ -1,13 +1,44 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 
 import {
-  buildUnitySessionUrl,
   issueJourneySession,
-  parseUnitySessionUrl,
   verifyJourneySessionToken,
 } from "../journey-session.ts";
+import type { DilemmaWorld } from "../interpret-dilemma.ts";
 
 const secret = "tranquiliways-test-secret";
+
+const stubWorld: DilemmaWorld = {
+  id: "world-stub",
+  dilema: "Devo largar meu emprego seguro?",
+  geradoEm: "2026-04-17T20:00:00.000Z",
+  caminhoParado: {
+    nome: "Ficou parado",
+    titulo: "Mesa vazia",
+    tom: "arrependimento",
+    corDominante: "#6b7a8d",
+    gradiente: ["#c9d0d8", "#8a96a3"],
+    ambientes: {
+      quarto: { descricao: "Manhã pesada", elementos: ["cama desfeita"], cor: "#8a96a3", humor: "inércia" },
+      sala: { descricao: "TV ligada", elementos: ["sofá amassado"], cor: "#7a8693", humor: "arrependimento" },
+      trabalho: { descricao: "Mesmo lugar", elementos: ["mesa desordenada"], cor: "#6b7a8d", humor: "estagnação" },
+      familia: { descricao: "Jantar em silêncio", elementos: ["prato pela metade"], cor: "#7d8a9a", humor: "distância" },
+    },
+  },
+  caminhoMudanca: {
+    nome: "Seguiu em frente",
+    titulo: "Primeiro dia",
+    tom: "transformacao",
+    corDominante: "#4a7fa5",
+    gradiente: ["#a8d4ef", "#5b9ec9"],
+    ambientes: {
+      quarto: { descricao: "Alarme às 6h", elementos: ["mochila pronta"], cor: "#7ab8d4", humor: "antecipação" },
+      sala: { descricao: "Planner na mesa", elementos: ["post-its"], cor: "#5a9ab5", humor: "foco" },
+      trabalho: { descricao: "Novo espaço", elementos: ["mesa arrumada"], cor: "#4a7fa5", humor: "propósito" },
+      familia: { descricao: "Jantar com história", elementos: ["mesa cheia"], cor: "#5a8fba", humor: "conexão" },
+    },
+  },
+};
 
 async function run(name: string, fn: () => Promise<void> | void) {
   try {
@@ -22,8 +53,9 @@ async function run(name: string, fn: () => Promise<void> | void) {
 await run("issueJourneySession creates a ready session with a launch token", async () => {
   const session = await issueJourneySession(
     {
-      rawInput: "Quero voltar a sentir coragem para viver minha vida.",
+      rawInput: "Devo largar meu emprego seguro para seguir minha paixão?",
       inputMode: "text",
+      world: stubWorld,
     },
     {
       secret,
@@ -34,17 +66,19 @@ await run("issueJourneySession creates a ready session with a launch token", asy
 
   assert.equal(session.id, "session-123");
   assert.equal(session.createdAt, "2026-04-17T20:00:00.000Z");
-  assert.equal(session.rawInput, "Quero voltar a sentir coragem para viver minha vida.");
+  assert.equal(session.rawInput, "Devo largar meu emprego seguro para seguir minha paixão?");
   assert.equal(session.inputMode, "text");
   assert.equal(session.status, "ready");
   assert.ok(session.launchToken.length > 32);
+  assert.ok(session.world !== null);
 });
 
-await run("issueJourneySession seals the raw input instead of exposing it in plain text", async () => {
+await run("issueJourneySession seals o dilema e o mundo em vez de expô-los em texto simples", async () => {
   const session = await issueJourneySession(
     {
-      rawInput: "Quero abrir espaco para uma nova fase.",
+      rawInput: "Devo me separar do meu parceiro?",
       inputMode: "voice",
+      world: stubWorld,
     },
     {
       secret,
@@ -53,15 +87,17 @@ await run("issueJourneySession seals the raw input instead of exposing it in pla
     },
   );
 
-  assert.equal(session.launchToken.includes("Quero abrir espaco"), false);
+  assert.equal(session.launchToken.includes("Devo me separar"), false);
   assert.equal(session.launchToken.includes("session-sealed"), false);
+  assert.equal(session.launchToken.includes("world-stub"), false);
 });
 
-await run("verifyJourneySessionToken returns the original session for a valid token", async () => {
+await run("verifyJourneySessionToken retorna a sessão original para um token válido", async () => {
   const session = await issueJourneySession(
     {
-      rawInput: "Quero abrir espaco para uma nova fase.",
+      rawInput: "Devo investir todas as minhas economias em um negócio?",
       inputMode: "voice",
+      world: stubWorld,
     },
     {
       secret,
@@ -79,11 +115,12 @@ await run("verifyJourneySessionToken returns the original session for a valid to
   assert.deepEqual(verified, session);
 });
 
-await run("verifyJourneySessionToken rejects a token for the wrong session id", async () => {
+await run("verifyJourneySessionToken rejeita token para session id errado", async () => {
   const session = await issueJourneySession(
     {
-      rawInput: "Quero aprender a confiar mais em mim.",
+      rawInput: "Devo largar tudo e viajar pelo mundo?",
       inputMode: "text",
+      world: stubWorld,
     },
     {
       secret,
@@ -99,25 +136,4 @@ await run("verifyJourneySessionToken rejects a token for the wrong session id", 
   });
 
   assert.equal(verified, null);
-});
-
-await run("buildUnitySessionUrl and parseUnitySessionUrl round-trip the session launch payload", () => {
-  const url = buildUnitySessionUrl({
-    id: "session-abc",
-    launchToken: "token-xyz",
-  });
-
-  assert.equal(url, "tranquiliways://session/session-abc?token=token-xyz");
-
-  const parsed = parseUnitySessionUrl(url);
-
-  assert.deepEqual(parsed, {
-    id: "session-abc",
-    launchToken: "token-xyz",
-  });
-});
-
-await run("parseUnitySessionUrl returns null for unrelated URLs", () => {
-  assert.equal(parseUnitySessionUrl("https://tranquiliways.app/session/123"), null);
-  assert.equal(parseUnitySessionUrl("tranquiliways://other/123"), null);
 });
