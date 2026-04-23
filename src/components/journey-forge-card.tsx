@@ -3,6 +3,7 @@ import { LoaderCircle, Mic, Sparkles, Waves } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useWays } from "@/hooks/use-ways";
 import { createJourneySession } from "@/lib/journey-api";
 import type { JourneyInputMode } from "@/lib/journey-session";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ export function JourneyForgeCard() {
   const [isForging, setIsForging] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const { saveWaySession } = useWays();
 
   const canForge = prompt.trim().length > 0 && !isForging && !isListening;
   const nativeVoiceReady = isNativeJourneyVoiceAvailable();
@@ -60,6 +62,7 @@ export function JourneyForgeCard() {
         rawInput,
         inputMode,
       });
+      saveWaySession(session);
 
       window.location.assign(
         `/ways/${encodeURIComponent(session.id)}?token=${encodeURIComponent(session.launchToken)}`,
@@ -84,7 +87,7 @@ export function JourneyForgeCard() {
         </div>
         <div className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-950/60">
           <Waves className="h-4 w-4" />
-          Input, sessao e travessia para o Unity
+          Input, sessao e mundo 2.5D
         </div>
       </div>
 
@@ -93,8 +96,8 @@ export function JourneyForgeCard() {
           Forje o primeiro TranquiliWay.
         </h2>
         <p className="max-w-2xl text-base leading-7 text-sky-950/72">
-          Digite ou fale o acontecimento que esta mexendo com voce. Nesta fase, sua fala vira
-          sessao, acende a jornada e abre o caminho para um hub 3D sereno no Android.
+          Digite ou fale o acontecimento que esta mexendo com voce. Sua fala vira sessao, salva o
+          caminho no historico local e abre um mundo 2.5D sereno para revisitar depois.
         </p>
       </div>
 
@@ -157,7 +160,7 @@ export function JourneyForgeCard() {
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-sky-950/58">
           <span className="glass-panel rounded-full px-3 py-1.5">Android-first</span>
           <span className="glass-panel rounded-full px-3 py-1.5">Sessao compartilhada</span>
-          <span className="glass-panel rounded-full px-3 py-1.5">Unity via deep link</span>
+          <span className="glass-panel rounded-full px-3 py-1.5">Historico reabrivel</span>
         </div>
 
         {feedback ? (

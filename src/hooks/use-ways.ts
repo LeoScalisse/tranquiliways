@@ -1,61 +1,26 @@
-import { useCallback, useEffect, useState } from "react";
-import type { DilemmaWorld } from "@/lib/interpret-dilemma";
+import { useCallback, useSyncExternalStore } from "react";
 
-export interface SavedWay {
-  id: string;
-  dilema: string;
-  world: DilemmaWorld;
-  savedAt: number;
-}
+import {
+  clearWayHistory,
+  getWayHistorySnapshot,
+  saveJourneySessionHistory,
+  subscribeWayHistory,
+  type WayHistoryEntry,
+} from "@/lib/way-history";
+import type { JourneySession } from "@/lib/journey-session";
 
-const STORAGE_KEY = "tranquili.ways.v2";
-
-function load(): SavedWay[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as SavedWay[];
-  } catch {
-    return [];
-  }
-}
-
-function save(ways: SavedWay[]) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ways));
-  } catch {
-    // ignore quota
-  }
-}
+export type SavedWay = WayHistoryEntry;
 
 export function useWays() {
-  const [ways, setWays] = useState<SavedWay[]>([]);
+  const ways = useSyncExternalStore(subscribeWayHistory, getWayHistorySnapshot, () => []);
 
-  useEffect(() => {
-    setWays(load());
-  }, []);
-
-  const addWay = useCallback((dilema: string, world: DilemmaWorld) => {
-    const entry: SavedWay = {
-      id: world.id,
-      dilema,
-      world,
-      savedAt: Date.now(),
-    };
-    setWays((prev) => {
-      const next = [entry, ...prev];
-      save(next);
-      return next;
-    });
-    return entry;
+  const saveWaySession = useCallback((session: JourneySession) => {
+    return saveJourneySessionHistory(session);
   }, []);
 
   const clearWays = useCallback(() => {
-    setWays([]);
-    save([]);
+    clearWayHistory();
   }, []);
 
-  return { ways, addWay, clearWays };
+  return { ways, saveWaySession, clearWays };
 }

@@ -15,7 +15,7 @@ function Index() {
   const [interacting, setInteracting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const { addWay } = useWays();
+  const { saveWaySession } = useWays();
   const navigate = useNavigate();
 
   async function handleSend(message: string) {
@@ -33,7 +33,7 @@ function Index() {
 
     try {
       const session = await createJourneySession({ rawInput, inputMode: "text" });
-      addWay(rawInput, session.world);
+      saveWaySession(session);
 
       navigate({
         to: "/ways/$sessionId",

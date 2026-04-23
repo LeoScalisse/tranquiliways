@@ -49,8 +49,8 @@ Path alias: `@/*` → `./src/*`
 |------|-------|---------|
 | `__root.tsx` | — | HTML shell and root layout |
 | `index.tsx` | `/` | Landing page — dilemma input form |
-| `ways.tsx` | `/ways` | Gallery of previously generated ways |
-| `ways/$sessionId.tsx` | `/ways/:id` | Detail view of a generated DilemmaWorld |
+| `ways.tsx` | `/ways` | Gallery of locally saved TranquiliWays |
+| `ways/$sessionId.tsx` | `/ways/:id` | Detail view of a generated or migrated DilemmaWorld |
 | `api/sessions.ts` | `POST /api/sessions` | Create a journey session |
 | `api/sessions/$id.ts` | `GET /api/sessions/:id` | Fetch a session |
 
@@ -62,8 +62,8 @@ Path alias: `@/*` → `./src/*`
 2. `POST /api/sessions` calls `interpret-dilemma.ts` which invokes the Claude API
 3. Claude returns a **DilemmaWorld** with two paths and four environments each
 4. The session is AES-GCM encrypted (`journey-session.ts`) and returned as a secure token
-5. User is redirected to `/ways/$sessionId` to view the world
-6. Past ways are tracked locally via `use-ways.ts`
+5. The generated session is saved locally in the way history store
+6. User is redirected to `/ways/$sessionId` to view or revisit the world
 
 ### Key Data Model
 
@@ -84,9 +84,10 @@ JourneySession: encrypted user input + DilemmaWorld + security token
 | `interpret-way.ts` | Way interpretation logic |
 | `journey-session.ts` | AES-GCM session encryption/decryption (Web Crypto API) |
 | `journey-api.ts` | Client-side API call wrappers |
+| `way-history.ts` | Local way history storage, migration, and session persistence helpers |
 | `tranquili-native.ts` | Capacitor native bindings (status bar, keyboard, haptics) |
 | `tranquili-voice.ts` | Voice input capture |
-| `unity-launcher.ts` | Unity/game content integration |
+| `unity-launcher.ts` | Deprecated Unity launcher compatibility shim |
 
 ### Design Conventions
 

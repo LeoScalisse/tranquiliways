@@ -60,19 +60,26 @@ function WaysPage() {
                     key={way.id}
                     className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
                   >
-                    <div
-                      className="w-full max-w-sm rounded-[2rem] p-6 space-y-4"
+                    <button
+                      type="button"
+                      className="w-full max-w-sm rounded-[2rem] p-6 space-y-4 text-left transition hover:-translate-y-1"
                       style={{
                         background: `linear-gradient(140deg, ${way.world.caminhoParado.gradiente[0]}cc, ${way.world.caminhoMudanca.gradiente[0]}cc)`,
                         border: "1px solid rgba(255,255,255,0.5)",
                         boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
                       }}
+                      onClick={() =>
+                        navigate({
+                          to: "/ways/$sessionId",
+                          params: { sessionId: way.id },
+                          search: way.launchToken ? { token: way.launchToken } : {},
+                        })}
                     >
                       <p className="text-xs font-medium uppercase tracking-widest text-sky-950/45">
                         Dilema
                       </p>
                       <p className="text-base font-medium text-sky-950/85 leading-6 line-clamp-3">
-                        {way.dilema}
+                        {way.rawInput}
                       </p>
 
                       <div className="flex gap-3">
@@ -109,13 +116,13 @@ function WaysPage() {
                       </div>
 
                       <p className="text-xs text-sky-950/40">
-                        {new Date(way.savedAt).toLocaleDateString("pt-BR", {
+                        {new Date(way.createdAt).toLocaleDateString("pt-BR", {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
                         })}
                       </p>
-                    </div>
+                    </button>
                   </div>
                 ))}
               </div>
