@@ -58,9 +58,14 @@ function Index() {
       </div>
 
       <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-start gap-8 px-4 pt-[20svh]">
-        <TranquiliWaysTitle shimmerActive={!interacting} />
+        <div style={{ animation: "stagger-reveal 0.5s var(--ease-out-strong) both" }}>
+          <TranquiliWaysTitle shimmerActive={!interacting} />
+        </div>
 
-        <p className="max-w-sm text-center text-base text-sky-950/55 leading-7">
+        <p
+          className="max-w-sm text-center text-base text-sky-950/55 leading-7"
+          style={{ animation: "stagger-reveal 0.5s var(--ease-out-strong) both 0.08s" }}
+        >
           Descreva um dilema da sua vida. A IA vai gerar um mundo visual com os dois caminhos que você pode seguir.
         </p>
 
@@ -68,6 +73,7 @@ function Index() {
           className="w-full"
           onFocusCapture={() => setInteracting(true)}
           onBlurCapture={() => setInteracting(false)}
+          style={{ animation: "stagger-reveal 0.5s var(--ease-out-strong) both 0.16s" }}
         >
           <PromptInputBox
             isLoading={isSubmitting}
@@ -77,7 +83,10 @@ function Index() {
           />
 
           {isSubmitting && (
-            <p className="mt-4 px-4 text-center text-sm text-sky-950/60 animate-pulse">
+            <p
+              className="mt-4 px-4 text-center text-sm text-sky-950/60"
+              style={{ animation: "content-breathe 2s ease-in-out infinite" }}
+            >
               Construindo os seus caminhos...
             </p>
           )}
@@ -87,7 +96,12 @@ function Index() {
           ) : null}
         </div>
 
-        <p className="text-xs text-sky-950/35">3 gerações gratuitas por semana</p>
+        <p
+          className="text-xs text-sky-950/35"
+          style={{ animation: "stagger-reveal 0.5s var(--ease-out-strong) both 0.24s" }}
+        >
+          3 gerações gratuitas por semana
+        </p>
       </div>
     </div>
   );

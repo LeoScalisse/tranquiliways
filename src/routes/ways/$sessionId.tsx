@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, LoaderCircle, TriangleAlert, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { motion, AnimatePresence } from "motion/react";
 
 import { DilemmaWorldView } from "@/components/dilemma-world";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
@@ -92,8 +93,16 @@ function DilemmaSessionPage() {
         {isLoading && (
           <section className="glass-panel rounded-[2rem] p-6">
             <div className="flex items-center gap-3 text-sky-950/75">
-              <LoaderCircle className="h-5 w-5 animate-spin" />
-              <span>Construindo seu mundo...</span>
+              <div className="relative flex h-5 w-5 items-center justify-center">
+                <div
+                  className="absolute inset-0 rounded-full bg-sky-400/30"
+                  style={{ animation: "content-breathe 1.4s ease-in-out infinite" }}
+                />
+                <LoaderCircle className="relative z-10 h-5 w-5 animate-spin" />
+              </div>
+              <span style={{ animation: "content-breathe 2s ease-in-out infinite" }}>
+                Construindo seu mundo...
+              </span>
             </div>
           </section>
         )}
@@ -122,32 +131,72 @@ function DilemmaSessionPage() {
           </section>
         )}
 
-        {way && !isLoading && (
-          <>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-950/72">
-                <Sparkles className="h-4 w-4" />
-                {way.kind === "legacy" ? "Mundo salvo" : "Mundo gerado"}
-              </div>
-            </div>
-
-            <h1 className="app-heading px-1 text-2xl font-semibold text-sky-950 sm:text-3xl">
-              Explore os dois lados do seu dilema.
-            </h1>
-
-            <DilemmaWorldView world={way.world} />
-
-            <div className="flex justify-center pt-2">
-              <Button
-                variant="glass"
-                className="rounded-full px-6 text-sky-950"
-                onClick={() => navigate({ to: "/ways" })}
+        <AnimatePresence>
+          {way && !isLoading && (
+            <>
+              {/* Rings de reveal — explodem uma vez ao aparecer */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none fixed inset-0 flex items-center justify-center"
+                style={{ zIndex: 50 }}
               >
-                Ver todos os meus dilemas
-              </Button>
-            </div>
-          </>
-        )}
+                {([0, 200, 400] as const).map((delay) => (
+                  <div
+                    key={delay}
+                    className="absolute rounded-full border border-sky-300/40"
+                    style={{
+                      animation: `reveal-ring-expand 900ms var(--ease-out-strong) ${delay}ms both`,
+                    }}
+                  />
+                ))}
+              </div>
+
+              <motion.div
+                className="flex flex-wrap items-center gap-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+              >
+                <div className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-950/72">
+                  <Sparkles className="h-4 w-4" />
+                  {way.kind === "legacy" ? "Mundo salvo" : "Mundo gerado"}
+                </div>
+              </motion.div>
+
+              <motion.h1
+                className="app-heading px-1 text-2xl font-semibold text-sky-950 sm:text-3xl"
+                initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
+                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.08 }}
+              >
+                Explore os dois lados do seu dilema.
+              </motion.h1>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", duration: 0.5, bounce: 0.12, delay: 0.12 }}
+              >
+                <DilemmaWorldView world={way.world} />
+              </motion.div>
+
+              <motion.div
+                className="flex justify-center pt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
+              >
+                <Button
+                  variant="glass"
+                  className="rounded-full px-6 text-sky-950"
+                  onClick={() => navigate({ to: "/ways" })}
+                >
+                  Ver todos os meus dilemas
+                </Button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import { motion } from "motion/react";
 
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { useWays } from "@/hooks/use-ways";
@@ -55,19 +56,29 @@ function WaysPage() {
           <>
             <div className="w-full overflow-hidden" ref={emblaRef}>
               <div className="flex">
-                {ways.map((way) => (
-                  <div
+                {ways.map((way, index) => (
+                  <motion.div
                     key={way.id}
                     className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.45,
+                      ease: [0.23, 1, 0.32, 1],
+                      delay: index * 0.05,
+                    }}
                   >
-                    <button
+                    <motion.button
                       type="button"
-                      className="w-full max-w-sm rounded-[2rem] p-6 space-y-4 text-left transition hover:-translate-y-1"
+                      className="w-full max-w-sm rounded-[2rem] p-6 space-y-4 text-left"
                       style={{
                         background: `linear-gradient(140deg, ${way.world.caminhoParado.gradiente[0]}cc, ${way.world.caminhoMudanca.gradiente[0]}cc)`,
                         border: "1px solid rgba(255,255,255,0.5)",
                         boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
                       }}
+                      whileHover={{ y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                       onClick={() =>
                         navigate({
                           to: "/ways/$sessionId",
@@ -122,8 +133,8 @@ function WaysPage() {
                           year: "numeric",
                         })}
                       </p>
-                    </button>
-                  </div>
+                    </motion.button>
+                  </motion.div>
                 ))}
               </div>
             </div>

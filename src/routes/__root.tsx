@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AnimatedOrbs } from "@/components/ui/animated-orbs";
 
 function NotFoundComponent() {
   return (
@@ -75,5 +76,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <AnimatedOrbs />
+      <Outlet />
+    </>
+  );
 }

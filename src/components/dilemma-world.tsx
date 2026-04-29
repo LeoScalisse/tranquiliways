@@ -34,9 +34,10 @@ function AmbientePanel({ ambiente, tipo, gradiente, isActive }: AmbientePanelPro
           ? `0 0 0 2px ${ambiente.cor}80, 0 24px 60px ${ambiente.cor}40`
           : "0 8px 32px rgba(0,0,0,0.12)",
       }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      initial={{ opacity: 0, scale: 0.96, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ type: "spring", duration: 0.45, bounce: 0.1 }}
     >
       {/* Camada de parallax: fundo distante */}
       <div
@@ -149,52 +150,68 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
           />
         </AnimatePresence>
 
-        {/* Navegação entre ambientes */}
-        <button
+        {/* Navegação entre ambientes — Task 11 */}
+        <motion.button
           onClick={goPrev}
           disabled={currentIndex === 0}
-          className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition disabled:opacity-0"
+          className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm disabled:opacity-0"
           style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
           aria-label="Ambiente anterior"
         >
           <ChevronLeft className="h-4 w-4 text-sky-950/70" />
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
           onClick={goNext}
           disabled={currentIndex === AMBIENTE_ORDER.length - 1}
-          className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition disabled:opacity-0"
+          className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm disabled:opacity-0"
           style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
           aria-label="Próximo ambiente"
         >
           <ChevronRight className="h-4 w-4 text-sky-950/70" />
-        </button>
+        </motion.button>
       </div>
 
-      {/* Indicadores de ambiente */}
+      {/* Indicadores de ambiente — Task 10 */}
       <div className="flex justify-center gap-2">
         {AMBIENTE_ORDER.map((key) => {
           const { Icon } = AMBIENTE_META[key];
           const isActive = key === ambienteAtivo;
           return (
-            <button
+            <motion.button
               key={key}
               onClick={() => onAmbienteChange(key)}
               className={cn(
-                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all",
-                isActive
-                  ? "text-sky-950"
-                  : "text-sky-950/40 hover:text-sky-950/60",
+                "relative flex items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium",
+                isActive ? "text-sky-950" : "text-sky-950/40",
               )}
               style={{
                 background: isActive ? `${caminho.corDominante}25` : "rgba(255,255,255,0.35)",
                 border: isActive ? `1px solid ${caminho.corDominante}50` : "1px solid transparent",
+                transition: "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
               }}
+              whileTap={{ scale: 0.93 }}
+              transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
               aria-label={AMBIENTE_META[key].label}
             >
-              <Icon className="h-3 w-3" />
-              <span className="hidden sm:inline">{AMBIENTE_META[key].label}</span>
-            </button>
+              {/* Ripple ao ativar */}
+              {isActive && (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 rounded-full"
+                  style={{
+                    background: `${caminho.corDominante}40`,
+                    animation: "chip-ripple 500ms var(--ease-out-strong) both",
+                  }}
+                />
+              )}
+              <Icon className="relative z-10 h-3 w-3" />
+              <span className="relative z-10 hidden sm:inline">{AMBIENTE_META[key].label}</span>
+            </motion.button>
           );
         })}
       </div>
@@ -219,59 +236,49 @@ export function DilemmaWorldView({ world, className }: DilemmaWorldViewProps) {
 
   return (
     <div className={cn("flex flex-col gap-5", className)} ref={containerRef}>
-      {/* Seletor de caminho */}
+      {/* Seletor de caminho — Task 7 */}
       <div
-        className="flex gap-1 rounded-full p-1"
+        className="relative flex gap-1 rounded-full p-1"
         style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
       >
-        <button
-          onClick={() => setCaminhoAtivo("parado")}
-          className={cn(
-            "flex-1 rounded-full px-4 py-2.5 text-sm font-medium transition-all",
-            caminhoAtivo === "parado"
-              ? "text-sky-950 shadow-sm"
-              : "text-sky-950/50 hover:text-sky-950/70",
-          )}
-          style={
-            caminhoAtivo === "parado"
-              ? {
-                  background: `linear-gradient(135deg, ${world.caminhoParado.gradiente[0]}, ${world.caminhoParado.gradiente[1]})`,
-                }
-              : { background: "transparent" }
-          }
-        >
-          {world.caminhoParado.nome}
-        </button>
-        <button
-          onClick={() => setCaminhoAtivo("mudanca")}
-          className={cn(
-            "flex-1 rounded-full px-4 py-2.5 text-sm font-medium transition-all",
-            caminhoAtivo === "mudanca"
-              ? "text-sky-950 shadow-sm"
-              : "text-sky-950/50 hover:text-sky-950/70",
-          )}
-          style={
-            caminhoAtivo === "mudanca"
-              ? {
-                  background: `linear-gradient(135deg, ${world.caminhoMudanca.gradiente[0]}, ${world.caminhoMudanca.gradiente[1]})`,
-                }
-              : { background: "transparent" }
-          }
-        >
-          {world.caminhoMudanca.nome}
-        </button>
+        {(["parado", "mudanca"] as const).map((key) => {
+          const c = key === "parado" ? world.caminhoParado : world.caminhoMudanca;
+          const isActive = caminhoAtivo === key;
+          return (
+            <motion.button
+              key={key}
+              onClick={() => setCaminhoAtivo(key)}
+              className="relative flex-1 rounded-full px-4 py-2.5 text-sm font-medium"
+              style={{ color: isActive ? "rgb(8 47 73)" : "rgba(8,47,73,0.5)" }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="path-selector-bg"
+                  className="absolute inset-0 rounded-full shadow-sm"
+                  style={{
+                    background: `linear-gradient(135deg, ${c.gradiente[0]}, ${c.gradiente[1]})`,
+                  }}
+                  transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
+                />
+              )}
+              <span className="relative z-10">{c.nome}</span>
+            </motion.button>
+          );
+        })}
       </div>
 
-      {/* Mundo navegável */}
+      {/* Mundo navegável — Task 8 */}
       <div className="h-[420px] sm:h-[480px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={caminhoAtivo}
             className="h-full"
-            initial={{ opacity: 0, x: caminhoAtivo === "mudanca" ? 40 : -40 }}
+            initial={{ opacity: 0, x: caminhoAtivo === "mudanca" ? 32 : -32 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: caminhoAtivo === "mudanca" ? -40 : 40 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
+            exit={{ opacity: 0, x: caminhoAtivo === "mudanca" ? -32 : 32 }}
+            transition={{ type: "spring", duration: 0.4, bounce: 0.08 }}
           >
             <CaminhoView
               caminho={caminho}

@@ -195,6 +195,62 @@
   }
 }
 
+/* ── Easing personalizado (Emil-style) ── */
+:root {
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* ── Keyframes globais ── */
+
+@keyframes orb-float-1 {
+  0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.45; }
+  30%       { transform: translateY(18px) translateX(-8px) scale(1.04); opacity: 0.55; }
+  70%       { transform: translateY(-10px) translateX(5px) scale(0.97); opacity: 0.38; }
+}
+@keyframes orb-float-2 {
+  0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.35; }
+  40%       { transform: translateY(-20px) translateX(10px) scale(1.06); opacity: 0.45; }
+  75%       { transform: translateY(12px) translateX(-5px) scale(0.96); opacity: 0.28; }
+}
+@keyframes orb-float-3 {
+  0%, 100% { transform: translateY(0px) scale(1); opacity: 0.40; }
+  50%       { transform: translateY(-14px) scale(1.08); opacity: 0.52; }
+}
+
+@keyframes reveal-ring-expand {
+  0%   { width: 40px; height: 40px; opacity: 0.7; }
+  100% { width: 280px; height: 280px; opacity: 0; }
+}
+
+@keyframes chip-ripple {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.35; }
+  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+}
+
+@keyframes content-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+@keyframes stagger-reveal {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0px); }
+}
+
+/* ── Acessibilidade: respeitar preferência de movimento reduzido ── */
+@media (prefers-reduced-motion: reduce) {
+  [style*="orb-float"],
+  [style*="reveal-ring"],
+  [style*="chip-ripple"],
+  [style*="content-breathe"],
+  [style*="stagger-reveal"] {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+}
+
 /* Way card (landscape postcard) */
 .way-card {
   display: flex;
