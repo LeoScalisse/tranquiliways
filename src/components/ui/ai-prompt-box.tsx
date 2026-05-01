@@ -364,6 +364,7 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
   const [showSearch, setShowSearch] = React.useState(false);
   const [showThink, setShowThink] = React.useState(false);
   const [showCanvas, setShowCanvas] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
   const promptBoxRef = React.useRef<HTMLDivElement>(null);
 
@@ -429,9 +430,20 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
 
   return (
     <>
+      <div
+        onFocusCapture={() => setIsFocused(true)}
+        onBlurCapture={() => setIsFocused(false)}
+      >
       <PromptInput
         value={input} onValueChange={setInput} isLoading={isLoading} onSubmit={handleSubmit}
-        className={cn("w-full bg-white border-black/10 shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 ease-in-out", isRecording && "border-red-500/70", className)}
+        className={cn(
+          "w-full bg-white border-black/10 transition-all duration-300 ease-in-out",
+          isFocused
+            ? "shadow-[0_0_0_3px_rgba(92,195,255,0.22),0_18px_44px_rgba(30,76,112,0.14)] border-sky-300/40"
+            : "shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
+          isRecording && "border-red-500/70",
+          className,
+        )}
         disabled={isLoading || isRecording} ref={ref || promptBoxRef}
         onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
       >
@@ -521,12 +533,31 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
               onClick={() => { if (isRecording) setIsRecording(false); else if (hasContent) handleSubmit(); else setIsRecording(true); }}
               disabled={isLoading && !hasContent}
             >
-              {isLoading ? <Square className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white animate-pulse" /> : isRecording ? <StopCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" /> : hasContent ? <ArrowUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" /> : <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-white transition-colors" />}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {isLoading ? (
+                  <motion.span key="loading" className="inline-flex items-center justify-center" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ type: "spring", stiffness: 400, damping: 22 }}>
+                    <Square className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white animate-pulse" />
+                  </motion.span>
+                ) : isRecording ? (
+                  <motion.span key="stop" className="inline-flex items-center justify-center" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ type: "spring", stiffness: 400, damping: 22 }}>
+                    <StopCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+                  </motion.span>
+                ) : hasContent ? (
+                  <motion.span key="send" className="inline-flex items-center justify-center" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ type: "spring", stiffness: 400, damping: 22 }}>
+                    <ArrowUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                  </motion.span>
+                ) : (
+                  <motion.span key="mic" className="inline-flex items-center justify-center" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ type: "spring", stiffness: 400, damping: 22 }}>
+                    <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </PromptButton>
           </PromptInputAction>
         </PromptInputActions>
       </PromptInput>
 
+      </div>
       <ImageViewDialog imageUrl={selectedImage} onClose={() => setSelectedImage(null)} />
     </>
   );

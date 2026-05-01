@@ -3,6 +3,7 @@ import { Cloud } from "lucide-react";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTouchRipple } from "@/hooks/use-touch-ripple";
 
 interface LiquidGlassButtonProps {
   to: LinkProps["to"];
@@ -21,6 +22,11 @@ export function LiquidGlassButton({
   prominent = false,
   compact = false,
 }: LiquidGlassButtonProps) {
+  const { onPointerDown, rippleElements } = useTouchRipple(
+    prominent ? "rgba(3, 105, 161, 0.28)" : "rgba(255, 255, 255, 0.55)",
+    72,
+  );
+
   return (
     <Link to={to} className="inline-flex">
       <motion.div
@@ -34,6 +40,7 @@ export function LiquidGlassButton({
         )}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
+        onPointerDown={onPointerDown}
         style={{
           backdropFilter: "blur(18px) saturate(1.7)",
           WebkitBackdropFilter: "blur(18px) saturate(1.7)",
@@ -46,6 +53,7 @@ export function LiquidGlassButton({
           className={prominent ? "text-sky-950" : "text-white"}
         />
         {label ? <span className="relative z-10 pr-1">{label}</span> : null}
+        {rippleElements}
         <div
           className="pointer-events-none absolute"
           style={{
