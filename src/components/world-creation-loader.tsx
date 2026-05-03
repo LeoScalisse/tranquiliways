@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Sparkles } from "lucide-react";
 
 const STAGES = [
@@ -16,10 +16,15 @@ interface WorldCreationLoaderProps {
 
 export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
   const [stageIndex, setStageIndex] = useState(0);
+  const shouldReduce = useReducedMotion();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStageIndex((prev) => Math.min(prev + 1, STAGES.length - 1));
+      setStageIndex((prev) => {
+        const next = Math.min(prev + 1, STAGES.length - 1);
+        if (next === STAGES.length - 1) clearInterval(interval);
+        return next;
+      });
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -49,7 +54,7 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
         </motion.p>
 
         {/* Ícone + mensagem do estágio */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3" role="status" aria-live="polite">
           <div
             className="flex h-10 w-10 items-center justify-center rounded-full"
             style={{
@@ -70,7 +75,7 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+              transition={shouldReduce ? { duration: 0 } : { duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
             >
               {STAGES[stageIndex]}
             </motion.p>
@@ -88,7 +93,7 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
                 background:
                   i <= stageIndex ? "#5a7fa5" : "rgba(90,127,165,0.25)",
               }}
-              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              transition={shouldReduce ? { duration: 0 } : { duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             />
           ))}
         </div>
