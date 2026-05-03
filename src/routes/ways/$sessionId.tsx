@@ -83,12 +83,17 @@ function DilemmaSessionPage() {
       <div className="glass-orb bottom-[16%] left-[6%] h-40 w-40 opacity-45" />
 
       <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col gap-5 px-4 pt-4 pb-8">
-        <header className="flex items-center justify-between gap-3">
+        <motion.header
+          className="flex items-center justify-between gap-3"
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        >
           <LiquidGlassButton to="/" icon={ArrowLeft} compact />
           <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
             Seus caminhos
           </div>
-        </header>
+        </motion.header>
 
         {isLoading && (
           <section className="glass-panel rounded-[2rem] p-6">
@@ -155,7 +160,7 @@ function DilemmaSessionPage() {
                 className="flex flex-wrap items-center gap-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+                transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1], delay: 0.15 }}
               >
                 <div className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-950/72">
                   <Sparkles className="h-4 w-4" />
@@ -167,7 +172,7 @@ function DilemmaSessionPage() {
                 className="app-heading px-1 text-2xl font-semibold text-sky-950 sm:text-3xl"
                 initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
                 animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.08 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.15 }}
               >
                 Explore os dois lados do seu dilema.
               </motion.h1>
@@ -175,7 +180,7 @@ function DilemmaSessionPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: "spring", duration: 0.5, bounce: 0.12, delay: 0.12 }}
+                transition={{ type: "spring", duration: 0.5, bounce: 0.12, delay: 0.3 }}
               >
                 <DilemmaWorldView world={way.world} />
               </motion.div>
@@ -184,7 +189,7 @@ function DilemmaSessionPage() {
                 className="flex justify-center pt-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.9 }}
               >
                 <Button
                   variant="glass"
