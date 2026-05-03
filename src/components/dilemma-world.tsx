@@ -178,12 +178,14 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
 
       {/* Indicadores de ambiente — Task 10 */}
       <div className="flex justify-center gap-2">
-        {AMBIENTE_ORDER.map((key) => {
+        {AMBIENTE_ORDER.map((key, idx) => {
           const { Icon } = AMBIENTE_META[key];
           const isActive = key === ambienteAtivo;
           return (
             <motion.button
               key={key}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
               onClick={() => onAmbienteChange(key)}
               className={cn(
                 "relative flex items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium",
@@ -195,7 +197,11 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
                 transition: "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
               }}
               whileTap={{ scale: 0.93 }}
-              transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
+              transition={{
+                opacity: { duration: 0.25, delay: 0.7 + idx * 0.08 },
+                y: { duration: 0.25, delay: 0.7 + idx * 0.08 },
+                scale: { duration: 0.12, ease: [0.23, 1, 0.32, 1] },
+              }}
               aria-label={AMBIENTE_META[key].label}
             >
               {/* Ripple ao ativar */}
@@ -237,9 +243,12 @@ export function DilemmaWorldView({ world, className }: DilemmaWorldViewProps) {
   return (
     <div className={cn("flex flex-col gap-5", className)} ref={containerRef}>
       {/* Seletor de caminho — Task 7 */}
-      <div
+      <motion.div
         className="relative flex gap-1 rounded-full p-1"
         style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
+        initial={{ opacity: 0, scaleX: 0.88 }}
+        animate={{ opacity: 1, scaleX: 1 }}
+        transition={{ type: "spring", duration: 0.45, bounce: 0.15 }}
       >
         {(["parado", "mudanca"] as const).map((key) => {
           const c = key === "parado" ? world.caminhoParado : world.caminhoMudanca;
@@ -267,7 +276,7 @@ export function DilemmaWorldView({ world, className }: DilemmaWorldViewProps) {
             </motion.button>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* Mundo navegável — Task 8 */}
       <div className="h-[420px] sm:h-[480px]">
