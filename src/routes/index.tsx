@@ -61,7 +61,7 @@ function Index() {
 
   if (isSubmitting) {
     return (
-      <div className="safe-screen relative overflow-hidden">
+      <div className="relative min-h-svh overflow-hidden">
         <WorldCreationLoader dilemma={rawInputRef.current} />
       </div>
     );
