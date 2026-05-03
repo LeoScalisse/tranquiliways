@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
+import { WorldCreationLoader } from "@/components/world-creation-loader";
 import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { TranquiliWaysTitle } from "@/components/ui/tranquili-ways-title";
@@ -15,6 +16,7 @@ function Index() {
   const [interacting, setInteracting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const rawInputRef = useRef("");
   const { saveWaySession } = useWays();
   const navigate = useNavigate();
 
@@ -28,17 +30,23 @@ function Index() {
       return;
     }
 
+    rawInputRef.current = rawInput;
     setFeedback(null);
     setIsSubmitting(true);
 
     try {
-      const session = await createJourneySession({ rawInput, inputMode: "text" });
-      saveWaySession(session);
+      const result = await createJourneySession({ rawInput, inputMode: "text" });
 
+      if ("guardrail" in result) {
+        setFeedback(result.mensagem);
+        return;
+      }
+
+      saveWaySession(result);
       navigate({
         to: "/ways/$sessionId",
-        params: { sessionId: session.id },
-        search: { token: session.launchToken },
+        params: { sessionId: result.id },
+        search: { token: result.launchToken },
       });
     } catch (error) {
       setFeedback(
@@ -49,6 +57,14 @@ function Index() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isSubmitting) {
+    return (
+      <div className="safe-screen relative overflow-hidden">
+        <WorldCreationLoader dilemma={rawInputRef.current} />
+      </div>
+    );
   }
 
   return (
@@ -81,15 +97,6 @@ function Index() {
             className="rounded-[1.75rem] border-white/30 bg-white/75 shadow-[0_18px_44px_rgba(30,76,112,0.12)]"
             onSend={(message) => { void handleSend(message); }}
           />
-
-          {isSubmitting && (
-            <p
-              className="mt-4 px-4 text-center text-sm text-sky-950/60"
-              style={{ animation: "content-breathe 2s ease-in-out infinite" }}
-            >
-              Construindo os seus caminhos...
-            </p>
-          )}
 
           {feedback && !isSubmitting ? (
             <p className="mt-4 px-4 text-center text-sm text-sky-950/70">{feedback}</p>
