@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, Home, Briefcase, Users, Tv } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DilemmaWorld, CaminhoMundo, Ambiente } from "@/lib/interpret-dilemma";
@@ -176,51 +176,6 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
         </motion.button>
       </div>
 
-      {/* Indicadores de ambiente — Task 10 */}
-      <div className="flex justify-center gap-2">
-        {AMBIENTE_ORDER.map((key, idx) => {
-          const { Icon } = AMBIENTE_META[key];
-          const isActive = key === ambienteAtivo;
-          return (
-            <motion.button
-              key={key}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              onClick={() => onAmbienteChange(key)}
-              className={cn(
-                "relative flex items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium",
-                isActive ? "text-sky-950" : "text-sky-950/40",
-              )}
-              style={{
-                background: isActive ? `${caminho.corDominante}25` : "rgba(255,255,255,0.35)",
-                border: isActive ? `1px solid ${caminho.corDominante}50` : "1px solid transparent",
-                transition: "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
-              }}
-              whileTap={{ scale: 0.93 }}
-              transition={{
-                opacity: { duration: 0.25, delay: 0.7 + idx * 0.08 },
-                y: { duration: 0.25, delay: 0.7 + idx * 0.08 },
-                scale: { duration: 0.12, ease: [0.23, 1, 0.32, 1] },
-              }}
-              aria-label={AMBIENTE_META[key].label}
-            >
-              {/* Ripple ao ativar */}
-              {isActive && (
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 rounded-full"
-                  style={{
-                    background: `${caminho.corDominante}40`,
-                    animation: "chip-ripple 500ms var(--ease-out-strong) both",
-                  }}
-                />
-              )}
-              <Icon className="relative z-10 h-3 w-3" />
-              <span className="relative z-10 hidden sm:inline">{AMBIENTE_META[key].label}</span>
-            </motion.button>
-          );
-        })}
-      </div>
     </div>
   );
 }
@@ -296,6 +251,52 @@ export function DilemmaWorldView({ world, className }: DilemmaWorldViewProps) {
             />
           </motion.div>
         </AnimatePresence>
+      </div>
+
+      {/* Indicadores de ambiente */}
+      <div className="flex justify-center gap-2">
+        {AMBIENTE_ORDER.map((key, idx) => {
+          const { Icon } = AMBIENTE_META[key];
+          const isActive = key === ambienteAtivo;
+          return (
+            <motion.button
+              key={key}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={() => setAmbiente(key)}
+              className={cn(
+                "relative flex items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium",
+                isActive ? "text-sky-950" : "text-sky-950/40",
+              )}
+              style={{
+                background: isActive ? `${caminho.corDominante}25` : "rgba(255,255,255,0.35)",
+                border: isActive ? `1px solid ${caminho.corDominante}50` : "1px solid transparent",
+                transition: "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
+              }}
+              whileTap={{ scale: 0.93 }}
+              transition={{
+                opacity: { duration: 0.25, delay: 0.7 + idx * 0.08 },
+                y: { duration: 0.25, delay: 0.7 + idx * 0.08 },
+                scale: { duration: 0.12, ease: [0.23, 1, 0.32, 1] },
+              }}
+              aria-label={AMBIENTE_META[key].label}
+            >
+              {/* Ripple ao ativar */}
+              {isActive && (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 rounded-full"
+                  style={{
+                    background: `${caminho.corDominante}40`,
+                    animation: "chip-ripple 500ms var(--ease-out-strong) both",
+                  }}
+                />
+              )}
+              <Icon className="relative z-10 h-3 w-3" />
+              <span className="relative z-10 hidden sm:inline">{AMBIENTE_META[key].label}</span>
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* Dilema original */}
