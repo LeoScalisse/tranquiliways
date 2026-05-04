@@ -13,5 +13,5 @@ O objetivo e provar:
 
 - o app recebe input
 - a sessao nasce
-- a Unity abre
-- o hub 3D hidrata a sessao via backend
+- a Mundo gráfico intarativo/jogado abre
+

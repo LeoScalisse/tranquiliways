@@ -3,7 +3,9 @@
     "allow": [
       "WebFetch(domain:claude.ai)",
       "Bash(npx tsc *)",
-      "Bash(npx skills *)"
+      "Bash(npx skills *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

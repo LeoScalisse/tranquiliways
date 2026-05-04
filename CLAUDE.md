@@ -2,9 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Required Reading
+
+Before making edits or updates that affect product direction, UX, UI copy, AI behavior, loading flows, monetization, retention, or platform priorities, read `docs/product-context.md`.
+
+If a proposed change conflicts with that document, stop and realign before implementing.
+
 ## Project Overview
 
-TranquiliWays is a full-stack web app (with iOS/Android via Capacitor) that helps users explore life dilemmas by generating AI-powered visual "worlds" representing two paths: staying put vs. making a change. The UI is in Portuguese (pt-BR).
+TranquiliWays is a full-stack web app (with iOS/Android via Capacitor) that helps young users explore life dilemmas by generating AI-powered visual worlds that make possible futures feel tangible. The product should clarify possibilities without deciding for the user. The UI is in Portuguese (pt-BR).
 
 ## Commands
 
@@ -35,7 +41,7 @@ npx tsc --noEmit
 - **Forms/validation:** React Hook Form + Zod
 - **Animations:** Framer Motion / Motion
 - **Backend:** TanStack Start server functions + Cloudflare Workers (via Wrangler)
-- **AI:** Claude API for dilemma interpretation
+- **AI:** gemini API for dilemma interpretation
 - **Mobile:** Capacitor 7 (app ID: `com.tranquiliways.app`)
 - **Build:** Vite 7 via `@lovable.dev/vite-tanstack-config` preset
 
@@ -87,7 +93,6 @@ JourneySession: encrypted user input + DilemmaWorld + security token
 | `way-history.ts` | Local way history storage, migration, and session persistence helpers |
 | `tranquili-native.ts` | Capacitor native bindings (status bar, keyboard, haptics) |
 | `tranquili-voice.ts` | Voice input capture |
-| `unity-launcher.ts` | Deprecated Unity launcher compatibility shim |
 
 ### Design Conventions
 

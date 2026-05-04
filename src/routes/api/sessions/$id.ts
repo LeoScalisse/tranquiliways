@@ -7,7 +7,9 @@ export const Route = createFileRoute("/api/sessions/$id")({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
-        const token = new URL(request.url).searchParams.get("token");
+        const authHeader = request.headers.get("Authorization");
+        const token =
+          authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
         if (!token) {
           return Response.json(
@@ -15,7 +17,7 @@ export const Route = createFileRoute("/api/sessions/$id")({
               error: "missing_launch_token",
               message: "O launch token e obrigatorio para abrir esta sessao.",
             },
-            { status: 400 },
+            { status: 401 },
           );
         }
 

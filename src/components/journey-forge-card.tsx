@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useWays } from "@/hooks/use-ways";
 import { createJourneySession } from "@/lib/journey-api";
+import type { CreateSessionResult } from "@/lib/journey-api";
 import type { JourneyInputMode } from "@/lib/journey-session";
 import { cn } from "@/lib/utils";
 import {
@@ -58,14 +59,19 @@ export function JourneyForgeCard() {
     setIsForging(true);
 
     try {
-      const session = await createJourneySession({
+      const result: CreateSessionResult = await createJourneySession({
         rawInput,
         inputMode,
       });
-      saveWaySession(session);
 
+      if ("guardrail" in result) {
+        setFeedback(result.mensagem);
+        return;
+      }
+
+      saveWaySession(result);
       window.location.assign(
-        `/ways/${encodeURIComponent(session.id)}?token=${encodeURIComponent(session.launchToken)}`,
+        `/ways/${encodeURIComponent(result.id)}?token=${encodeURIComponent(result.launchToken)}`,
       );
     } catch (error) {
       setFeedback(

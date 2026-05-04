@@ -31,7 +31,6 @@ interface VerifyJourneySessionOptions {
   secret?: string;
 }
 
-const DEFAULT_SESSION_SECRET = "tranquiliways-phase-1-dev-secret";
 const AES_GCM_IV_LENGTH = 12;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -117,7 +116,13 @@ function resolveJourneySessionSecret(secret?: string): string {
   const processSecret = (
     globalThis as typeof globalThis & { process?: { env?: Record<string, string | undefined> } }
   ).process?.env?.TRANQUILIWAYS_SESSION_SECRET;
-  return processSecret || DEFAULT_SESSION_SECRET;
+  if (!processSecret) {
+    throw new Error(
+      "TRANQUILIWAYS_SESSION_SECRET não está configurada. " +
+        "Defina essa variável de ambiente antes de iniciar o servidor.",
+    );
+  }
+  return processSecret;
 }
 
 function isJourneySessionPayload(

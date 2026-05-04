@@ -45,7 +45,7 @@ public class TranquiliNativePlugin extends Plugin {
         String rawUrl = call.getString("url");
 
         if (rawUrl == null || rawUrl.trim().isEmpty()) {
-            call.reject("Informe uma URL valida para abrir o Unity.");
+            call.reject("Informe uma URL valida para abrir o conteudo externo.");
             return;
         }
 
@@ -62,7 +62,7 @@ public class TranquiliNativePlugin extends Plugin {
         } catch (ActivityNotFoundException error) {
           call.reject("Nenhum app compativel foi encontrado para abrir esta URL.");
         } catch (Exception error) {
-          call.reject("Nao foi possivel abrir o Unity neste dispositivo.");
+          call.reject("Nao foi possivel abrir este conteudo externo neste dispositivo.");
         }
     }
 

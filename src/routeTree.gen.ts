@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as WaysSessionIdRouteImport } from './routes/ways/$sessionId'
 import { Route as IndexNextRouteImport } from './routes/index.next'
 import { Route as ApiSessionsRouteImport } from './routes/api/sessions'
+import { Route as ApiQuestionsRouteImport } from './routes/api/questions'
 import { Route as ApiSessionsIdRouteImport } from './routes/api/sessions/$id'
 
 const WaysRoute = WaysRouteImport.update({
@@ -41,6 +42,11 @@ const ApiSessionsRoute = ApiSessionsRouteImport.update({
   path: '/api/sessions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiQuestionsRoute = ApiQuestionsRouteImport.update({
+  id: '/api/questions',
+  path: '/api/questions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSessionsIdRoute = ApiSessionsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -50,6 +56,7 @@ const ApiSessionsIdRoute = ApiSessionsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ways': typeof WaysRouteWithChildren
+  '/api/questions': typeof ApiQuestionsRoute
   '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/index/next': typeof IndexNextRoute
   '/ways/$sessionId': typeof WaysSessionIdRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ways': typeof WaysRouteWithChildren
+  '/api/questions': typeof ApiQuestionsRoute
   '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/index/next': typeof IndexNextRoute
   '/ways/$sessionId': typeof WaysSessionIdRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ways': typeof WaysRouteWithChildren
+  '/api/questions': typeof ApiQuestionsRoute
   '/api/sessions': typeof ApiSessionsRouteWithChildren
   '/index/next': typeof IndexNextRoute
   '/ways/$sessionId': typeof WaysSessionIdRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/ways'
+    | '/api/questions'
     | '/api/sessions'
     | '/index/next'
     | '/ways/$sessionId'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/ways'
+    | '/api/questions'
     | '/api/sessions'
     | '/index/next'
     | '/ways/$sessionId'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/ways'
+    | '/api/questions'
     | '/api/sessions'
     | '/index/next'
     | '/ways/$sessionId'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   WaysRoute: typeof WaysRouteWithChildren
+  ApiQuestionsRoute: typeof ApiQuestionsRoute
   ApiSessionsRoute: typeof ApiSessionsRouteWithChildren
   IndexNextRoute: typeof IndexNextRoute
 }
@@ -143,6 +156,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSessionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/questions': {
+      id: '/api/questions'
+      path: '/api/questions'
+      fullPath: '/api/questions'
+      preLoaderRoute: typeof ApiQuestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/sessions/$id': {
       id: '/api/sessions/$id'
       path: '/$id'
@@ -178,6 +198,7 @@ const ApiSessionsRouteWithChildren = ApiSessionsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   WaysRoute: WaysRouteWithChildren,
+  ApiQuestionsRoute: ApiQuestionsRoute,
   ApiSessionsRoute: ApiSessionsRouteWithChildren,
   IndexNextRoute: IndexNextRoute,
 }

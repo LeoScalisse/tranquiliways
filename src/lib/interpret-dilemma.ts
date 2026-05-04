@@ -1,6 +1,10 @@
+import { z } from "zod";
+
 // Interpreta o dilema do usuário e gera um DilemmaWorld com dois caminhos navegáveis.
-// O campo `world` é gerado server-side pela Claude API; este módulo define os tipos
-// e a função de fallback heurístico usada quando a API não está disponível.
+// O campo `world` é gerado server-side pela Gemini API; este módulo define os tipos,
+// os schemas Zod de validação e a função de fallback heurístico.
+
+export type TipoDilema = "tradeoff" | "avoidance" | "values";
 
 export type TomEmocional =
   | "arrependimento"
@@ -44,10 +48,55 @@ export interface CaminhoMundo {
 export interface DilemmaWorld {
   id: string;
   dilema: string;
+  tipoDilema?: TipoDilema;
   caminhoParado: CaminhoMundo;
   caminhoMudanca: CaminhoMundo;
   geradoEm: string;
 }
+
+// ---------------------------------------------------------------------------
+// Schemas Zod — validam a resposta JSON do Gemini antes de usar
+// ---------------------------------------------------------------------------
+
+const TomEmocionalSchema = z.enum([
+  "arrependimento", "esperanca", "ansiedade", "paz",
+  "solidao", "conexao", "estagnacao", "transformacao",
+]);
+
+const AmbienteSchema = z.object({
+  descricao: z.string(),
+  elementos: z.array(z.string()),
+  cor: z.string(),
+  humor: z.string(),
+});
+
+const CaminhoMundoSchema = z.object({
+  nome: z.string(),
+  titulo: z.string(),
+  tom: TomEmocionalSchema,
+  corDominante: z.string(),
+  gradiente: z.tuple([z.string(), z.string()]),
+  ambientes: z.object({
+    quarto: AmbienteSchema,
+    sala: AmbienteSchema,
+    trabalho: AmbienteSchema,
+    familia: AmbienteSchema,
+  }),
+});
+
+export const GeminiWorldResponseSchema = z.object({
+  tipo: z.enum(["tradeoff", "avoidance", "values"]),
+  caminhoParado: CaminhoMundoSchema,
+  caminhoMudanca: CaminhoMundoSchema,
+});
+
+export const GeminiQuestionsResponseSchema = z.object({
+  perguntas: z.array(z.string()).max(3),
+});
+
+export const GeminiGuardrailSchema = z.object({
+  guardrail: z.literal(true),
+});
 
 // ---------------------------------------------------------------------------
 // Fallback heurístico — usado quando ANTHROPIC_API_KEY não está disponível
