@@ -5,9 +5,12 @@ import { z } from "zod";
 import { motion, AnimatePresence } from "motion/react";
 
 import { DilemmaWorldView } from "@/components/dilemma-world";
+import { PlayableWorldExperience } from "@/features/playable-world/ui/playable-world-experience";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { Button } from "@/components/ui/button";
 import { getJourneySession } from "@/lib/journey-api";
+import type { JourneyGenerationWarning } from "@/lib/journey-session";
+import { isLegacyDilemmaWorld, isPlayableWorld } from "@/lib/journey-world";
 import {
   getWayHistoryEntry,
   saveJourneySessionHistory,
@@ -21,6 +24,27 @@ export const Route = createFileRoute("/ways/$sessionId")({
   component: DilemmaSessionPage,
 });
 
+const FALLBACK_NOTICE_BY_WARNING: Record<JourneyGenerationWarning, string> = {
+  groq_quota_exhausted:
+    "A IA da Groq estava no limite neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
+  groq_unavailable:
+    "A IA da Groq nao ficou disponivel neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
+  groq_invalid_response:
+    "A IA da Groq respondeu de forma inconsistente neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
+};
+
+function getFallbackNotice(entry: WayHistoryEntry | null) {
+  if (!entry || entry.generationSource !== "fallback") {
+    return null;
+  }
+
+  if (!entry.generationWarning) {
+    return "Este mundo foi forjado em modo local para manter sua jornada em movimento.";
+  }
+
+  return FALLBACK_NOTICE_BY_WARNING[entry.generationWarning];
+}
+
 function DilemmaSessionPage() {
   const { sessionId } = Route.useParams();
   const { token } = Route.useSearch();
@@ -29,6 +53,7 @@ function DilemmaSessionPage() {
   const [way, setWay] = useState<WayHistoryEntry | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fallbackNotice = getFallbackNotice(way);
 
   useEffect(() => {
     let active = true;
@@ -74,8 +99,38 @@ function DilemmaSessionPage() {
     }
 
     void loadSession();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [sessionId, token]);
+
+  if (way && !isLoading && isPlayableWorld(way.world)) {
+    return (
+      <div className="safe-screen relative overflow-hidden">
+        <div className="absolute left-4 top-4 z-20">
+          <LiquidGlassButton to="/ways" icon={ArrowLeft} compact />
+        </div>
+
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-16 sm:px-6">
+          {fallbackNotice ? (
+            <section className="glass-panel rounded-[1.5rem] border border-white/35 px-4 py-3 text-sm leading-6 text-sky-950/78">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/55 px-3 py-1 text-xs uppercase tracking-[0.2em] text-sky-950/55">
+                <Sparkles className="h-3.5 w-3.5" />
+                Modo local
+              </div>
+              <p className="mt-3 max-w-3xl">{fallbackNotice}</p>
+            </section>
+          ) : null}
+          <PlayableWorldExperience
+            world={way.world}
+            onBrowseWays={() => navigate({ to: "/ways" })}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const shouldRenderLegacyWorld = way && !isLoading && isLegacyDilemmaWorld(way.world);
 
   return (
     <div className="safe-screen relative overflow-hidden">
@@ -123,7 +178,11 @@ function DilemmaSessionPage() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {token ? (
-                    <Button variant="glassProminent" onClick={() => window.location.reload()} className="rounded-full px-5">
+                    <Button
+                      variant="glassProminent"
+                      onClick={() => window.location.reload()}
+                      className="rounded-full px-5"
+                    >
                       Tentar de novo
                     </Button>
                   ) : null}
@@ -137,7 +196,7 @@ function DilemmaSessionPage() {
         )}
 
         <AnimatePresence>
-          {way && !isLoading && (
+          {shouldRenderLegacyWorld && (
             <>
               {/* Rings de reveal — explodem uma vez ao aparecer */}
               <div
@@ -202,6 +261,39 @@ function DilemmaSessionPage() {
             </>
           )}
         </AnimatePresence>
+
+        {way && !isLoading && !shouldRenderLegacyWorld && !isPlayableWorld(way.world) ? (
+          <section className="glass-panel rounded-[2rem] p-6">
+            <div className="flex items-start gap-3 rounded-[1.5rem] border border-amber-200/70 bg-white/72 p-5 text-sky-950/75">
+              <TriangleAlert className="mt-0.5 h-5 w-5 text-amber-500" />
+              <div className="space-y-4">
+                <div>
+                  <h2 className="app-heading text-2xl font-semibold">Sessao inconsistente.</h2>
+                  <p className="mt-2 max-w-xl text-sm leading-6">
+                    O mundo foi salvo, mas esse formato nao conseguiu ser reconhecido na abertura.
+                    Tente gerar novamente para reconstruir a sessao com o renderer atual.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant="glassProminent"
+                    onClick={() => navigate({ to: "/" })}
+                    className="rounded-full px-5"
+                  >
+                    Gerar de novo
+                  </Button>
+                  <Button
+                    variant="glass"
+                    className="rounded-full px-5 text-sky-950"
+                    onClick={() => navigate({ to: "/ways" })}
+                  >
+                    Ver minhas ways
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
       </div>
     </div>
   );

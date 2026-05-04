@@ -1,5 +1,12 @@
-import type { DilemmaWorld } from "./interpret-dilemma";
-import type { JourneyInputMode, JourneySession } from "./journey-session";
+import { isJourneyWorld, type JourneyWorld } from "./journey-world.ts";
+import {
+  isJourneyGenerationWarning,
+  normalizeJourneyGenerationMeta,
+  type JourneyGenerationSource,
+  type JourneyGenerationWarning,
+  type JourneyInputMode,
+  type JourneySession,
+} from "./journey-session.ts";
 
 export type WayHistoryKind = "session" | "legacy";
 
@@ -9,14 +16,25 @@ export interface WayHistoryEntry {
   rawInput: string;
   createdAt: string;
   inputMode?: JourneyInputMode;
-  world: DilemmaWorld;
+  world: JourneyWorld;
   launchToken?: string;
+  generationSource?: JourneyGenerationSource;
+  generationWarning?: JourneyGenerationWarning;
 }
+
+type LegacyWayHistoryEntry = Omit<WayHistoryEntry, "generationSource" | "generationWarning"> & {
+  generationSource?: JourneyGenerationSource | "gemini";
+  generationWarning?:
+    | JourneyGenerationWarning
+    | "gemini_quota_exhausted"
+    | "gemini_unavailable"
+    | "gemini_invalid_response";
+};
 
 interface LegacySavedWay {
   id: string;
   dilema: string;
-  world: DilemmaWorld;
+  world: JourneyWorld;
   savedAt: number;
 }
 
@@ -41,8 +59,13 @@ function toTimestamp(value: string) {
   return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
-function isDilemmaWorld(value: unknown): value is DilemmaWorld {
-  return value !== null && typeof value === "object";
+function isLegacyJourneyGenerationWarning(value: unknown) {
+  return (
+    isJourneyGenerationWarning(value) ||
+    value === "gemini_quota_exhausted" ||
+    value === "gemini_unavailable" ||
+    value === "gemini_invalid_response"
+  );
 }
 
 function isWayHistoryEntry(value: unknown): value is WayHistoryEntry {
@@ -50,23 +73,33 @@ function isWayHistoryEntry(value: unknown): value is WayHistoryEntry {
     return false;
   }
 
-  const candidate = value as Partial<WayHistoryEntry>;
+  const candidate = value as Partial<LegacyWayHistoryEntry>;
 
   return (
     typeof candidate.id === "string" &&
     (candidate.kind === "session" || candidate.kind === "legacy") &&
     typeof candidate.rawInput === "string" &&
     typeof candidate.createdAt === "string" &&
-    isDilemmaWorld(candidate.world) &&
+    isJourneyWorld(candidate.world) &&
     (candidate.inputMode === undefined ||
       candidate.inputMode === "text" ||
       candidate.inputMode === "voice") &&
-    (candidate.launchToken === undefined || typeof candidate.launchToken === "string")
+    (candidate.launchToken === undefined || typeof candidate.launchToken === "string") &&
+    (candidate.generationSource === undefined ||
+      candidate.generationSource === "groq" ||
+      candidate.generationSource === "gemini" ||
+      candidate.generationSource === "fallback") &&
+    (candidate.generationWarning === undefined ||
+      isLegacyJourneyGenerationWarning(candidate.generationWarning))
   );
 }
 
 function normalizeWayHistoryEntry(entry: WayHistoryEntry): WayHistoryEntry {
   const fallbackCreatedAt = new Date().toISOString();
+  const generationMeta =
+    entry.kind === "session"
+      ? normalizeJourneyGenerationMeta(entry)
+      : normalizeLegacyGenerationMeta(entry);
 
   return {
     id: entry.id,
@@ -76,6 +109,39 @@ function normalizeWayHistoryEntry(entry: WayHistoryEntry): WayHistoryEntry {
     inputMode: entry.inputMode,
     world: entry.world,
     launchToken: entry.launchToken || undefined,
+    ...generationMeta,
+  };
+}
+
+function normalizeLegacyGenerationMeta(entry: WayHistoryEntry) {
+  const legacyEntry = entry as LegacyWayHistoryEntry;
+
+  if (
+    legacyEntry.generationSource !== "fallback" &&
+    legacyEntry.generationSource !== "groq" &&
+    legacyEntry.generationSource !== "gemini"
+  ) {
+    return {
+      generationSource: undefined,
+      generationWarning: undefined,
+    };
+  }
+
+  if (legacyEntry.generationSource === "groq" || legacyEntry.generationSource === "gemini") {
+    return {
+      generationSource: "groq" as const,
+      generationWarning: undefined,
+    };
+  }
+
+  const normalizedFallback = normalizeJourneyGenerationMeta({
+    generationSource: "fallback",
+    generationWarning: legacyEntry.generationWarning,
+  });
+
+  return {
+    generationSource: normalizedFallback.generationSource,
+    generationWarning: normalizedFallback.generationWarning,
   };
 }
 
@@ -139,7 +205,7 @@ function migrateLegacyWays(raw: string | null): WayHistoryEntry[] {
           typeof item.id === "string" &&
           typeof item.dilema === "string" &&
           typeof item.savedAt === "number" &&
-          isDilemmaWorld(item.world)
+          isJourneyWorld(item.world)
         );
       })
       .map((item) => {
@@ -204,6 +270,8 @@ export function createWayHistoryEntryFromSession(session: JourneySession): WayHi
     inputMode: session.inputMode,
     world: session.world,
     launchToken: session.launchToken,
+    generationSource: session.generationSource,
+    generationWarning: session.generationWarning,
   });
 }
 

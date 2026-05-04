@@ -70,9 +70,7 @@ export function JourneyForgeCard() {
       }
 
       saveWaySession(result);
-      window.location.assign(
-        `/ways/${encodeURIComponent(result.id)}?token=${encodeURIComponent(result.launchToken)}`,
-      );
+      window.location.assign(`/ways/${encodeURIComponent(result.id)}`);
     } catch (error) {
       setFeedback(
         error instanceof Error

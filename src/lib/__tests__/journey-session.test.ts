@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 
 import {
   issueJourneySession,
+  normalizeJourneyGenerationMeta,
   verifyJourneySessionToken,
 } from "../journey-session.ts";
 import type { DilemmaWorld } from "../interpret-dilemma.ts";
@@ -69,6 +70,8 @@ await run("issueJourneySession creates a ready session with a launch token", asy
   assert.equal(session.rawInput, "Devo largar meu emprego seguro para seguir minha paixão?");
   assert.equal(session.inputMode, "text");
   assert.equal(session.status, "ready");
+  assert.equal(session.generationSource, "groq");
+  assert.equal(session.generationWarning, undefined);
   assert.ok(session.launchToken.length > 32);
   assert.ok(session.world !== null);
 });
@@ -90,6 +93,52 @@ await run("issueJourneySession seals o dilema e o mundo em vez de expô-los em t
   assert.equal(session.launchToken.includes("Devo me separar"), false);
   assert.equal(session.launchToken.includes("session-sealed"), false);
   assert.equal(session.launchToken.includes("world-stub"), false);
+});
+
+await run("issueJourneySession preserva metadata de fallback no token da sessão", async () => {
+  const session = await issueJourneySession(
+    {
+      rawInput: "Estou travado entre seguir como estou e me mover.",
+      inputMode: "text",
+      world: stubWorld,
+      generationSource: "fallback",
+      generationWarning: "groq_quota_exhausted",
+    },
+    {
+      secret,
+      id: "session-fallback",
+      now: "2026-04-17T20:05:00.000Z",
+    },
+  );
+
+  const verified = await verifyJourneySessionToken({
+    id: session.id,
+    token: session.launchToken,
+    secret,
+  });
+
+  assert.equal(session.generationSource, "fallback");
+  assert.equal(session.generationWarning, "groq_quota_exhausted");
+  assert.deepEqual(verified, session);
+});
+
+await run("normalizeJourneyGenerationMeta converte metadata legada da Gemini para Groq", () => {
+  const direct = normalizeJourneyGenerationMeta({
+    generationSource: "gemini",
+  } as never);
+
+  const fallback = normalizeJourneyGenerationMeta({
+    generationSource: "fallback",
+    generationWarning: "gemini_quota_exhausted",
+  } as never);
+
+  assert.deepEqual(direct, {
+    generationSource: "groq",
+  });
+  assert.deepEqual(fallback, {
+    generationSource: "fallback",
+    generationWarning: "groq_quota_exhausted",
+  });
 });
 
 await run("verifyJourneySessionToken retorna a sessão original para um token válido", async () => {

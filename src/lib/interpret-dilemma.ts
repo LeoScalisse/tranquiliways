@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Interpreta o dilema do usuário e gera um DilemmaWorld com dois caminhos navegáveis.
-// O campo `world` é gerado server-side pela Gemini API; este módulo define os tipos,
+// O campo `world` é gerado server-side pela Groq API; este módulo define os tipos,
 // os schemas Zod de validação e a função de fallback heurístico.
 
 export type TipoDilema = "tradeoff" | "avoidance" | "values";
@@ -54,8 +54,10 @@ export interface DilemmaWorld {
   geradoEm: string;
 }
 
+export type LegacyDilemmaWorld = DilemmaWorld;
+
 // ---------------------------------------------------------------------------
-// Schemas Zod — validam a resposta JSON do Gemini antes de usar
+// Schemas Zod — validam a resposta JSON da Groq antes de usar
 // ---------------------------------------------------------------------------
 
 const TomEmocionalSchema = z.enum([
@@ -84,22 +86,31 @@ const CaminhoMundoSchema = z.object({
   }),
 });
 
-export const GeminiWorldResponseSchema = z.object({
+export const DilemmaWorldSchema = z.object({
+  id: z.string(),
+  dilema: z.string(),
+  tipoDilema: z.enum(["tradeoff", "avoidance", "values"]).optional(),
+  caminhoParado: CaminhoMundoSchema,
+  caminhoMudanca: CaminhoMundoSchema,
+  geradoEm: z.string(),
+});
+
+export const GroqWorldResponseSchema = z.object({
   tipo: z.enum(["tradeoff", "avoidance", "values"]),
   caminhoParado: CaminhoMundoSchema,
   caminhoMudanca: CaminhoMundoSchema,
 });
 
-export const GeminiQuestionsResponseSchema = z.object({
+export const GroqQuestionsResponseSchema = z.object({
   perguntas: z.array(z.string()).max(3),
 });
 
-export const GeminiGuardrailSchema = z.object({
+export const GroqGuardrailSchema = z.object({
   guardrail: z.literal(true),
 });
 
 // ---------------------------------------------------------------------------
-// Fallback heurístico — usado quando ANTHROPIC_API_KEY não está disponível
+// Fallback heurístico — usado quando a Groq não está disponível
 // ---------------------------------------------------------------------------
 
 type DilemaTema = "carreira" | "relacionamento" | "proposito" | "financeiro" | "saude" | "geral";

@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 
+import { createPlayableWorldFixture } from "../../features/playable-world/__tests__/fixtures.ts";
 import type { DilemmaWorld } from "../interpret-dilemma.ts";
 import type { JourneySession } from "../journey-session.ts";
+import { isPlayableWorld } from "../journey-world.ts";
 import {
   __resetWayHistoryForTests,
   clearWayHistory,
@@ -51,10 +53,30 @@ const stubWorld: DilemmaWorld = {
     corDominante: "#6b7a8d",
     gradiente: ["#c9d0d8", "#8a96a3"],
     ambientes: {
-      quarto: { descricao: "Manha pesada", elementos: ["cama desfeita"], cor: "#8a96a3", humor: "inercia" },
-      sala: { descricao: "TV ligada", elementos: ["sofa amassado"], cor: "#7a8693", humor: "arrependimento" },
-      trabalho: { descricao: "Mesmo lugar", elementos: ["mesa desordenada"], cor: "#6b7a8d", humor: "estagnacao" },
-      familia: { descricao: "Jantar em silencio", elementos: ["prato pela metade"], cor: "#7d8a9a", humor: "distancia" },
+      quarto: {
+        descricao: "Manha pesada",
+        elementos: ["cama desfeita"],
+        cor: "#8a96a3",
+        humor: "inercia",
+      },
+      sala: {
+        descricao: "TV ligada",
+        elementos: ["sofa amassado"],
+        cor: "#7a8693",
+        humor: "arrependimento",
+      },
+      trabalho: {
+        descricao: "Mesmo lugar",
+        elementos: ["mesa desordenada"],
+        cor: "#6b7a8d",
+        humor: "estagnacao",
+      },
+      familia: {
+        descricao: "Jantar em silencio",
+        elementos: ["prato pela metade"],
+        cor: "#7d8a9a",
+        humor: "distancia",
+      },
     },
   },
   caminhoMudanca: {
@@ -64,10 +86,30 @@ const stubWorld: DilemmaWorld = {
     corDominante: "#4a7fa5",
     gradiente: ["#a8d4ef", "#5b9ec9"],
     ambientes: {
-      quarto: { descricao: "Alarme as 6h", elementos: ["mochila pronta"], cor: "#7ab8d4", humor: "antecipacao" },
-      sala: { descricao: "Planner na mesa", elementos: ["post-its"], cor: "#5a9ab5", humor: "foco" },
-      trabalho: { descricao: "Novo espaco", elementos: ["mesa arrumada"], cor: "#4a7fa5", humor: "proposito" },
-      familia: { descricao: "Jantar com historia", elementos: ["mesa cheia"], cor: "#5a8fba", humor: "conexao" },
+      quarto: {
+        descricao: "Alarme as 6h",
+        elementos: ["mochila pronta"],
+        cor: "#7ab8d4",
+        humor: "antecipacao",
+      },
+      sala: {
+        descricao: "Planner na mesa",
+        elementos: ["post-its"],
+        cor: "#5a9ab5",
+        humor: "foco",
+      },
+      trabalho: {
+        descricao: "Novo espaco",
+        elementos: ["mesa arrumada"],
+        cor: "#4a7fa5",
+        humor: "proposito",
+      },
+      familia: {
+        descricao: "Jantar com historia",
+        elementos: ["mesa cheia"],
+        cor: "#5a8fba",
+        humor: "conexao",
+      },
     },
   },
 };
@@ -91,6 +133,8 @@ function createSession(overrides: Partial<JourneySession> = {}): JourneySession 
     inputMode: overrides.inputMode ?? "text",
     status: overrides.status ?? "ready",
     world: overrides.world ?? stubWorld,
+    generationSource: overrides.generationSource ?? "groq",
+    generationWarning: overrides.generationWarning,
   };
 }
 
@@ -149,7 +193,64 @@ run("saveJourneySessionHistory persiste sessoes novas com token e input mode", (
   assert.equal(entry?.kind, "session");
   assert.equal(entry?.launchToken, "launch-token-abc");
   assert.equal(entry?.inputMode, "voice");
+  assert.equal(entry?.generationSource, "groq");
+  assert.equal(entry?.generationWarning, undefined);
   assert.deepEqual(getWayHistoryEntry("session-abc"), entry);
+});
+
+run("saveJourneySessionHistory persiste aviso de fallback para reabertura", () => {
+  const storage = new MemoryStorage();
+  installBrowserStorage(storage);
+  __resetWayHistoryForTests();
+
+  saveJourneySessionHistory(
+    createSession({
+      id: "session-fallback",
+      generationSource: "fallback",
+      generationWarning: "groq_quota_exhausted",
+    }),
+  );
+
+  const restored = getWayHistoryEntry("session-fallback");
+
+  assert.equal(restored?.generationSource, "fallback");
+  assert.equal(restored?.generationWarning, "groq_quota_exhausted");
+});
+
+run("getWayHistorySnapshot normaliza metadata legada da Gemini ao carregar storage novo", () => {
+  const storage = new MemoryStorage();
+  installBrowserStorage(storage);
+  __resetWayHistoryForTests();
+
+  storage.setItem(
+    WAY_HISTORY_STORAGE_KEY,
+    JSON.stringify([
+      {
+        kind: "session",
+        ...createSession({
+          id: "session-legacy-provider",
+          generationSource: "gemini",
+        }),
+      },
+      {
+        kind: "session",
+        ...createSession({
+          id: "session-legacy-fallback",
+          generationSource: "fallback",
+          generationWarning: "gemini_unavailable",
+        }),
+      },
+    ]),
+  );
+
+  const snapshot = getWayHistorySnapshot();
+  const providerEntry = snapshot.find((entry) => entry.id === "session-legacy-provider");
+  const fallbackEntry = snapshot.find((entry) => entry.id === "session-legacy-fallback");
+
+  assert.equal(providerEntry?.generationSource, "groq");
+  assert.equal(providerEntry?.generationWarning, undefined);
+  assert.equal(fallbackEntry?.generationSource, "fallback");
+  assert.equal(fallbackEntry?.generationWarning, "groq_unavailable");
 });
 
 run("saveJourneySessionHistory mantem o historico ordenado do mais novo para o mais antigo", () => {
@@ -179,4 +280,52 @@ run("saveJourneySessionHistory mantem o historico ordenado do mais novo para o m
     snapshot.map((entry) => entry.id),
     ["session-new", "session-old"],
   );
+});
+
+run("saveJourneySessionHistory reabre sessoes jogaveis sem quebrar o historico", () => {
+  const storage = new MemoryStorage();
+  installBrowserStorage(storage);
+  __resetWayHistoryForTests();
+
+  const playableSession = createSession({
+    id: "session-playable",
+    world: createPlayableWorldFixture(),
+  });
+
+  saveJourneySessionHistory(playableSession);
+  const restored = getWayHistoryEntry("session-playable");
+  const playableWorld = restored?.world as { version?: string; paths?: unknown[] } | undefined;
+
+  assert.equal(restored?.id, "session-playable");
+  assert.equal(playableWorld?.version, "playable-v1");
+  assert.equal(Array.isArray(playableWorld?.paths), true);
+});
+
+run("saveJourneySessionHistory reconhece mundo jogavel mesmo com dilema longo", () => {
+  const storage = new MemoryStorage();
+  installBrowserStorage(storage);
+  __resetWayHistoryForTests();
+
+  const longDilemma =
+    "Estou entre continuar na carreira segura que me protege hoje e me mover para um trabalho " +
+    "mais alinhado com o que eu quero construir, mas isso mexe com medo, familia, dinheiro e " +
+    "com a sensacao de que posso me arrepender se eu errar o tempo desse movimento.";
+
+  const playableWorld = {
+    ...createPlayableWorldFixture(),
+    dilema: longDilemma,
+  };
+
+  saveJourneySessionHistory(
+    createSession({
+      id: "session-playable-long",
+      rawInput: longDilemma,
+      world: playableWorld,
+    }),
+  );
+
+  const restored = getWayHistoryEntry("session-playable-long");
+
+  assert.equal(restored?.rawInput, longDilemma);
+  assert.equal(isPlayableWorld(restored?.world), true);
 });

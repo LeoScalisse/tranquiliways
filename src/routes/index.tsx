@@ -46,7 +46,6 @@ function Index() {
       navigate({
         to: "/ways/$sessionId",
         params: { sessionId: result.id },
-        search: { token: result.launchToken },
       });
     } catch (error) {
       setFeedback(

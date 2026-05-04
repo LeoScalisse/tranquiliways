@@ -81,7 +81,9 @@ export async function getJourneySession(
   lookup: JourneySessionLookup,
 ): Promise<JourneySession> {
   const response = await fetch(`/api/sessions/${encodeURIComponent(lookup.id)}`, {
-    headers: { Authorization: `Bearer ${lookup.launchToken}` },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ launchToken: lookup.launchToken }),
   });
 
   if (!response.ok) {

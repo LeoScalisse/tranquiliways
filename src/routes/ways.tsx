@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { useWays } from "@/hooks/use-ways";
+import { getWorldCardMeta } from "@/lib/journey-world";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/ways")({
@@ -27,7 +28,9 @@ function WaysPage() {
     const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
     emblaApi.on("select", onSelect);
     onSelect();
-    return () => { emblaApi.off("select", onSelect); };
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
   }, [emblaApi]);
 
   return (
@@ -43,7 +46,8 @@ function WaysPage() {
               <Sparkles className="h-7 w-7 text-sky-950/70" />
             </div>
             <p className="max-w-xs text-base text-sky-950/75">
-              Voce ainda nao explorou nenhum dilema. Comece descrevendo uma decisao que esta te pesando.
+              Voce ainda nao explorou nenhum dilema. Comece descrevendo uma decisao que esta te
+              pesando.
             </p>
             <button
               onClick={() => navigate({ to: "/" })}
@@ -56,86 +60,90 @@ function WaysPage() {
           <>
             <div className="w-full overflow-hidden" ref={emblaRef}>
               <div className="flex">
-                {ways.map((way, index) => (
-                  <motion.div
-                    key={way.id}
-                    className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.45,
-                      ease: [0.23, 1, 0.32, 1],
-                      delay: index * 0.05,
-                    }}
-                  >
-                    <motion.button
-                      type="button"
-                      className="w-full max-w-sm rounded-[2rem] p-6 space-y-4 text-left"
-                      style={{
-                        background: `linear-gradient(140deg, ${way.world.caminhoParado.gradiente[0]}cc, ${way.world.caminhoMudanca.gradiente[0]}cc)`,
-                        border: "1px solid rgba(255,255,255,0.5)",
-                        boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
+                {ways.map((way, index) => {
+                  const card = getWorldCardMeta(way.world);
+
+                  return (
+                    <motion.div
+                      key={way.id}
+                      className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.45,
+                        ease: [0.23, 1, 0.32, 1],
+                        delay: index * 0.05,
                       }}
-                      whileHover={{ y: -4 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-                      onClick={() =>
-                        navigate({
-                          to: "/ways/$sessionId",
-                          params: { sessionId: way.id },
-                          search: way.launchToken ? { token: way.launchToken } : {},
-                        })}
                     >
-                      <p className="text-xs font-medium uppercase tracking-widest text-sky-950/45">
-                        Dilema
-                      </p>
-                      <p className="text-base font-medium text-sky-950/85 leading-6 line-clamp-3">
-                        {way.rawInput}
-                      </p>
+                      <motion.button
+                        type="button"
+                        className="w-full max-w-sm rounded-[2rem] p-6 space-y-4 text-left"
+                        style={{
+                          background: `linear-gradient(140deg, ${card.accentGradient[0]}cc, ${card.accentGradient[1]}cc)`,
+                          border: "1px solid rgba(255,255,255,0.5)",
+                          boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
+                        }}
+                        whileHover={{ y: -4 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                        onClick={() =>
+                          navigate({
+                            to: "/ways/$sessionId",
+                            params: { sessionId: way.id },
+                          })
+                        }
+                      >
+                        <p className="text-xs font-medium uppercase tracking-widest text-sky-950/45">
+                          Dilema
+                        </p>
+                        <p className="text-base font-medium text-sky-950/85 leading-6 line-clamp-3">
+                          {way.rawInput}
+                        </p>
 
-                      <div className="flex gap-3">
-                        <div
-                          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
-                          style={{
-                            background: `${way.world.caminhoParado.corDominante}20`,
-                            border: `1px solid ${way.world.caminhoParado.corDominante}30`,
-                          }}
-                        >
-                          <p className="font-medium text-sky-950/70">{way.world.caminhoParado.nome}</p>
-                          <p
-                            className="mt-0.5 font-semibold"
-                            style={{ color: way.world.caminhoParado.corDominante }}
+                        <div className="flex gap-3">
+                          <div
+                            className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
+                            style={{
+                              background: `${card.leftPath.color}20`,
+                              border: `1px solid ${card.leftPath.color}30`,
+                            }}
                           >
-                            {way.world.caminhoParado.titulo}
-                          </p>
-                        </div>
-                        <div
-                          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
-                          style={{
-                            background: `${way.world.caminhoMudanca.corDominante}20`,
-                            border: `1px solid ${way.world.caminhoMudanca.corDominante}30`,
-                          }}
-                        >
-                          <p className="font-medium text-sky-950/70">{way.world.caminhoMudanca.nome}</p>
-                          <p
-                            className="mt-0.5 font-semibold"
-                            style={{ color: way.world.caminhoMudanca.corDominante }}
+                            <p className="font-medium text-sky-950/70">{card.leftPath.label}</p>
+                            <p
+                              className="mt-0.5 font-semibold"
+                              style={{ color: card.leftPath.color }}
+                            >
+                              {card.leftPath.title}
+                            </p>
+                          </div>
+                          <div
+                            className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
+                            style={{
+                              background: `${card.rightPath.color}20`,
+                              border: `1px solid ${card.rightPath.color}30`,
+                            }}
                           >
-                            {way.world.caminhoMudanca.titulo}
-                          </p>
+                            <p className="font-medium text-sky-950/70">{card.rightPath.label}</p>
+                            <p
+                              className="mt-0.5 font-semibold"
+                              style={{ color: card.rightPath.color }}
+                            >
+                              {card.rightPath.title}
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      <p className="text-xs text-sky-950/40">
-                        {new Date(way.createdAt).toLocaleDateString("pt-BR", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </motion.button>
-                  </motion.div>
-                ))}
+                        <p className="text-xs text-sky-950/40">
+                          {new Date(way.createdAt).toLocaleDateString("pt-BR", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </motion.button>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
 

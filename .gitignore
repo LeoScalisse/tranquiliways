@@ -20,6 +20,16 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Generated analysis artifacts
+.graphify*
+graphify-out/
+.superpowers/brainstorm/
+.obsidian/
+TranquiliWays/
+.claude/worktrees/*
+.claude/worktrees/**
+.tmp-groq-dev.*
+
 # Editor directories and files
 .vscode/*
 !.vscode/

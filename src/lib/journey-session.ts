@@ -1,22 +1,41 @@
-import type { DilemmaWorld } from "./interpret-dilemma";
+import { isJourneyWorld, type JourneyWorld } from "./journey-world.ts";
 
 export type JourneyInputMode = "text" | "voice";
 export type JourneySessionStatus = "ready" | "error";
+export type JourneyGenerationSource = "groq" | "fallback";
+export type JourneyGenerationWarning =
+  | "groq_quota_exhausted"
+  | "groq_unavailable"
+  | "groq_invalid_response";
 
-export interface JourneySession {
+type LegacyJourneyGenerationSource = JourneyGenerationSource | "gemini";
+type LegacyJourneyGenerationWarning =
+  | JourneyGenerationWarning
+  | "gemini_quota_exhausted"
+  | "gemini_unavailable"
+  | "gemini_invalid_response";
+
+export interface JourneyGenerationMeta {
+  generationSource: JourneyGenerationSource;
+  generationWarning?: JourneyGenerationWarning;
+}
+
+export interface JourneySession extends JourneyGenerationMeta {
   id: string;
   launchToken: string;
   createdAt: string;
   rawInput: string;
   inputMode: JourneyInputMode;
   status: JourneySessionStatus;
-  world: DilemmaWorld;
+  world: JourneyWorld;
 }
 
 interface IssueJourneySessionInput {
   rawInput: string;
   inputMode: JourneyInputMode;
-  world: DilemmaWorld;
+  world: JourneyWorld;
+  generationSource?: JourneyGenerationSource;
+  generationWarning?: JourneyGenerationWarning;
 }
 
 interface IssueJourneySessionOptions {
@@ -46,6 +65,7 @@ export async function issueJourneySession(
     inputMode: input.inputMode,
     status: "ready",
     world: input.world,
+    ...normalizeJourneyGenerationMeta(input),
   };
 
   const launchToken = await sealJourneySessionPayload(session, options.secret);
@@ -82,6 +102,7 @@ export async function verifyJourneySessionToken(
 
     return {
       ...payload,
+      ...normalizeJourneyGenerationMeta(payload),
       launchToken: options.token,
     };
   } catch {
@@ -134,8 +155,74 @@ function isJourneySessionPayload(
     typeof payload.rawInput === "string" &&
     (payload.inputMode === "text" || payload.inputMode === "voice") &&
     (payload.status === "ready" || payload.status === "error") &&
-    payload.world !== null &&
-    typeof payload.world === "object"
+    isJourneyGenerationMetaPayload(payload) &&
+    isJourneyWorld(payload.world)
+  );
+}
+
+export function normalizeJourneyGenerationMeta(
+  value:
+    | Partial<JourneyGenerationMeta>
+    | {
+        generationSource?: LegacyJourneyGenerationSource;
+        generationWarning?: LegacyJourneyGenerationWarning;
+      }
+    | undefined,
+): JourneyGenerationMeta {
+  if (value?.generationSource === "fallback") {
+    return {
+      generationSource: "fallback",
+      generationWarning: normalizeLegacyJourneyGenerationWarning(value.generationWarning),
+    };
+  }
+
+  return {
+    generationSource: "groq",
+  };
+}
+
+export function isJourneyGenerationWarning(value: unknown): value is JourneyGenerationWarning {
+  return (
+    value === "groq_quota_exhausted" ||
+    value === "groq_unavailable" ||
+    value === "groq_invalid_response"
+  );
+}
+
+function isLegacyJourneyGenerationWarning(value: unknown): value is LegacyJourneyGenerationWarning {
+  return (
+    isJourneyGenerationWarning(value) ||
+    value === "gemini_quota_exhausted" ||
+    value === "gemini_unavailable" ||
+    value === "gemini_invalid_response"
+  );
+}
+
+function normalizeLegacyJourneyGenerationWarning(
+  value: unknown,
+): JourneyGenerationWarning | undefined {
+  if (value === "gemini_quota_exhausted") return "groq_quota_exhausted";
+  if (value === "gemini_unavailable") return "groq_unavailable";
+  if (value === "gemini_invalid_response") return "groq_invalid_response";
+  return isJourneyGenerationWarning(value) ? value : undefined;
+}
+
+function isJourneyGenerationMetaPayload(
+  value: {
+    generationSource?: unknown;
+    generationWarning?: unknown;
+  },
+): value is {
+  generationSource?: LegacyJourneyGenerationSource;
+  generationWarning?: LegacyJourneyGenerationWarning;
+} {
+  return (
+    (value.generationSource === undefined ||
+      value.generationSource === "groq" ||
+      value.generationSource === "gemini" ||
+      value.generationSource === "fallback") &&
+    (value.generationWarning === undefined ||
+      isLegacyJourneyGenerationWarning(value.generationWarning))
   );
 }
 
@@ -151,7 +238,9 @@ function decodeBase64Url(value: string): Uint8Array {
 
 function encodeBase64(bytes: Uint8Array): string {
   let binary = "";
-  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
   return btoa(binary);
 }
 
