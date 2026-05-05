@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 
 import appCss from "../styles.css?url";
 import { AnimatedOrbs } from "@/components/ui/animated-orbs";
+import { PointerProvider } from "@/lib/pointer-context";
 
 function NotFoundComponent() {
   return (
@@ -33,7 +34,8 @@ export const Route = createRootRoute({
       { title: "TranquiliWays" },
       {
         name: "description",
-        content: "TranquiliWays oferece uma jornada mobile calma para explorar ideias, registrar sentimentos e navegar seus ways.",
+        content:
+          "TranquiliWays oferece uma jornada mobile calma para explorar ideias, registrar sentimentos e navegar seus ways.",
       },
       { name: "author", content: "TranquiliWays" },
       { name: "theme-color", content: "#d8f0ff" },
@@ -43,7 +45,8 @@ export const Route = createRootRoute({
       { property: "og:title", content: "TranquiliWays" },
       {
         property: "og:description",
-        content: "Uma interface híbrida pensada para Android e iOS com visual fluido e botões em estilo Liquid Glass.",
+        content:
+          "Uma interface híbrida pensada para Android e iOS com visual fluido e botões em estilo Liquid Glass.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -77,9 +80,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <>
+    <PointerProvider>
       <AnimatedOrbs />
       <Outlet />
-    </>
+    </PointerProvider>
   );
 }

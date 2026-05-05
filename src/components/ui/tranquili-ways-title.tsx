@@ -6,9 +6,7 @@ interface TranquiliWaysTitleProps {
   shimmerActive?: boolean;
 }
 
-export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
-  shimmerActive = true,
-}) => {
+export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({ shimmerActive = true }) => {
   const [collapsed, setCollapsed] = React.useState(false);
   const [animKey, setAnimKey] = React.useState(0);
 
@@ -36,80 +34,74 @@ export const TranquiliWaysTitle: React.FC<TranquiliWaysTitleProps> = ({
     }),
   };
 
-  const headingClass =
-    "app-heading text-4xl font-bold sm:text-5xl md:text-6xl";
+  const headingClass = "app-heading text-4xl font-bold sm:text-5xl md:text-6xl";
 
   return (
-    <div className="flex w-full justify-center">
+    <div className="flex w-full justify-center" style={{ perspective: "1200px" }}>
       <div
         className="relative flex min-h-[72px] items-center justify-center sm:min-h-[88px] cursor-pointer"
         onClick={handleRestart}
       >
         <motion.div
-          key={animKey}
-          className="flex items-center justify-center"
-          layout
-          transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
+          key={`entrance-${animKey}`}
+          initial={{ opacity: 0, z: -180 }}
+          animate={{ opacity: 1, z: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          style={{ transformStyle: "preserve-3d" }}
         >
-          {/* Tranquili — collapses smoothly */}
-          <motion.span
-            className="flex overflow-hidden whitespace-nowrap"
-            animate={
-              collapsed
-                ? { width: 0, opacity: 0 }
-                : { width: "auto", opacity: 1 }
-            }
+          <motion.div
+            key={animKey}
+            className="flex items-center justify-center"
+            layout
             transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
           >
-            {tranquiliChars.map((char, i) => (
-              <motion.span
-                key={`t-${i}`}
-                custom={i}
-                initial="hidden"
-                animate="show"
-                variants={charStagger}
-                className={`${headingClass} text-white`}
-              >
-                {char}
-              </motion.span>
-            ))}
-          </motion.span>
-
-          {/* Ways — always visible, shimmer after collapse */}
-          {collapsed ? (
-            <ShimmerText
-              active={shimmerActive}
-              duration={1}
-              delay={0.8}
-              className={headingClass}
+            {/* Tranquili — collapses smoothly */}
+            <motion.span
+              className="flex overflow-hidden whitespace-nowrap"
+              animate={collapsed ? { width: 0, opacity: 0 } : { width: "auto", opacity: 1 }}
+              transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
             >
-              <span style={{ color: "#ffdb58" }}>
-                {waysChars.map((char, i) => (
-                  <motion.span
-                    key={`ws-${i}`}
-                    initial={{ opacity: 1 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    {char}
-                  </motion.span>
-                ))}
-              </span>
-            </ShimmerText>
-          ) : (
-            waysChars.map((char, i) => (
-              <motion.span
-                key={`w-${i}`}
-                custom={tranquiliChars.length + i}
-                initial="hidden"
-                animate="show"
-                variants={charStagger}
-                className={headingClass}
-                style={{ color: "#ffdb58" }}
-              >
-                {char}
-              </motion.span>
-            ))
-          )}
+              {tranquiliChars.map((char, i) => (
+                <motion.span
+                  key={`t-${i}`}
+                  custom={i}
+                  initial="hidden"
+                  animate="show"
+                  variants={charStagger}
+                  className={`${headingClass} text-white`}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </motion.span>
+
+            {/* Ways — always visible, shimmer after collapse */}
+            {collapsed ? (
+              <ShimmerText active={shimmerActive} duration={1} delay={0.8} className={headingClass}>
+                <span style={{ color: "#ffdb58" }}>
+                  {waysChars.map((char, i) => (
+                    <motion.span key={`ws-${i}`} initial={{ opacity: 1 }} animate={{ opacity: 1 }}>
+                      {char}
+                    </motion.span>
+                  ))}
+                </span>
+              </ShimmerText>
+            ) : (
+              waysChars.map((char, i) => (
+                <motion.span
+                  key={`w-${i}`}
+                  custom={tranquiliChars.length + i}
+                  initial="hidden"
+                  animate="show"
+                  variants={charStagger}
+                  className={headingClass}
+                  style={{ color: "#ffdb58" }}
+                >
+                  {char}
+                </motion.span>
+              ))
+            )}
+          </motion.div>
         </motion.div>
       </div>
     </div>

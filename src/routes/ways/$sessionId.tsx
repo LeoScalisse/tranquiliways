@@ -137,12 +137,16 @@ function DilemmaSessionPage() {
       <div className="glass-orb right-[8%] top-[10%] h-28 w-28 opacity-55" />
       <div className="glass-orb bottom-[16%] left-[6%] h-40 w-40 opacity-45" />
 
-      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col gap-5 px-4 pt-4 pb-8">
+      <div
+        className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col gap-5 px-4 pt-4 pb-8"
+        style={{ perspective: "1000px" }}
+      >
         <motion.header
           className="flex items-center justify-between gap-3"
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+          initial={{ opacity: 0, y: -20, z: -60 }}
+          animate={{ opacity: 1, y: 0, z: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          style={{ perspective: "800px" }}
         >
           <LiquidGlassButton to="/" icon={ArrowLeft} compact />
           <div className="glass-panel rounded-full px-4 py-2 text-sm text-sky-950/70">
@@ -196,24 +200,31 @@ function DilemmaSessionPage() {
         )}
 
         <AnimatePresence>
-          {shouldRenderLegacyWorld && (
+          {way && !isLoading && isLegacyDilemmaWorld(way.world) && (
             <>
               {/* Rings de reveal — explodem uma vez ao aparecer */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none fixed inset-0 flex items-center justify-center"
-                style={{ zIndex: 50 }}
+              <motion.div
+                initial={{ scale: 0.8, rotateX: 20 }}
+                animate={{ scale: 1, rotateX: 0 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                style={{ perspective: "600px" }}
               >
-                {([0, 200, 400] as const).map((delay) => (
-                  <div
-                    key={delay}
-                    className="absolute rounded-full border border-sky-300/40"
-                    style={{
-                      animation: `reveal-ring-expand 900ms var(--ease-out-strong) ${delay}ms both`,
-                    }}
-                  />
-                ))}
-              </div>
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none fixed inset-0 flex items-center justify-center"
+                  style={{ zIndex: 50 }}
+                >
+                  {([0, 200, 400] as const).map((delay) => (
+                    <div
+                      key={delay}
+                      className="absolute rounded-full border border-sky-300/40"
+                      style={{
+                        animation: `reveal-ring-expand 900ms var(--ease-out-strong) ${delay}ms both`,
+                      }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
 
               <motion.div
                 className="flex flex-wrap items-center gap-3"
@@ -237,9 +248,10 @@ function DilemmaSessionPage() {
               </motion.h1>
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: "spring", duration: 0.5, bounce: 0.12, delay: 0.3 }}
+                initial={{ opacity: 0, scale: 0.97, z: 80 }}
+                animate={{ opacity: 1, scale: 1, z: 0 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+                style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
               >
                 <DilemmaWorldView world={way.world} />
               </motion.div>
