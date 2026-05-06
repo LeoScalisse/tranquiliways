@@ -1,8 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Sparkles } from "lucide-react";
-import { useMemo } from "react";
+import { ArrowLeft, Sparkles, X } from "lucide-react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { useWays } from "@/hooks/use-ways";
 import { getWorldCardMeta } from "@/lib/journey-world";
@@ -11,82 +21,95 @@ export const Route = createFileRoute("/ways")({
   component: WaysPage,
 });
 
-function cylinderTranslateZ(count: number) {
-  const n = Math.max(count, 1);
-  return Math.round(260 / Math.tan(Math.PI / n));
-}
-
 interface CylinderCardProps {
   way: ReturnType<typeof useWays>["ways"][number];
   index: number;
   count: number;
-  translateZ: number;
-  onClick: () => void;
+  onOpen: () => void;
+  onDelete: () => void;
 }
 
-function CylinderCard({ way, index, count, translateZ, onClick }: CylinderCardProps) {
+function CylinderCard({ way, index, count, onOpen, onDelete }: CylinderCardProps) {
   const card = getWorldCardMeta(way.world);
 
   return (
     <div
-      className="tw-cylinder-item space-y-4 text-left"
+      className="tw-cylinder-item"
       style={
         {
           "--quantity": count,
           "--index": index,
-          "--translateZ": `${translateZ}px`,
-          background: `linear-gradient(140deg, ${card.accentGradient[0]}cc, ${card.accentGradient[1]}cc)`,
-          border: "1px solid rgba(255,255,255,0.5)",
-          boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
+          border: `1.5px solid ${card.accentGradient[0]}88`,
         } as React.CSSProperties
       }
-      onClick={onClick}
+      onClick={onOpen}
     >
-      <p className="text-xs font-medium uppercase tracking-widest text-sky-950/45">Dilema</p>
-      <p className="text-base font-medium text-sky-950/85 leading-6 line-clamp-3">{way.rawInput}</p>
+      {/* Radial gradient background — mirrors the reference */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background: `#0000 radial-gradient(circle, ${card.accentGradient[0]}33 0%, ${card.accentGradient[1]}99 80%, ${card.accentGradient[1]}ee 100%)`,
+        }}
+      />
 
-      <div className="flex gap-3">
-        <div
-          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
-          style={{
-            background: `${card.leftPath.color}20`,
-            border: `1px solid ${card.leftPath.color}30`,
-          }}
-        >
-          <p className="font-medium text-sky-950/70">{card.leftPath.label}</p>
-          <p className="mt-0.5 font-semibold" style={{ color: card.leftPath.color }}>
+      {/* Delete button */}
+      <button
+        className="absolute right-1.5 top-1.5 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-black/20 text-white/70 transition-colors hover:bg-rose-500/70 hover:text-white"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        aria-label={`Excluir dilema: ${way.rawInput}`}
+      >
+        <X className="h-2.5 w-2.5" />
+      </button>
+
+      {/* Content */}
+      <div className="relative z-10 flex h-full flex-col gap-2 p-2.5">
+        <p className="text-[9px] font-medium uppercase tracking-widest text-sky-950/50">Dilema</p>
+
+        <p className="flex-1 text-[11px] font-medium leading-[1.4] text-sky-950/85 line-clamp-4">
+          {way.rawInput}
+        </p>
+
+        <div className="flex flex-col gap-1">
+          <div
+            className="rounded-lg px-2 py-1 text-center text-[9px] font-semibold"
+            style={{ background: `${card.leftPath.color}25`, color: card.leftPath.color }}
+          >
             {card.leftPath.title}
-          </p>
-        </div>
-        <div
-          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
-          style={{
-            background: `${card.rightPath.color}20`,
-            border: `1px solid ${card.rightPath.color}30`,
-          }}
-        >
-          <p className="font-medium text-sky-950/70">{card.rightPath.label}</p>
-          <p className="mt-0.5 font-semibold" style={{ color: card.rightPath.color }}>
+          </div>
+          <div
+            className="rounded-lg px-2 py-1 text-center text-[9px] font-semibold"
+            style={{ background: `${card.rightPath.color}25`, color: card.rightPath.color }}
+          >
             {card.rightPath.title}
-          </p>
+          </div>
         </div>
-      </div>
 
-      <p className="text-xs text-sky-950/40">
-        {new Date(way.createdAt).toLocaleDateString("pt-BR", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}
-      </p>
+        <p className="text-[8px] text-sky-950/40">
+          {new Date(way.createdAt).toLocaleDateString("pt-BR", {
+            day: "numeric",
+            month: "short",
+          })}
+        </p>
+      </div>
     </div>
   );
 }
 
 function WaysPage() {
-  const { ways } = useWays();
+  const { ways, removeWay } = useWays();
   const navigate = useNavigate();
-  const translateZ = useMemo(() => cylinderTranslateZ(ways.length), [ways.length]);
+  const [wayToDelete, setWayToDelete] = useState<(typeof ways)[number] | null>(null);
+
+  function handleConfirmDelete() {
+    if (!wayToDelete) return;
+    removeWay(wayToDelete.id);
+    setWayToDelete(null);
+  }
 
   return (
     <div className="safe-screen relative overflow-hidden">
@@ -94,7 +117,7 @@ function WaysPage() {
         <LiquidGlassButton to="/" icon={ArrowLeft} compact />
       </div>
 
-      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-center gap-6 px-4 pt-20">
+      <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-center gap-4 px-4 pt-20">
         <AnimatePresence mode="wait">
           {ways.length === 0 ? (
             <motion.div
@@ -109,7 +132,7 @@ function WaysPage() {
                 <Sparkles className="h-7 w-7 text-sky-950/70" />
               </div>
               <p className="max-w-xs text-base text-sky-950/75">
-                Voce ainda nao explorou nenhum dilema. Comece descrevendo uma decisao que esta te
+                Você ainda não explorou nenhum dilema. Comece descrevendo uma decisão que está te
                 pesando.
               </p>
               <button
@@ -122,7 +145,7 @@ function WaysPage() {
           ) : (
             <motion.div
               key="cylinder"
-              className="flex w-full flex-col items-center gap-4"
+              className="flex w-full flex-col items-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -138,13 +161,13 @@ function WaysPage() {
                       way={way}
                       index={index}
                       count={ways.length}
-                      translateZ={translateZ}
-                      onClick={() =>
+                      onOpen={() =>
                         navigate({
                           to: "/ways/$sessionId",
                           params: { sessionId: way.id },
                         })
                       }
+                      onDelete={() => setWayToDelete(way)}
                     />
                   ))}
                 </div>
@@ -154,12 +177,43 @@ function WaysPage() {
                 {ways.length} {ways.length === 1 ? "dilema explorado" : "dilemas explorados"}
               </p>
               <p className="text-center text-xs text-sky-950/35">
-                Toque em qualquer card para abrir
+                Toque num card para abrir · × para remover
               </p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      <AlertDialog
+        open={wayToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setWayToDelete(null);
+        }}
+      >
+        <AlertDialogContent className="max-w-md rounded-[1.75rem] border border-white/35 bg-white/92 p-6 text-sky-950 shadow-[0_24px_70px_rgba(19,55,86,0.2)]">
+          <AlertDialogHeader className="text-left">
+            <AlertDialogTitle className="text-xl font-semibold text-sky-950">
+              Excluir esta way?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-6 text-sky-950/68">
+              {wayToDelete
+                ? `Você vai remover este dilema do histórico deste dispositivo: "${wayToDelete.rawInput}".`
+                : "Você vai remover esta way do histórico deste dispositivo."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-3 sm:justify-end">
+            <AlertDialogCancel className="mt-0 rounded-full border-white/45 bg-white/70 text-sky-950 hover:bg-white">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-full bg-rose-500 px-5 text-white hover:bg-rose-600"
+              onClick={handleConfirmDelete}
+            >
+              Excluir way
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
