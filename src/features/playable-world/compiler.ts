@@ -16,7 +16,6 @@ import {
   type SlotName,
   type Vec3,
   type WorldIntent,
-  ROOM_IDS,
 } from "./model.ts";
 
 const ROOM_LABELS: Record<RoomId, string> = {
@@ -24,6 +23,17 @@ const ROOM_LABELS: Record<RoomId, string> = {
   sala: "Sala",
   trabalho: "Trabalho",
   familia: "Familia",
+  jardim: "Jardim",
+  cozinha: "Cozinha",
+  academia: "Academia",
+  varanda: "Varanda",
+  cafe: "Café",
+  biblioteca: "Biblioteca",
+  carro: "Carro",
+  escola: "Escola",
+  escritorio: "Escritório",
+  hospital: "Hospital",
+  praia: "Praia",
 };
 
 const BASE_PALETTES: Record<ColorHint, RoomPalette> = {
@@ -434,16 +444,15 @@ function createPathBlueprint(
   worldSeed: number,
 ): PathBlueprint {
   const palette = paletteForHint(intent.colorHint, intent.id === "parado" ? "mist" : "golden");
-  const roomTuples = ROOM_IDS.map((_, roomIndex) => {
-    const roomIntent = intent.rooms[roomIndex];
-    return createRoomBlueprint(
+  const rooms = intent.rooms.map((roomIntent, roomIndex) =>
+    createRoomBlueprint(
       roomIntent,
       intent.id,
       roomIndex,
       hashString(`${worldSeed}:${intent.id}:${roomIntent.id}:${roomIntent.title}`),
       palette,
-    );
-  }) as PathBlueprint["rooms"];
+    ),
+  ) as PathBlueprint["rooms"];
 
   return {
     id: intent.id,
@@ -453,7 +462,7 @@ function createPathBlueprint(
     closureLine: intent.closureLine,
     colorHint: intent.colorHint,
     palette,
-    rooms: roomTuples,
+    rooms,
   };
 }
 
