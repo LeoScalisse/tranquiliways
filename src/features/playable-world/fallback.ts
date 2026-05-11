@@ -41,6 +41,17 @@ const ROOM_LAYOUT_BY_ID: Record<RoomId, RoomLayout> = {
   sala: "crossroads",
   trabalho: "atelier",
   familia: "corridor",
+  jardim: "crossroads",
+  cozinha: "atelier",
+  academia: "corridor",
+  varanda: "sanctuary",
+  cafe: "crossroads",
+  biblioteca: "sanctuary",
+  carro: "corridor",
+  escola: "atelier",
+  escritorio: "atelier",
+  hospital: "sanctuary",
+  praia: "crossroads",
 };
 
 const ROOM_CLIMATE_BY_ID: Record<RoomId, ClimatePreset> = {
@@ -48,6 +59,17 @@ const ROOM_CLIMATE_BY_ID: Record<RoomId, ClimatePreset> = {
   sala: "overcast",
   trabalho: "golden",
   familia: "night",
+  jardim: "dawn",
+  cozinha: "golden",
+  academia: "overcast",
+  varanda: "dawn",
+  cafe: "overcast",
+  biblioteca: "mist",
+  carro: "golden",
+  escola: "overcast",
+  escritorio: "golden",
+  hospital: "mist",
+  praia: "dawn",
 };
 
 const PATH_HINT_BY_TONE: Record<string, ColorHint> = {
@@ -66,6 +88,17 @@ const HOTSPOT_KIND_BY_ROOM: Record<RoomId, HotspotKind> = {
   sala: "relationship",
   trabalho: "work",
   familia: "support",
+  jardim: "ritual",
+  cozinha: "ritual",
+  academia: "body",
+  varanda: "future",
+  cafe: "relationship",
+  biblioteca: "calling",
+  carro: "choice",
+  escola: "calling",
+  escritorio: "work",
+  hospital: "body",
+  praia: "future",
 };
 
 function detectTheme(dilema: string): DilemmaTheme {
@@ -128,11 +161,12 @@ function uniquePropStory(ambiente: Ambiente): PropKind[] {
     ...ambiente.elementos.flatMap(mapElementToPropKind),
     ...mapElementToPropKind(ambiente.descricao),
   ];
-  const deduped = Array.from(new Set(props));
+  const deduped = Array.from(new Set<PropKind>(props));
+  const fallbackProps: PropKind[] = ["plant", "lamp", "chair"];
 
   return deduped.slice(0, 5).length >= 3
     ? deduped.slice(0, 5)
-    : [...deduped, "plant", "lamp", "chair"].slice(0, 3);
+    : [...deduped, ...fallbackProps].slice(0, 3);
 }
 
 function createRoomIntent(roomId: RoomId, ambiente: Ambiente): RoomIntent {
