@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, LoaderCircle, TriangleAlert, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -25,12 +25,12 @@ export const Route = createFileRoute("/ways/$sessionId")({
 });
 
 const FALLBACK_NOTICE_BY_WARNING: Record<JourneyGenerationWarning, string> = {
-  groq_quota_exhausted:
-    "A IA da Groq estava no limite neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
-  groq_unavailable:
-    "A IA da Groq nao ficou disponivel neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
-  groq_invalid_response:
-    "A IA da Groq respondeu de forma inconsistente neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
+  gemini_quota_exhausted:
+    "A IA da Gemini estava no limite neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
+  gemini_unavailable:
+    "A IA da Gemini nao ficou disponivel neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
+  gemini_invalid_response:
+    "A IA da Gemini respondeu de forma inconsistente neste momento, entao este mundo foi forjado em modo local para nao interromper sua jornada.",
 };
 
 function getFallbackNotice(entry: WayHistoryEntry | null) {
@@ -109,6 +109,16 @@ function DilemmaSessionPage() {
       <div className="safe-screen relative overflow-hidden">
         <div className="absolute left-4 top-4 z-20">
           <LiquidGlassButton to="/ways" icon={ArrowLeft} compact />
+        </div>
+        <div className="absolute right-4 top-4 z-20">
+          <Link to="/ways/$sessionId/world" params={{ sessionId }}>
+            <button
+              type="button"
+              className="rounded-full bg-white/20 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm hover:bg-white/30"
+            >
+              Explorar Mundo
+            </button>
+          </Link>
         </div>
 
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-16 sm:px-6">
