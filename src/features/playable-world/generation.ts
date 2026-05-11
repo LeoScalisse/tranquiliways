@@ -15,7 +15,7 @@ import {
   type WorldIntent,
 } from "./model.ts";
 
-export const GroqPlayableGuardrailSchema = z.object({
+export const GeminiPlayableGuardrailSchema = z.object({
   guardrail: z.literal(true),
 });
 
@@ -68,11 +68,11 @@ ENUMS PERMITIDOS:
 
 CONTRATO:
 - paths deve ter exatamente 2 itens: primeiro id "parado", segundo id "mudanca"
-- cada path deve ter exatamente 4 rooms nesta ordem:
-  1. quarto
-  2. sala
-  3. trabalho
-  4. familia
+- cada path deve ter entre 2 e 5 rooms
+- escolha os room ids mais adequados ao contexto do dilema
+- os ids "quarto", "sala", "trabalho" e "familia" tem preferencia para dilemas genericos
+- nunca repita o mesmo room id dentro do mesmo path
+- os dois paths podem ter numeros e tipos de rooms diferentes se fizer sentido narrativo
 - cada room precisa de 3 a 5 props
 - cada room precisa de 2 ou 3 hotspots
 - label e title curtos
@@ -104,7 +104,7 @@ RETORNE APENAS JSON VALIDO NESTE SHAPE:
       "closureLine": "<frase curta>",
       "rooms": [
         {
-          "id": "quarto",
+          "id": "<room id do pool permitido>",
           "title": "<curto>",
           "summary": "<cena concreta>",
           "mood": "<curto>",
@@ -120,9 +120,7 @@ RETORNE APENAS JSON VALIDO NESTE SHAPE:
             }
           ]
         },
-        { "id": "sala", "...": "mesma estrutura" },
-        { "id": "trabalho", "...": "mesma estrutura" },
-        { "id": "familia", "...": "mesma estrutura" }
+        { "...": "2 a 5 rooms por path, ids escolhidos pelo contexto" }
       ]
     },
     {
@@ -132,7 +130,7 @@ RETORNE APENAS JSON VALIDO NESTE SHAPE:
       "summary": "<resumo concreto do custo ou textura desse caminho>",
       "colorHint": "mist" | "ember" | "aqua" | "gold" | "rose" | "sage" | "slate" | "violet",
       "closureLine": "<frase curta>",
-      "rooms": [<mesma ordem e estrutura>]
+      "rooms": [{ "...": "2 a 5 rooms por path, ids escolhidos pelo contexto" }]
     }
   ]
 }`;
