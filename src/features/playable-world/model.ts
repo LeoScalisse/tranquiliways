@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 export const PATH_IDS = ["parado", "mudanca"] as const;
-export const ROOM_IDS = ["quarto", "sala", "trabalho", "familia"] as const;
+export const ROOM_IDS = [
+  "quarto", "sala", "trabalho", "familia",
+  "jardim", "cozinha", "academia", "varanda",
+  "cafe", "biblioteca", "carro", "escola",
+  "escritorio", "hospital", "praia",
+] as const;
 export const CAMERA_PRESETS = ["isometric-calm"] as const;
 export const CLIMATE_PRESETS = ["dawn", "overcast", "mist", "golden", "night"] as const;
 export const LIGHTING_PRESETS = ["soft", "misty", "warm", "moonlit"] as const;
@@ -128,7 +133,7 @@ export interface PathIntent {
   summary: string;
   colorHint: ColorHint;
   closureLine: string;
-  rooms: [RoomIntent, RoomIntent, RoomIntent, RoomIntent];
+  rooms: RoomIntent[];
 }
 
 export interface WorldIntent {
@@ -213,7 +218,7 @@ export interface PathBlueprint {
   closureLine: string;
   colorHint: ColorHint;
   palette: RoomPalette;
-  rooms: [RoomBlueprint, RoomBlueprint, RoomBlueprint, RoomBlueprint];
+  rooms: RoomBlueprint[];
 }
 
 export interface HubPortalBlueprint {
@@ -289,12 +294,10 @@ const BaseRoomIntentSchema = z.object({
   hotspots: z.array(HotspotIntentSchema).min(2).max(3),
 });
 
-export const RoomIntentTupleSchema = z.tuple([
-  BaseRoomIntentSchema.extend({ id: z.literal("quarto") }),
-  BaseRoomIntentSchema.extend({ id: z.literal("sala") }),
-  BaseRoomIntentSchema.extend({ id: z.literal("trabalho") }),
-  BaseRoomIntentSchema.extend({ id: z.literal("familia") }),
-]);
+export const RoomIntentArraySchema = z
+  .array(BaseRoomIntentSchema.extend({ id: z.enum(ROOM_IDS) }))
+  .min(2)
+  .max(5);
 
 const BasePathIntentSchema = z.object({
   label: shortText,
@@ -322,11 +325,11 @@ export const WorldIntentSchema = z.object({
   paths: z.tuple([
     BasePathIntentSchema.extend({
       id: z.literal("parado"),
-      rooms: RoomIntentTupleSchema,
+      rooms: RoomIntentArraySchema,
     }),
     BasePathIntentSchema.extend({
       id: z.literal("mudanca"),
-      rooms: RoomIntentTupleSchema,
+      rooms: RoomIntentArraySchema,
     }),
   ]),
 });
@@ -387,12 +390,10 @@ const RoomBlueprintSchema = z.object({
   navigation: NavigationAnchorsSchema,
 });
 
-const RoomBlueprintTupleSchema = z.tuple([
-  RoomBlueprintSchema.extend({ id: z.literal("quarto") }),
-  RoomBlueprintSchema.extend({ id: z.literal("sala") }),
-  RoomBlueprintSchema.extend({ id: z.literal("trabalho") }),
-  RoomBlueprintSchema.extend({ id: z.literal("familia") }),
-]);
+const RoomBlueprintArraySchema = z
+  .array(RoomBlueprintSchema.extend({ id: z.enum(ROOM_IDS) }))
+  .min(2)
+  .max(5);
 
 const PathBlueprintSchema = z.object({
   id: z.enum(PATH_IDS),
@@ -402,7 +403,7 @@ const PathBlueprintSchema = z.object({
   closureLine: shortText,
   colorHint: z.enum(COLOR_HINTS),
   palette: RoomPaletteSchema,
-  rooms: RoomBlueprintTupleSchema,
+  rooms: RoomBlueprintArraySchema,
 });
 
 const HubPortalBlueprintSchema = z.object({
