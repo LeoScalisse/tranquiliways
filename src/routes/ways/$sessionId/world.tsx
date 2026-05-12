@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { PlayableWorldExperience } from "@/features/playable-world/ui/playable-world-experience";
 import { isPlayableWorld } from "@/lib/journey-world";
-import { getWayHistoryEntry } from "@/lib/way-history";
+import { getWayHistoryEntry, type WayHistoryEntry } from "@/lib/way-history";
 
 export const Route = createFileRoute("/ways/$sessionId/world")({
   component: WorldExplorationPage,
@@ -13,13 +13,16 @@ export const Route = createFileRoute("/ways/$sessionId/world")({
 function WorldExplorationPage() {
   const { sessionId } = Route.useParams();
   const navigate = useNavigate();
-  const entry = getWayHistoryEntry(sessionId);
+  const [entry, setEntry] = useState<WayHistoryEntry | null>(null);
 
   useEffect(() => {
-    if (!entry || !isPlayableWorld(entry.world)) {
+    const found = getWayHistoryEntry(sessionId);
+    if (!found || !isPlayableWorld(found.world)) {
       void navigate({ to: "/ways/$sessionId", params: { sessionId } });
+    } else {
+      setEntry(found);
     }
-  }, [entry, navigate, sessionId]);
+  }, [sessionId, navigate]);
 
   if (!entry || !isPlayableWorld(entry.world)) {
     return null;
