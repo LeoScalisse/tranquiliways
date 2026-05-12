@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { WorldExplorer } from "@/components/world-explorer";
+import { ArrowLeft } from "lucide-react";
+import { motion } from "motion/react";
+import { PlayableWorldExperience } from "@/features/playable-world/ui/playable-world-experience";
 import { isPlayableWorld } from "@/lib/journey-world";
 import { getWayHistoryEntry } from "@/lib/way-history";
 
@@ -24,9 +26,23 @@ function WorldExplorationPage() {
   }
 
   return (
-    <WorldExplorer
-      world={entry.world}
-      onClose={() => void navigate({ to: "/ways/$sessionId", params: { sessionId } })}
-    />
+    <div className="safe-screen relative overflow-hidden">
+      <div className="absolute left-4 top-4 z-20">
+        <motion.button
+          type="button"
+          onClick={() => void navigate({ to: "/ways/$sessionId", params: { sessionId } })}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/18 shadow-[0_14px_34px_rgba(24,74,116,0.14),inset_0_1px_0_rgba(255,255,255,0.48)] backdrop-blur-[18px]"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 300, damping: 22 }}
+        >
+          <ArrowLeft size={18} strokeWidth={1.9} className="text-white" />
+        </motion.button>
+      </div>
+      <PlayableWorldExperience
+        world={entry.world}
+        onBrowseWays={() => void navigate({ to: "/ways" })}
+      />
+    </div>
   );
 }
