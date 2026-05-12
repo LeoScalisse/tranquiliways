@@ -1,5 +1,8 @@
 # Design Spec: Mundo Isométrico 2.5D
 
+> **SUPERSEDIDA — 2026-05-11**
+> Esta spec nunca foi implementada. O projeto adotou React Three Fiber (`src/features/playable-world/`) com câmera ortográfica, hub + salas 3D sequenciais e state machine em `simulation.ts`. A abordagem Canvas 2D isométrica abaixo é mantida apenas como histórico de design.
+
 **Data:** 2026-05-11
 **Status:** Aprovado
 **Referência visual:** [Creative Web Development with Three.js and Blender – 3D Portfolio for Beginners](https://www.youtube.com/watch?v=yhtdkuw9mbM) — molde de navegação: personagem anda pelo mundo, câmera segue, objetos interativos espalhados no mapa
