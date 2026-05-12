@@ -30,6 +30,7 @@ function WorldExplorationPage() {
       <div className="absolute left-4 top-4 z-20">
         <motion.button
           type="button"
+          aria-label="Voltar"
           onClick={() => void navigate({ to: "/ways/$sessionId", params: { sessionId } })}
           className="flex h-11 w-11 items-center justify-center rounded-full bg-white/18 shadow-[0_14px_34px_rgba(24,74,116,0.14),inset_0_1px_0_rgba(255,255,255,0.48)] backdrop-blur-[18px]"
           whileHover={{ scale: 1.05 }}
