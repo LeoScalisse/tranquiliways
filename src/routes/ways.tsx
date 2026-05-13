@@ -3,7 +3,7 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
-import { getWorldCardMeta } from "@/lib/journey-world";
+import { getWorldCardMeta, isPlayableWorld } from "@/lib/journey-world";
 import type { WayHistoryEntry } from "@/lib/way-history";
 import type { PathId } from "@/features/playable-world/model";
 
@@ -100,7 +100,11 @@ function WaysPage() {
                       <WayLandscapeCard
                         way={way}
                         onDelete={() => setWayToDelete(way)}
-                        onChoosePath={(path) => setSelectedEntry({ way, path })}
+                        onChoosePath={
+                          isPlayableWorld(way.world)
+                            ? (path) => setSelectedEntry({ way, path })
+                            : undefined
+                        }
                       />
                     </div>
                   )}
@@ -111,7 +115,7 @@ function WaysPage() {
                 {ways.length} {ways.length === 1 ? "dilema explorado" : "dilemas explorados"}
               </p>
               <p className="text-center text-xs text-sky-950/35">
-                Toque num card para abrir · × para remover
+                Escolha um caminho para entrar · × para remover
               </p>
             </motion.div>
           )}

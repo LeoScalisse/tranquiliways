@@ -7,7 +7,7 @@ import type { WayHistoryEntry } from "@/lib/way-history";
 interface Props {
   way: WayHistoryEntry;
   onDelete: () => void;
-  onChoosePath: (path: PathId) => void;
+  onChoosePath?: (path: PathId) => void;
 }
 
 function TreeSvg({ color }: { color: string }) {
@@ -155,67 +155,69 @@ export function WayLandscapeCard({ way, onDelete, onChoosePath }: Props) {
       </div>
 
       {/* ── card-paths: botões dos dois caminhos ── */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onChoosePath("parado");
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
+      {onChoosePath ? (
+        <div
           style={{
-            display: "block",
-            width: "100%",
-            padding: "6px 8px",
-            borderRadius: "4px",
-            border: `1.5px solid ${card.leftPath.color}8c`,
-            background: `${card.leftPath.color}26`,
-            cursor: "pointer",
-            textAlign: "center",
-            color: card.leftPath.color,
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+            flex: 1,
+            justifyContent: "center",
           }}
         >
-          <div style={{ fontSize: "9px", fontWeight: 600, lineHeight: 1.3 }}>
-            {card.leftPath.label}
-          </div>
-          <div style={{ fontSize: "8px", fontWeight: 400, lineHeight: 1.3, opacity: 0.8 }}>
-            {card.leftPath.title}
-          </div>
-        </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onChoosePath("parado");
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "6px 8px",
+              borderRadius: "4px",
+              border: `1.5px solid ${card.leftPath.color}8c`,
+              background: `${card.leftPath.color}26`,
+              cursor: "pointer",
+              textAlign: "center",
+              color: card.leftPath.color,
+            }}
+          >
+            <div style={{ fontSize: "9px", fontWeight: 600, lineHeight: 1.3 }}>
+              {card.leftPath.label}
+            </div>
+            <div style={{ fontSize: "8px", fontWeight: 400, lineHeight: 1.3, opacity: 0.8 }}>
+              {card.leftPath.title}
+            </div>
+          </button>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onChoosePath("mudanca");
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "6px 8px",
-            borderRadius: "4px",
-            border: `1.5px solid ${card.rightPath.color}8c`,
-            background: `${card.rightPath.color}26`,
-            cursor: "pointer",
-            textAlign: "center",
-            color: card.rightPath.color,
-          }}
-        >
-          <div style={{ fontSize: "9px", fontWeight: 600, lineHeight: 1.3 }}>
-            {card.rightPath.label}
-          </div>
-          <div style={{ fontSize: "8px", fontWeight: 400, lineHeight: 1.3, opacity: 0.8 }}>
-            {card.rightPath.title}
-          </div>
-        </button>
-      </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onChoosePath("mudanca");
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "6px 8px",
+              borderRadius: "4px",
+              border: `1.5px solid ${card.rightPath.color}8c`,
+              background: `${card.rightPath.color}26`,
+              cursor: "pointer",
+              textAlign: "center",
+              color: card.rightPath.color,
+            }}
+          >
+            <div style={{ fontSize: "9px", fontWeight: 600, lineHeight: 1.3 }}>
+              {card.rightPath.label}
+            </div>
+            <div style={{ fontSize: "8px", fontWeight: 400, lineHeight: 1.3, opacity: 0.8 }}>
+              {card.rightPath.title}
+            </div>
+          </button>
+        </div>
+      ) : null}
 
       {/* ── card-divider ── */}
       <hr
