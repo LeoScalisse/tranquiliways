@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
-import { WorldCreationLoader } from "@/components/world-creation-loader";
+import {
+  WorldCreationLoader,
+  type WorldCreationStageId,
+} from "@/components/world-creation-loader";
 import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { TranquiliWaysTitle } from "@/components/ui/tranquili-ways-title";
@@ -12,9 +15,15 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
 function Index() {
   const [interacting, setInteracting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [creationStage, setCreationStage] = useState<WorldCreationStageId>("preparing");
+  const [generationStartedAt, setGenerationStartedAt] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const rawInputRef = useRef("");
   const { saveWaySession } = useWays();
@@ -32,21 +41,30 @@ function Index() {
 
     rawInputRef.current = rawInput;
     setFeedback(null);
+    setCreationStage("preparing");
+    setGenerationStartedAt(Date.now());
     setIsSubmitting(true);
 
     try {
+      setCreationStage("generating");
       const result = await createJourneySession({ rawInput, inputMode: "text" });
+
+      setCreationStage("receiving");
+      await sleep(600);
 
       if ("guardrail" in result) {
         setFeedback(result.mensagem);
         return;
       }
 
+      setCreationStage("saving");
       saveWaySession(result);
-      navigate({
-        to: "/ways/$sessionId",
-        params: { sessionId: result.id },
-      });
+      await sleep(500);
+
+      setCreationStage("opening");
+      await sleep(700);
+
+      await navigate({ to: "/ways" });
     } catch (error) {
       setFeedback(
         error instanceof Error
@@ -61,7 +79,11 @@ function Index() {
   if (isSubmitting) {
     return (
       <div className="relative min-h-svh overflow-hidden">
-        <WorldCreationLoader dilemma={rawInputRef.current} />
+        <WorldCreationLoader
+          dilemma={rawInputRef.current}
+          stage={creationStage}
+          startedAt={generationStartedAt ?? undefined}
+        />
       </div>
     );
   }
@@ -69,7 +91,7 @@ function Index() {
   return (
     <div className="safe-screen relative overflow-hidden">
       <div className="absolute left-4 top-4 z-10">
-        <LiquidGlassButton to="/ways" />
+        <LiquidGlassButton to="/ways" label="Ways" />
       </div>
 
       <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-start gap-8 px-4 pt-[20svh]">
@@ -81,7 +103,8 @@ function Index() {
           className="max-w-sm text-center text-base text-sky-950/55 leading-7"
           style={{ animation: "stagger-reveal 0.5s var(--ease-out-strong) both 0.08s" }}
         >
-          Descreva um dilema da sua vida. A IA vai gerar um mundo visual com os dois caminhos que você pode seguir.
+          Descreva um dilema da sua vida. A IA vai gerar um mundo visual com os dois caminhos que
+          você pode seguir.
         </p>
 
         <div
@@ -94,7 +117,9 @@ function Index() {
             isLoading={isSubmitting}
             placeholder="Qual é o seu dilema?"
             className="rounded-[1.75rem] border-white/30 bg-white/75 shadow-[0_18px_44px_rgba(30,76,112,0.12)]"
-            onSend={(message) => { void handleSend(message); }}
+            onSend={(message) => {
+              void handleSend(message);
+            }}
           />
 
           {feedback && !isSubmitting ? (
