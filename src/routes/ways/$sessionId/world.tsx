@@ -5,13 +5,11 @@ import { motion } from "motion/react";
 import { PlayableWorldExperience } from "@/features/playable-world/ui/playable-world-experience";
 import { isPlayableWorld } from "@/lib/journey-world";
 import { getWayHistoryEntry, type WayHistoryEntry } from "@/lib/way-history";
+import { PATH_IDS, type PathId } from "@/features/playable-world/model";
 
 export const Route = createFileRoute("/ways/$sessionId/world")({
   validateSearch: (search: Record<string, unknown>) => ({
-    path:
-      search.path === "parado" || search.path === "mudanca"
-        ? (search.path as "parado" | "mudanca")
-        : undefined,
+    path: PATH_IDS.includes(search.path as PathId) ? (search.path as PathId) : undefined,
   }),
   component: WorldExplorationPage,
 });
