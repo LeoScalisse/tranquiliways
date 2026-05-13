@@ -1,11 +1,13 @@
 import { useState } from "react";
 
 import { getWorldCardMeta } from "@/lib/journey-world";
+import type { PathId } from "@/features/playable-world/model";
 import type { WayHistoryEntry } from "@/lib/way-history";
 
 interface Props {
   way: WayHistoryEntry;
   onDelete: () => void;
+  onChoosePath: (path: PathId) => void;
 }
 
 function TreeSvg({ color }: { color: string }) {
@@ -22,14 +24,12 @@ function TreeSvg({ color }: { color: string }) {
   );
 }
 
-export function WayLandscapeCard({ way, onDelete }: Props) {
+export function WayLandscapeCard({ way, onDelete, onChoosePath }: Props) {
   const card = getWorldCardMeta(way.world);
   const [deleteHovered, setDeleteHovered] = useState(false);
   const date = new Date(way.createdAt);
   const dayNum = date.getDate();
   const monthStr = date.toLocaleDateString("pt-BR", { month: "short" });
-  const rawText = way.rawInput.trim();
-  const subtitle = rawText.length > 52 ? rawText.slice(0, 52) + "…" : rawText;
 
   const cssVars = {
     // Landscape scene variables
@@ -154,18 +154,67 @@ export function WayLandscapeCard({ way, onDelete }: Props) {
         {card.title}
       </div>
 
-      {/* ── card-subtitle: dilema em texto ── */}
+      {/* ── card-paths: botões dos dois caminhos ── */}
       <div
         style={{
-          fontSize: "10px",
-          fontWeight: 400,
-          color: "var(--font-color-sub)",
-          lineHeight: 1.45,
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
           flex: 1,
-          overflow: "hidden",
+          justifyContent: "center",
         }}
       >
-        {subtitle}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onChoosePath("parado");
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "6px 8px",
+            borderRadius: "4px",
+            border: `1.5px solid ${card.leftPath.color}8c`,
+            background: `${card.leftPath.color}26`,
+            cursor: "pointer",
+            textAlign: "center",
+            color: card.leftPath.color,
+          }}
+        >
+          <div style={{ fontSize: "9px", fontWeight: 600, lineHeight: 1.3 }}>
+            {card.leftPath.label}
+          </div>
+          <div style={{ fontSize: "8px", fontWeight: 400, lineHeight: 1.3, opacity: 0.8 }}>
+            {card.leftPath.title}
+          </div>
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onChoosePath("mudanca");
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "6px 8px",
+            borderRadius: "4px",
+            border: `1.5px solid ${card.rightPath.color}8c`,
+            background: `${card.rightPath.color}26`,
+            cursor: "pointer",
+            textAlign: "center",
+            color: card.rightPath.color,
+          }}
+        >
+          <div style={{ fontSize: "9px", fontWeight: 600, lineHeight: 1.3 }}>
+            {card.rightPath.label}
+          </div>
+          <div style={{ fontSize: "8px", fontWeight: 400, lineHeight: 1.3, opacity: 0.8 }}>
+            {card.rightPath.title}
+          </div>
+        </button>
       </div>
 
       {/* ── card-divider ── */}
