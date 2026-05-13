@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import { getWorldCardMeta } from "@/lib/journey-world";
@@ -177,11 +177,16 @@ function PathEntryModal({
 }) {
   const card = getWorldCardMeta(entry.way.world);
   const pathMeta = entry.path === "parado" ? card.leftPath : card.rightPath;
+  const onNavigateRef = useRef(onNavigate);
 
   useEffect(() => {
-    const timer = setTimeout(onNavigate, 1500);
+    onNavigateRef.current = onNavigate;
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => onNavigateRef.current(), 1500);
     return () => clearTimeout(timer);
-  }, [onNavigate]);
+  }, []);
 
   return (
     <motion.div
