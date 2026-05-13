@@ -1,7 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+
+import { getWorldCardMeta } from "@/lib/journey-world";
+import type { WayHistoryEntry } from "@/lib/way-history";
+import type { PathId } from "@/features/playable-world/model";
 
 import {
   AlertDialog,
@@ -26,6 +30,10 @@ function WaysPage() {
   const { ways, removeWay } = useWays();
   const navigate = useNavigate();
   const [wayToDelete, setWayToDelete] = useState<(typeof ways)[number] | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<{
+    way: WayHistoryEntry;
+    path: PathId;
+  } | null>(null);
 
   function handleConfirmDelete() {
     if (!wayToDelete) return;
@@ -89,7 +97,11 @@ function WaysPage() {
                         })
                       }
                     >
-                      <WayLandscapeCard way={way} onDelete={() => setWayToDelete(way)} />
+                      <WayLandscapeCard
+                        way={way}
+                        onDelete={() => setWayToDelete(way)}
+                        onChoosePath={(path) => setSelectedEntry({ way, path })}
+                      />
                     </div>
                   )}
                 />
@@ -105,6 +117,22 @@ function WaysPage() {
           )}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {selectedEntry ? (
+          <PathEntryModal
+            key="path-modal"
+            entry={selectedEntry}
+            onNavigate={() => {
+              void navigate({
+                to: "/ways/$sessionId/world",
+                params: { sessionId: selectedEntry.way.id },
+                search: { path: selectedEntry.path },
+              });
+            }}
+          />
+        ) : null}
+      </AnimatePresence>
 
       <AlertDialog
         open={wayToDelete !== null}
@@ -137,5 +165,81 @@ function WaysPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+function PathEntryModal({
+  entry,
+  onNavigate,
+}: {
+  entry: { way: WayHistoryEntry; path: PathId };
+  onNavigate: () => void;
+}) {
+  const card = getWorldCardMeta(entry.way.world);
+  const pathMeta = entry.path === "parado" ? card.leftPath : card.rightPath;
+
+  useEffect(() => {
+    const timer = setTimeout(onNavigate, 1500);
+    return () => clearTimeout(timer);
+  }, [onNavigate]);
+
+  return (
+    <motion.div
+      key="path-entry-modal"
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "12px",
+        background: `linear-gradient(135deg, ${pathMeta.color}33, ${pathMeta.color}88)`,
+      }}
+    >
+      <p
+        style={{
+          fontSize: "24px",
+          fontWeight: 700,
+          color: "#1e293b",
+          textAlign: "center",
+          padding: "0 24px",
+        }}
+      >
+        {pathMeta.label}
+      </p>
+      <p
+        style={{
+          fontSize: "14px",
+          color: "#1e293b99",
+          textAlign: "center",
+          padding: "0 32px",
+        }}
+      >
+        {pathMeta.title}
+      </p>
+      <div style={{ display: "flex", gap: "6px", marginTop: "8px" }}>
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "#1e293b",
+            }}
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 0.9, delay: i * 0.3, repeat: Infinity }}
+          />
+        ))}
+      </div>
+      <p style={{ fontSize: "13px", color: "#1e293b80", marginTop: "4px" }}>
+        Entrando no mundo...
+      </p>
+    </motion.div>
   );
 }
