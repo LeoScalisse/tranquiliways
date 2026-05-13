@@ -26,11 +26,11 @@ Combinação: fundo etéreo constante e sutil + liquid physics nos momentos de i
 
 3 orbes animadas globais, atrás de todo conteúdo:
 
-| Orbe | Tamanho | Posição | Blur | Ciclo | Cor |
-|------|---------|---------|------|-------|-----|
-| 1 | 200px | topo direito (-60px offset) | 18px | 10s | branco/azul claro |
-| 2 | 140px | centro esquerdo (-40px offset) | 14px | 14s | branco |
-| 3 | 100px | fundo direito | 10px | 8s | amarelo/creme |
+| Orbe | Tamanho | Posição                        | Blur | Ciclo | Cor               |
+| ---- | ------- | ------------------------------ | ---- | ----- | ----------------- |
+| 1    | 200px   | topo direito (-60px offset)    | 18px | 10s   | branco/azul claro |
+| 2    | 140px   | centro esquerdo (-40px offset) | 14px | 14s   | branco            |
+| 3    | 100px   | fundo direito                  | 10px | 8s    | amarelo/creme     |
 
 - Ciclos com números diferentes para nunca sincronizar
 - Opacidade 0.30–0.50 — sentidas, não vistas
@@ -52,7 +52,7 @@ Total: ~900ms
 ### 3. Troca de Caminho (`dilemma-world.tsx`)
 
 - `whileTap: { scale: 0.96 }` em ambos os botões
-- `layout` animation no indicador ativo (Framer Motion layout)  
+- `layout` animation no indicador ativo (Framer Motion layout)
 - Spring `{ duration: 0.4, bounce: 0.15 }` no movimento do background ativo
 - CaminhoView: spring `{ duration: 0.4, bounce: 0.08 }` no deslize lateral
 - Dot da cor dominante: pulsa 1× ao ativar (scale 1→1.3→1, 600ms)
@@ -67,14 +67,14 @@ Total: ~900ms
 
 ### 5. Micro-interações Globais
 
-| Onde | Mudança |
-|------|---------|
-| `transition-all` | → propriedades específicas |
-| Easing genérico | → `cubic-bezier(0.23, 1, 0.32, 1)` |
-| Way cards carousel | Stagger 50ms + `whileTap: { scale: 0.98 }` |
-| Loading state | Orbe pulsante + breathing no texto |
-| Botão "Explorar primeiro dilema" | `whileHover` + `whileTap` |
-| `prefers-reduced-motion` | Wrapper global remove transforms |
+| Onde                             | Mudança                                    |
+| -------------------------------- | ------------------------------------------ |
+| `transition-all`                 | → propriedades específicas                 |
+| Easing genérico                  | → `cubic-bezier(0.23, 1, 0.32, 1)`         |
+| Way cards carousel               | Stagger 50ms + `whileTap: { scale: 0.98 }` |
+| Loading state                    | Orbe pulsante + breathing no texto         |
+| Botão "Explorar primeiro dilema" | `whileHover` + `whileTap`                  |
+| `prefers-reduced-motion`         | Wrapper global remove transforms           |
 
 ## Arquivos Afetados
 

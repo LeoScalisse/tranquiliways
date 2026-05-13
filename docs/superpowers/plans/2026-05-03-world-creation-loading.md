@@ -12,27 +12,30 @@
 
 ## Mapa de Arquivos
 
-| Arquivo | Ação | Responsabilidade |
-|---------|------|-----------------|
-| `.env.local` | Criar | `GEMINI_API_KEY` + `TRANQUILIWAYS_SESSION_SECRET` |
-| `src/components/world-creation-loader.tsx` | Criar | Tela full-screen de loading com estágios emocionais |
-| `src/routes/index.tsx` | Modificar | Early return para `WorldCreationLoader` durante `isSubmitting` |
-| `src/routes/ways/$sessionId.tsx` | Modificar | Ajuste dos `delay` no reveal em cascata |
-| `src/components/dilemma-world.tsx` | Modificar | Animação de entrada no seletor de caminho + stagger nos dots |
+| Arquivo                                    | Ação      | Responsabilidade                                               |
+| ------------------------------------------ | --------- | -------------------------------------------------------------- |
+| `.env.local`                               | Criar     | `GEMINI_API_KEY` + `TRANQUILIWAYS_SESSION_SECRET`              |
+| `src/components/world-creation-loader.tsx` | Criar     | Tela full-screen de loading com estágios emocionais            |
+| `src/routes/index.tsx`                     | Modificar | Early return para `WorldCreationLoader` durante `isSubmitting` |
+| `src/routes/ways/$sessionId.tsx`           | Modificar | Ajuste dos `delay` no reveal em cascata                        |
+| `src/components/dilemma-world.tsx`         | Modificar | Animação de entrada no seletor de caminho + stagger nos dots   |
 
 ---
 
 ## Task 1: Configurar variáveis de ambiente
 
 **Files:**
+
 - Create: `.env.local`
 
 - [ ] **Step 1: Gerar `TRANQUILIWAYS_SESSION_SECRET`**
 
 Execute no terminal:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
 Copie o output (64 chars hex). Exemplo: `a3f8c2...` — guarde para o próximo passo.
 
 - [ ] **Step 2: Criar `.env.local` na raiz do projeto**
@@ -47,6 +50,7 @@ TRANQUILIWAYS_SESSION_SECRET=<output do passo 1>
 - [ ] **Step 3: Verificar que `.env.local` está no `.gitignore`**
 
 Abra `.gitignore` e confirme que existe uma linha `.env.local` ou `.env*`. Se não existir, adicione:
+
 ```
 .env.local
 ```
@@ -54,13 +58,17 @@ Abra `.gitignore` e confirme que existe uma linha `.env.local` ou `.env*`. Se n�
 - [ ] **Step 4: Verificar que a chave é lida pelo servidor**
 
 Adicione temporariamente no início de `src/routes/api/sessions.ts` (linha 1, após os imports):
+
 ```ts
 console.log("[sessions] Gemini disponível:", isGeminiAvailable());
 ```
+
 Execute `npm run dev`, submeta um dilema qualquer no app e verifique no terminal que aparece:
+
 ```
 [sessions] Gemini disponível: true
 ```
+
 Se aparecer `false`, o `.env.local` não está sendo lido — confirme o caminho do arquivo.
 
 - [ ] **Step 5: Remover o console.log temporário**
@@ -73,6 +81,7 @@ Remova a linha adicionada no Step 4.
 git add .gitignore
 git commit -m "chore: garantir .env.local no gitignore"
 ```
+
 (Não commite o `.env.local` — ele contém segredos.)
 
 ---
@@ -80,6 +89,7 @@ git commit -m "chore: garantir .env.local no gitignore"
 ## Task 2: Criar `WorldCreationLoader`
 
 **Files:**
+
 - Create: `src/components/world-creation-loader.tsx`
 
 - [ ] **Step 1: Criar o componente**
@@ -174,8 +184,7 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
               className="h-1.5 rounded-full"
               animate={{
                 width: i === stageIndex ? 20 : 6,
-                background:
-                  i <= stageIndex ? "#5a7fa5" : "rgba(90,127,165,0.25)",
+                background: i <= stageIndex ? "#5a7fa5" : "rgba(90,127,165,0.25)",
               }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             />
@@ -192,6 +201,7 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
 ```bash
 npx tsc --noEmit
 ```
+
 Esperado: sem erros relacionados a `world-creation-loader.tsx`.
 
 - [ ] **Step 3: Commit**
@@ -206,20 +216,25 @@ git commit -m "feat: componente WorldCreationLoader com estágios emocionais"
 ## Task 3: Loading imersivo em `index.tsx`
 
 **Files:**
+
 - Modify: `src/routes/index.tsx`
 
 - [ ] **Step 1: Adicionar imports**
 
 No topo de `src/routes/index.tsx`, substitua:
+
 ```tsx
 import { useState } from "react";
 ```
+
 Por:
+
 ```tsx
 import { useRef, useState } from "react";
 ```
 
 E adicione após os imports existentes:
+
 ```tsx
 import { WorldCreationLoader } from "@/components/world-creation-loader";
 ```
@@ -227,6 +242,7 @@ import { WorldCreationLoader } from "@/components/world-creation-loader";
 - [ ] **Step 2: Adicionar `rawInputRef`**
 
 Dentro de `function Index()`, após as declarações de estado existentes, adicione:
+
 ```tsx
 const rawInputRef = useRef("");
 ```
@@ -234,11 +250,14 @@ const rawInputRef = useRef("");
 - [ ] **Step 3: Capturar o dilema no início do submit**
 
 Dentro de `handleSend`, substitua:
+
 ```tsx
 setFeedback(null);
 setIsSubmitting(true);
 ```
+
 Por:
+
 ```tsx
 rawInputRef.current = rawInput;
 setFeedback(null);
@@ -248,6 +267,7 @@ setIsSubmitting(true);
 - [ ] **Step 4: Adicionar early return para o loader**
 
 Dentro de `function Index()`, após as declarações de estado e hooks (antes do `return` normal), adicione:
+
 ```tsx
 if (isSubmitting) {
   return (
@@ -261,15 +281,18 @@ if (isSubmitting) {
 - [ ] **Step 5: Remover o parágrafo de loading antigo**
 
 No JSX do `return` principal, remova o bloco:
+
 ```tsx
-{isSubmitting && (
-  <p
-    className="mt-4 px-4 text-center text-sm text-sky-950/60"
-    style={{ animation: "content-breathe 2s ease-in-out infinite" }}
-  >
-    Construindo os seus caminhos...
-  </p>
-)}
+{
+  isSubmitting && (
+    <p
+      className="mt-4 px-4 text-center text-sm text-sky-950/60"
+      style={{ animation: "content-breathe 2s ease-in-out infinite" }}
+    >
+      Construindo os seus caminhos...
+    </p>
+  );
+}
 ```
 
 - [ ] **Step 6: Type-check**
@@ -277,11 +300,13 @@ No JSX do `return` principal, remova o bloco:
 ```bash
 npx tsc --noEmit
 ```
+
 Esperado: sem erros.
 
 - [ ] **Step 7: Verificar no browser**
 
 Execute `npm run dev`. Abra o app, escreva um dilema e submeta. Verifique:
+
 - A tela de input some
 - `WorldCreationLoader` aparece com os orbs, o dilema ecoado e as mensagens progredindo a cada 3s
 - Após a geração, o app navega para `/ways/$sessionId`
@@ -298,15 +323,19 @@ git commit -m "feat: loading imersivo no index durante geração do mundo"
 ## Task 4: Reveal progressivo em `$sessionId.tsx`
 
 **Files:**
+
 - Modify: `src/routes/ways/$sessionId.tsx`
 
 - [ ] **Step 1: Animar o header na entrada**
 
 Em `src/routes/ways/$sessionId.tsx`, substitua:
+
 ```tsx
 <header className="flex items-center justify-between gap-3">
 ```
+
 Por:
+
 ```tsx
 <motion.header
   className="flex items-center justify-between gap-3"
@@ -315,11 +344,13 @@ Por:
   transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
 >
 ```
+
 E o fechamento `</header>` por `</motion.header>`.
 
 - [ ] **Step 2: Ajustar delay do badge "Mundo gerado"**
 
 Localize o `motion.div` que contém o badge `<Sparkles />`. Atualize seu `transition`:
+
 ```tsx
 transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1], delay: 0.15 }}
 ```
@@ -327,6 +358,7 @@ transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1], delay: 0.15 }}
 - [ ] **Step 3: Ajustar delay do título `h1`**
 
 Localize o `motion.h1` com "Explore os dois lados do seu dilema.". Atualize seu `transition`:
+
 ```tsx
 transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.15 }}
 ```
@@ -334,6 +366,7 @@ transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.15 }}
 - [ ] **Step 4: Ajustar delay do `DilemmaWorldView`**
 
 Localize o `motion.div` que envolve `<DilemmaWorldView />`. Atualize seu `transition`:
+
 ```tsx
 transition={{ type: "spring", duration: 0.5, bounce: 0.12, delay: 0.3 }}
 ```
@@ -341,6 +374,7 @@ transition={{ type: "spring", duration: 0.5, bounce: 0.12, delay: 0.3 }}
 - [ ] **Step 5: Ajustar delay do botão "Ver todos"**
 
 Localize o `motion.div` que envolve o `<Button>Ver todos os meus dilemas</Button>`. Atualize seu `transition`:
+
 ```tsx
 transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.9 }}
 ```
@@ -350,6 +384,7 @@ transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.9 }}
 ```bash
 npx tsc --noEmit
 ```
+
 Esperado: sem erros.
 
 - [ ] **Step 7: Verificar cascade no browser**
@@ -369,18 +404,22 @@ git commit -m "feat: reveal progressivo em cascata na página do mundo"
 ## Task 5: Animações de entrada em `DilemmaWorldView`
 
 **Files:**
+
 - Modify: `src/components/dilemma-world.tsx`
 
 - [ ] **Step 1: Envolver o seletor de caminho em `motion.div`**
 
 Em `src/components/dilemma-world.tsx`, dentro de `DilemmaWorldView`, localize o `div` do seletor de caminho que começa com:
+
 ```tsx
 <div
   className="relative flex gap-1 rounded-full p-1"
   style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
 >
 ```
+
 Substitua o `<div` por `<motion.div` e adicione as props de animação, fechando com `</motion.div>`:
+
 ```tsx
 <motion.div
   className="relative flex gap-1 rounded-full p-1"
@@ -394,11 +433,13 @@ Substitua o `<div` por `<motion.div` e adicione as props de animação, fechando
 - [ ] **Step 2: Adicionar stagger de entrada nos dots de ambiente**
 
 Em `CaminhoView`, localize o `AMBIENTE_ORDER.map`. Altere a assinatura do map para incluir o índice:
+
 ```tsx
 {AMBIENTE_ORDER.map((key, idx) => {
 ```
 
 No `motion.button` dos dots, adicione `initial`/`animate` e separe a `transition` por propriedade para não conflitar com `whileTap`:
+
 ```tsx
 <motion.button
   key={key}
@@ -429,11 +470,13 @@ No `motion.button` dos dots, adicione `initial`/`animate` e separe a `transition
 ```bash
 npx tsc --noEmit
 ```
+
 Esperado: sem erros.
 
 - [ ] **Step 4: Verificar no browser**
 
 Abra um world gerado. Confirme:
+
 - O seletor de caminho faz um spring de `scaleX: 0.88 → 1` ao entrar
 - Os 4 dots de ambiente entram escalonados (quarto primeiro, família por último)
 - O `whileTap` nos dots ainda funciona normalmente

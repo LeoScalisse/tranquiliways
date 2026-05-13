@@ -2,6 +2,13 @@ const GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/mo
 const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_TIMEOUT_MS = 35_000;
 
+export interface GeminiGenerationOptions {
+  maxOutputTokens?: number;
+  temperature?: number;
+  responseMimeType?: string;
+  thinkingBudget?: number;
+}
+
 function getProcessEnv(name: string): string | undefined {
   return (
     globalThis as typeof globalThis & { process?: { env?: Record<string, string | undefined> } }
@@ -20,13 +27,47 @@ export function isGeminiAvailable(): boolean {
   return Boolean(getGeminiApiKey());
 }
 
-export async function callGemini(prompt: string, maxOutputTokens = 2048): Promise<string> {
+function normalizeGeminiGenerationOptions(
+  optionsOrMaxOutputTokens: GeminiGenerationOptions | number = {},
+): Required<Pick<GeminiGenerationOptions, "maxOutputTokens" | "temperature" | "responseMimeType">> &
+  Pick<GeminiGenerationOptions, "thinkingBudget"> {
+  if (typeof optionsOrMaxOutputTokens === "number") {
+    return {
+      maxOutputTokens: optionsOrMaxOutputTokens,
+      temperature: 0.7,
+      responseMimeType: "application/json",
+    };
+  }
+
+  return {
+    maxOutputTokens: optionsOrMaxOutputTokens.maxOutputTokens ?? 2048,
+    temperature: optionsOrMaxOutputTokens.temperature ?? 0.7,
+    responseMimeType: optionsOrMaxOutputTokens.responseMimeType ?? "application/json",
+    ...(optionsOrMaxOutputTokens.thinkingBudget !== undefined
+      ? { thinkingBudget: optionsOrMaxOutputTokens.thinkingBudget }
+      : {}),
+  };
+}
+
+export async function callGemini(
+  prompt: string,
+  optionsOrMaxOutputTokens: GeminiGenerationOptions | number = {},
+): Promise<string> {
   const apiKey = getGeminiApiKey();
   if (!apiKey) throw new Error("GEMINI_API_KEY nao configurada");
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
   const model = encodeURIComponent(getGeminiModel());
+  const generationOptions = normalizeGeminiGenerationOptions(optionsOrMaxOutputTokens);
+  const generationConfig = {
+    responseMimeType: generationOptions.responseMimeType,
+    temperature: generationOptions.temperature,
+    maxOutputTokens: generationOptions.maxOutputTokens,
+    ...(generationOptions.thinkingBudget !== undefined
+      ? { thinkingConfig: { thinkingBudget: generationOptions.thinkingBudget } }
+      : {}),
+  };
 
   try {
     const response = await fetch(`${GEMINI_API_BASE_URL}/${model}:generateContent`, {
@@ -50,9 +91,7 @@ export async function callGemini(prompt: string, maxOutputTokens = 2048): Promis
           },
         ],
         generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.7,
-          maxOutputTokens,
+          ...generationConfig,
         },
       }),
       signal: controller.signal,

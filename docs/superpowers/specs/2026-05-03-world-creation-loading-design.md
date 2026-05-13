@@ -51,6 +51,7 @@ Sem esse arquivo, `isGeminiAvailable()` retorna `false` e a geração real nunca
 Componente full-screen que substitui o conteúdo do index durante `isSubmitting`.
 
 **Props:**
+
 ```ts
 interface WorldCreationLoaderProps {
   dilemma: string;
@@ -59,15 +60,16 @@ interface WorldCreationLoaderProps {
 
 **Estágios de mensagem** (progressão automática via `useEffect` + `setInterval`):
 
-| Estágio | Início | Mensagem |
-|---------|--------|----------|
-| 1 | 0s | "Lendo o que você está vivendo..." |
-| 2 | 3s | "Identificando os dois caminhos..." |
-| 3 | 6s | "Construindo o primeiro mundo..." |
-| 4 | 9s | "Dando vida ao segundo caminho..." |
-| 5+ | 12s | "Finalizando os detalhes..." (permanece aqui indefinidamente) |
+| Estágio | Início | Mensagem                                                      |
+| ------- | ------ | ------------------------------------------------------------- |
+| 1       | 0s     | "Lendo o que você está vivendo..."                            |
+| 2       | 3s     | "Identificando os dois caminhos..."                           |
+| 3       | 6s     | "Construindo o primeiro mundo..."                             |
+| 4       | 9s     | "Dando vida ao segundo caminho..."                            |
+| 5+      | 12s    | "Finalizando os detalhes..." (permanece aqui indefinidamente) |
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────┐
 │  [orb grande — fundo, breathing slow]   │
@@ -84,6 +86,7 @@ interface WorldCreationLoaderProps {
 ```
 
 **Detalhes de implementação:**
+
 - `AnimatePresence` no texto do estágio → `opacity: 0 → 1` + `y: 6 → 0` a cada troca
 - Orbs reutilizam `animation: content-breathe` (já existe no CSS global)
 - Dots: `#5a7fa5` preenchido / `rgba(90,127,165,0.25)` vazio
@@ -96,13 +99,15 @@ interface WorldCreationLoaderProps {
 ### 3. Modificação em `src/routes/index.tsx`
 
 **Antes** (estado `isSubmitting`):
+
 ```tsx
-{isSubmitting && (
-  <p className="mt-4 ...">Construindo os seus caminhos...</p>
-)}
+{
+  isSubmitting && <p className="mt-4 ...">Construindo os seus caminhos...</p>;
+}
 ```
 
 **Depois:**
+
 ```tsx
 if (isSubmitting) {
   return (
@@ -123,14 +128,14 @@ if (isSubmitting) {
 
 **Sequência de entrada** (via `delay` no Framer Motion):
 
-| Elemento | Delay | Animação |
-|----------|-------|----------|
-| Header | 0ms | fade + y: 8→0 |
-| Badge "Mundo gerado" + título | 150ms | fade + y: 10→0 |
-| Seletor de caminho | 300ms | `scaleX: 0.88→1` + fade (spring) |
-| Painel AmbientePanel ativo | 500ms | `scale: 0.96→1` + fade (spring) |
-| Dots de ambiente | 700ms | stagger 80ms por dot |
-| Botão "Ver todos" | 900ms | fade simples |
+| Elemento                      | Delay | Animação                         |
+| ----------------------------- | ----- | -------------------------------- |
+| Header                        | 0ms   | fade + y: 8→0                    |
+| Badge "Mundo gerado" + título | 150ms | fade + y: 10→0                   |
+| Seletor de caminho            | 300ms | `scaleX: 0.88→1` + fade (spring) |
+| Painel AmbientePanel ativo    | 500ms | `scale: 0.96→1` + fade (spring)  |
+| Dots de ambiente              | 700ms | stagger 80ms por dot             |
+| Botão "Ver todos"             | 900ms | fade simples                     |
 
 **`DilemmaWorldView`:** o seletor de caminho recebe `initial={{ scaleX: 0.88, opacity: 0 }}` com spring. Os `AmbientePanel` já têm `initial/animate` — ajusta-se o `delay` para ser passado como prop ou calculado via `index`.
 
@@ -149,9 +154,9 @@ if (isSubmitting) {
 
 ## Dependências e Riscos
 
-| Item | Risco | Mitigação |
-|------|-------|-----------|
-| `GEMINI_API_KEY` disponível | Sem a chave, geração real não acontece | Usuário confirmou ter a chave |
-| Gemini pode demorar >15s | Loading ficará no estágio "Finalizando..." em loop | Aceitável para MVP; mensagem de timeout pode ser adicionada depois |
-| `TRANQUILIWAYS_SESSION_SECRET` ausente | `issueJourneySession` lança erro → API retorna 400 | Incluído no `.env.local` |
-| Fallback heurístico | Ainda usado se Gemini falhar | Comportamento correto — degradação graciosa |
+| Item                                   | Risco                                              | Mitigação                                                          |
+| -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| `GEMINI_API_KEY` disponível            | Sem a chave, geração real não acontece             | Usuário confirmou ter a chave                                      |
+| Gemini pode demorar >15s               | Loading ficará no estágio "Finalizando..." em loop | Aceitável para MVP; mensagem de timeout pode ser adicionada depois |
+| `TRANQUILIWAYS_SESSION_SECRET` ausente | `issueJourneySession` lança erro → API retorna 400 | Incluído no `.env.local`                                           |
+| Fallback heurístico                    | Ainda usado se Gemini falhar                       | Comportamento correto — degradação graciosa                        |

@@ -10,7 +10,7 @@ const stubSession = {
   rawInput: "Devo mudar de cidade?",
   inputMode: "text",
   status: "ready",
-  generationSource: "groq",
+  generationSource: "gemini",
   world: {
     version: "playable-v1",
     id: "world-123",

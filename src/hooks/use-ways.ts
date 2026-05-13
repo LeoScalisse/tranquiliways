@@ -3,6 +3,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import {
   clearWayHistory,
   getWayHistorySnapshot,
+  removeWayHistoryEntry,
   saveJourneySessionHistory,
   subscribeWayHistory,
   type WayHistoryEntry,
@@ -18,9 +19,13 @@ export function useWays() {
     return saveJourneySessionHistory(session);
   }, []);
 
+  const removeWay = useCallback((id: string) => {
+    return removeWayHistoryEntry(id);
+  }, []);
+
   const clearWays = useCallback(() => {
     clearWayHistory();
   }, []);
 
-  return { ways, saveWaySession, clearWays };
+  return { ways, saveWaySession, removeWay, clearWays };
 }

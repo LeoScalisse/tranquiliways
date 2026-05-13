@@ -14,4 +14,3 @@ O objetivo e provar:
 - o app recebe input
 - a sessao nasce
 - a Mundo gráfico intarativo/jogado abre
-

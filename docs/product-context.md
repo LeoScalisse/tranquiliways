@@ -6,6 +6,25 @@ Read this document before making edits or updates that affect product direction,
 
 If a proposed change conflicts with this document, pause and realign before implementing.
 
+## Second Brain — Obsidian Vault (Tranquili+ Brand)
+
+Deeper brand DNA, philosophy, voice, personas, and the "why" behind the product live in the Tranquili+ Obsidian vault. **Consult it whenever a change touches brand identity, voice, philosophy, ethics, persona targeting, or emotional safety.**
+
+Vault root: `C:\Users\Erika Scalisse\OneDrive\Área de Trabalho\Tranquili Knowlage\Tranquili\`
+
+Key notes:
+
+- `Tranquili+/Tranquili+ - Essência da Marca.md` — brand essence (philosophy, values, voice rules, ethical limits, techniques)
+- `Tranquili+/TranquiliBrand/TranquiliWays.md` — product base (purpose, audience, promise, MVP rules)
+- `Tranquili+/🗺️ Índice - Tranquili+.md` — vault index
+- `Tranquili+/Guia Mestre de Personas Tranquili+.pdf` — 45 user personas
+- `Tranquili+/Relatório de Empatia - Dores para Inovação.pdf` — empathy research
+- `Tranquili+/Mentalidade de Trampolim.pdf` — core "trampoline mindset" philosophy
+- `Tranquili+/Sistema de Comunicação - Instruções para IA.pdf` — Tranquilinha (AI persona) operating system
+- `Resumos - Livros lidos/` — book summaries that shaped Tranquili+ philosophy (*A Coragem de Não Agradar*, *O Poder do Subconsciente*, *Sinal Verde*, *Almanaque de Naval Ravikant*, *Pense de Novo*, *Rápido e Devagar*, *Psicologia Financeira*, etc.)
+
+The TranquiliWays app is the world-generation product inside the broader **Tranquili+** brand universe — whose tagline is *"a vida +leve, +feliz e +calma"*. Every product decision should feel like it could only have come from that brand.
+
 ## Product Essence
 
 TranquiliWays helps young people make important life decisions with more clarity by making the future feel tangible in the present.

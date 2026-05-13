@@ -128,10 +128,7 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
     <div className="flex h-full flex-col gap-4">
       {/* Título do caminho */}
       <div className="flex items-center gap-3">
-        <div
-          className="h-3 w-3 rounded-full"
-          style={{ background: caminho.corDominante }}
-        />
+        <div className="h-3 w-3 rounded-full" style={{ background: caminho.corDominante }} />
         <div>
           <p className="text-xs font-medium uppercase tracking-widest opacity-50">{caminho.nome}</p>
           <h2 className="text-lg font-semibold text-sky-950">{caminho.titulo}</h2>
@@ -155,7 +152,10 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
           onClick={goPrev}
           disabled={currentIndex === 0}
           className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm disabled:opacity-0"
-          style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
+          style={{
+            background: "rgba(255,255,255,0.45)",
+            border: "1px solid rgba(255,255,255,0.6)",
+          }}
           whileTap={{ scale: 0.9 }}
           transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
           aria-label="Ambiente anterior"
@@ -167,7 +167,10 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
           onClick={goNext}
           disabled={currentIndex === AMBIENTE_ORDER.length - 1}
           className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm disabled:opacity-0"
-          style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
+          style={{
+            background: "rgba(255,255,255,0.45)",
+            border: "1px solid rgba(255,255,255,0.6)",
+          }}
           whileTap={{ scale: 0.9 }}
           transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
           aria-label="Próximo ambiente"
@@ -175,7 +178,6 @@ function CaminhoView({ caminho, ambienteAtivo, onAmbienteChange }: CaminhoViewPr
           <ChevronRight className="h-4 w-4 text-sky-950/70" />
         </motion.button>
       </div>
-
     </div>
   );
 }
@@ -271,7 +273,8 @@ export function DilemmaWorldView({ world, className }: DilemmaWorldViewProps) {
               style={{
                 background: isActive ? `${caminho.corDominante}25` : "rgba(255,255,255,0.35)",
                 border: isActive ? `1px solid ${caminho.corDominante}50` : "1px solid transparent",
-                transition: "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
+                transition:
+                  "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
               }}
               whileTap={{ scale: 0.93 }}
               transition={{

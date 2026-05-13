@@ -29,6 +29,7 @@ TranquiliWays/
 .claude/worktrees/*
 .claude/worktrees/**
 .tmp-groq-dev.*
+.tmp-gemini-dev.*
 
 # Editor directories and files
 .vscode/*

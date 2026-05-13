@@ -20,10 +20,30 @@ const stubWorld: DilemmaWorld = {
     corDominante: "#6b7a8d",
     gradiente: ["#c9d0d8", "#8a96a3"],
     ambientes: {
-      quarto: { descricao: "Manhã pesada", elementos: ["cama desfeita"], cor: "#8a96a3", humor: "inércia" },
-      sala: { descricao: "TV ligada", elementos: ["sofá amassado"], cor: "#7a8693", humor: "arrependimento" },
-      trabalho: { descricao: "Mesmo lugar", elementos: ["mesa desordenada"], cor: "#6b7a8d", humor: "estagnação" },
-      familia: { descricao: "Jantar em silêncio", elementos: ["prato pela metade"], cor: "#7d8a9a", humor: "distância" },
+      quarto: {
+        descricao: "Manhã pesada",
+        elementos: ["cama desfeita"],
+        cor: "#8a96a3",
+        humor: "inércia",
+      },
+      sala: {
+        descricao: "TV ligada",
+        elementos: ["sofá amassado"],
+        cor: "#7a8693",
+        humor: "arrependimento",
+      },
+      trabalho: {
+        descricao: "Mesmo lugar",
+        elementos: ["mesa desordenada"],
+        cor: "#6b7a8d",
+        humor: "estagnação",
+      },
+      familia: {
+        descricao: "Jantar em silêncio",
+        elementos: ["prato pela metade"],
+        cor: "#7d8a9a",
+        humor: "distância",
+      },
     },
   },
   caminhoMudanca: {
@@ -33,10 +53,30 @@ const stubWorld: DilemmaWorld = {
     corDominante: "#4a7fa5",
     gradiente: ["#a8d4ef", "#5b9ec9"],
     ambientes: {
-      quarto: { descricao: "Alarme às 6h", elementos: ["mochila pronta"], cor: "#7ab8d4", humor: "antecipação" },
-      sala: { descricao: "Planner na mesa", elementos: ["post-its"], cor: "#5a9ab5", humor: "foco" },
-      trabalho: { descricao: "Novo espaço", elementos: ["mesa arrumada"], cor: "#4a7fa5", humor: "propósito" },
-      familia: { descricao: "Jantar com história", elementos: ["mesa cheia"], cor: "#5a8fba", humor: "conexão" },
+      quarto: {
+        descricao: "Alarme às 6h",
+        elementos: ["mochila pronta"],
+        cor: "#7ab8d4",
+        humor: "antecipação",
+      },
+      sala: {
+        descricao: "Planner na mesa",
+        elementos: ["post-its"],
+        cor: "#5a9ab5",
+        humor: "foco",
+      },
+      trabalho: {
+        descricao: "Novo espaço",
+        elementos: ["mesa arrumada"],
+        cor: "#4a7fa5",
+        humor: "propósito",
+      },
+      familia: {
+        descricao: "Jantar com história",
+        elementos: ["mesa cheia"],
+        cor: "#5a8fba",
+        humor: "conexão",
+      },
     },
   },
 };
@@ -70,30 +110,33 @@ await run("issueJourneySession creates a ready session with a launch token", asy
   assert.equal(session.rawInput, "Devo largar meu emprego seguro para seguir minha paixão?");
   assert.equal(session.inputMode, "text");
   assert.equal(session.status, "ready");
-  assert.equal(session.generationSource, "groq");
+  assert.equal(session.generationSource, "gemini");
   assert.equal(session.generationWarning, undefined);
   assert.ok(session.launchToken.length > 32);
   assert.ok(session.world !== null);
 });
 
-await run("issueJourneySession seals o dilema e o mundo em vez de expô-los em texto simples", async () => {
-  const session = await issueJourneySession(
-    {
-      rawInput: "Devo me separar do meu parceiro?",
-      inputMode: "voice",
-      world: stubWorld,
-    },
-    {
-      secret,
-      id: "session-sealed",
-      now: "2026-04-17T20:10:00.000Z",
-    },
-  );
+await run(
+  "issueJourneySession seals o dilema e o mundo em vez de expô-los em texto simples",
+  async () => {
+    const session = await issueJourneySession(
+      {
+        rawInput: "Devo me separar do meu parceiro?",
+        inputMode: "voice",
+        world: stubWorld,
+      },
+      {
+        secret,
+        id: "session-sealed",
+        now: "2026-04-17T20:10:00.000Z",
+      },
+    );
 
-  assert.equal(session.launchToken.includes("Devo me separar"), false);
-  assert.equal(session.launchToken.includes("session-sealed"), false);
-  assert.equal(session.launchToken.includes("world-stub"), false);
-});
+    assert.equal(session.launchToken.includes("Devo me separar"), false);
+    assert.equal(session.launchToken.includes("session-sealed"), false);
+    assert.equal(session.launchToken.includes("world-stub"), false);
+  },
+);
 
 await run("issueJourneySession preserva metadata de fallback no token da sessão", async () => {
   const session = await issueJourneySession(
@@ -102,7 +145,7 @@ await run("issueJourneySession preserva metadata de fallback no token da sessão
       inputMode: "text",
       world: stubWorld,
       generationSource: "fallback",
-      generationWarning: "groq_quota_exhausted",
+      generationWarning: "gemini_quota_exhausted",
     },
     {
       secret,
@@ -118,26 +161,26 @@ await run("issueJourneySession preserva metadata de fallback no token da sessão
   });
 
   assert.equal(session.generationSource, "fallback");
-  assert.equal(session.generationWarning, "groq_quota_exhausted");
+  assert.equal(session.generationWarning, "gemini_quota_exhausted");
   assert.deepEqual(verified, session);
 });
 
-await run("normalizeJourneyGenerationMeta converte metadata legada da Gemini para Groq", () => {
+await run("normalizeJourneyGenerationMeta converte metadata legada da Groq para Gemini", () => {
   const direct = normalizeJourneyGenerationMeta({
-    generationSource: "gemini",
+    generationSource: "groq",
   } as never);
 
   const fallback = normalizeJourneyGenerationMeta({
     generationSource: "fallback",
-    generationWarning: "gemini_quota_exhausted",
+    generationWarning: "groq_quota_exhausted",
   } as never);
 
   assert.deepEqual(direct, {
-    generationSource: "groq",
+    generationSource: "gemini",
   });
   assert.deepEqual(fallback, {
     generationSource: "fallback",
-    generationWarning: "groq_quota_exhausted",
+    generationWarning: "gemini_quota_exhausted",
   });
 });
 

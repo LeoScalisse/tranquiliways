@@ -21,4 +21,3 @@ export async function requestJourneyVoiceTranscription(): Promise<string> {
 
   return transcript;
 }
-

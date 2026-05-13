@@ -158,7 +158,8 @@ export function interpretWay(prompt: string): InterpretedWay {
   const title = pick(POETIC_TITLES[weather], seed);
   const location = pick(POETIC_LOCATIONS, seed >> 2);
   const now = new Date();
-  const tempBase = weather === "night" ? 16 : weather === "sunny" ? 28 : weather === "sunset" ? 24 : 20;
+  const tempBase =
+    weather === "night" ? 16 : weather === "sunny" ? 28 : weather === "sunset" ? 24 : 20;
   const temperature = `${tempBase + (seed % 4)}°`;
 
   const forecast = [1, 2, 3].map((offset) => {

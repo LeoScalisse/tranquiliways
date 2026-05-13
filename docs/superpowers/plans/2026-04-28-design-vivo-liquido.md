@@ -12,21 +12,22 @@
 
 ## Mapa de Arquivos
 
-| Arquivo | Ação | Responsabilidade |
-|---------|------|-----------------|
-| `src/styles.css` | Modificar | Easing vars, keyframes: orb-float, reveal-ring, ripple |
-| `src/components/ui/animated-orbs.tsx` | Criar | Componente das 3 orbes globais |
-| `src/routes/__root.tsx` | Modificar | Montar `<AnimatedOrbs>` no `RootComponent` |
-| `src/routes/ways/$sessionId.tsx` | Modificar | Sequência orquestrada de reveal do mundo |
-| `src/components/dilemma-world.tsx` | Modificar | Spring no path selector + ambiente panels + ripple |
-| `src/routes/ways.tsx` | Modificar | Stagger entrada dos cards |
-| `src/routes/index.tsx` | Modificar | Stagger entrada da landing page |
+| Arquivo                               | Ação      | Responsabilidade                                       |
+| ------------------------------------- | --------- | ------------------------------------------------------ |
+| `src/styles.css`                      | Modificar | Easing vars, keyframes: orb-float, reveal-ring, ripple |
+| `src/components/ui/animated-orbs.tsx` | Criar     | Componente das 3 orbes globais                         |
+| `src/routes/__root.tsx`               | Modificar | Montar `<AnimatedOrbs>` no `RootComponent`             |
+| `src/routes/ways/$sessionId.tsx`      | Modificar | Sequência orquestrada de reveal do mundo               |
+| `src/components/dilemma-world.tsx`    | Modificar | Spring no path selector + ambiente panels + ripple     |
+| `src/routes/ways.tsx`                 | Modificar | Stagger entrada dos cards                              |
+| `src/routes/index.tsx`                | Modificar | Stagger entrada da landing page                        |
 
 ---
 
 ## Task 1: CSS Foundations — Easing e Keyframes
 
 **Files:**
+
 - Modify: `src/styles.css`
 
 - [ ] **Adicionar CSS custom properties de easing e novos keyframes ao `src/styles.css`**
@@ -44,42 +45,96 @@ Adicionar logo após o bloco `@layer utilities { ... }` (após a linha do `.glas
 
 /* Orbes flutuantes — cada uma tem seu próprio keyframe para ciclos distintos */
 @keyframes orb-float-1 {
-  0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.45; }
-  30%       { transform: translateY(18px) translateX(-8px) scale(1.04); opacity: 0.55; }
-  70%       { transform: translateY(-10px) translateX(5px) scale(0.97); opacity: 0.38; }
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(18px) translateX(-8px) scale(1.04);
+    opacity: 0.55;
+  }
+  70% {
+    transform: translateY(-10px) translateX(5px) scale(0.97);
+    opacity: 0.38;
+  }
 }
 @keyframes orb-float-2 {
-  0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.35; }
-  40%       { transform: translateY(-20px) translateX(10px) scale(1.06); opacity: 0.45; }
-  75%       { transform: translateY(12px) translateX(-5px) scale(0.96); opacity: 0.28; }
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-20px) translateX(10px) scale(1.06);
+    opacity: 0.45;
+  }
+  75% {
+    transform: translateY(12px) translateX(-5px) scale(0.96);
+    opacity: 0.28;
+  }
 }
 @keyframes orb-float-3 {
-  0%, 100% { transform: translateY(0px) scale(1); opacity: 0.40; }
-  50%       { transform: translateY(-14px) scale(1.08); opacity: 0.52; }
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-14px) scale(1.08);
+    opacity: 0.52;
+  }
 }
 
 /* Rings de reveal do mundo */
 @keyframes reveal-ring-expand {
-  0%   { width: 40px; height: 40px; opacity: 0.7; }
-  100% { width: 280px; height: 280px; opacity: 0; }
+  0% {
+    width: 40px;
+    height: 40px;
+    opacity: 0.7;
+  }
+  100% {
+    width: 280px;
+    height: 280px;
+    opacity: 0;
+  }
 }
 
 /* Ripple ao clicar nos chips de ambiente */
 @keyframes chip-ripple {
-  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.35; }
-  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
 }
 
 /* Breathing para loading state */
 @keyframes content-breathe {
-  0%, 100% { opacity: 0.55; }
-  50%       { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Stagger reveal — entrada de elementos com blur */
 @keyframes stagger-reveal {
-  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
-  to   { opacity: 1; transform: translateY(0);    filter: blur(0px); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
 }
 ```
 
@@ -103,6 +158,7 @@ git commit -m "style: add easing vars and animation keyframes for living design"
 ## Task 2: Componente AnimatedOrbs
 
 **Files:**
+
 - Create: `src/components/ui/animated-orbs.tsx`
 
 - [ ] **Criar o componente**
@@ -186,6 +242,7 @@ git commit -m "feat: add AnimatedOrbs background layer component"
 ## Task 3: Montar AnimatedOrbs no Root
 
 **Files:**
+
 - Modify: `src/routes/__root.tsx`
 
 - [ ] **Adicionar `AnimatedOrbs` ao `RootComponent`**
@@ -240,6 +297,7 @@ git commit -m "feat: mount global animated orbs in root layout"
 ## Task 4: Stagger da Landing Page
 
 **Files:**
+
 - Modify: `src/routes/index.tsx`
 
 - [ ] **Adicionar stagger de entrada aos elementos da landing page**
@@ -262,7 +320,8 @@ return (
         className="max-w-sm text-center text-base text-sky-950/55 leading-7"
         style={{ animation: "stagger-reveal 0.5s var(--ease-out-strong) both 0.08s" }}
       >
-        Descreva um dilema da sua vida. A IA vai gerar um mundo visual com os dois caminhos que você pode seguir.
+        Descreva um dilema da sua vida. A IA vai gerar um mundo visual com os dois caminhos que você
+        pode seguir.
       </p>
 
       <div
@@ -275,7 +334,9 @@ return (
           isLoading={isSubmitting}
           placeholder="Qual é o seu dilema?"
           className="rounded-[1.75rem] border-white/30 bg-white/75 shadow-[0_18px_44px_rgba(30,76,112,0.12)]"
-          onSend={(message) => { void handleSend(message); }}
+          onSend={(message) => {
+            void handleSend(message);
+          }}
         />
 
         {isSubmitting && (
@@ -317,6 +378,7 @@ git commit -m "feat: stagger entrance animation on landing page"
 ## Task 5: Stagger dos Cards na Ways Gallery
 
 **Files:**
+
 - Modify: `src/routes/ways.tsx`
 
 - [ ] **Adicionar import do motion e stagger nos cards**
@@ -330,86 +392,87 @@ import { motion } from "motion/react";
 Substituir o bloco do map de `ways` (o `<div key={way.id} ...>`) por:
 
 ```tsx
-{ways.map((way, index) => (
-  <motion.div
-    key={way.id}
-    className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
-    initial={{ opacity: 0, y: 14 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{
-      duration: 0.45,
-      ease: [0.23, 1, 0.32, 1],
-      delay: index * 0.05,
-    }}
-  >
-    <motion.button
-      type="button"
-      className="w-full max-w-sm rounded-[2rem] p-6 space-y-4 text-left"
-      style={{
-        background: `linear-gradient(140deg, ${way.world.caminhoParado.gradiente[0]}cc, ${way.world.caminhoMudanca.gradiente[0]}cc)`,
-        border: "1px solid rgba(255,255,255,0.5)",
-        boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
+{
+  ways.map((way, index) => (
+    <motion.div
+      key={way.id}
+      className="flex min-w-0 shrink-0 grow-0 basis-full items-center justify-center px-4 py-6"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.45,
+        ease: [0.23, 1, 0.32, 1],
+        delay: index * 0.05,
       }}
-      whileHover={{ translateY: -4 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-      onClick={() =>
-        navigate({
-          to: "/ways/$sessionId",
-          params: { sessionId: way.id },
-          search: way.launchToken ? { token: way.launchToken } : {},
-        })}
     >
-      <p className="text-xs font-medium uppercase tracking-widest text-sky-950/45">
-        Dilema
-      </p>
-      <p className="text-base font-medium text-sky-950/85 leading-6 line-clamp-3">
-        {way.rawInput}
-      </p>
+      <motion.button
+        type="button"
+        className="w-full max-w-sm rounded-[2rem] p-6 space-y-4 text-left"
+        style={{
+          background: `linear-gradient(140deg, ${way.world.caminhoParado.gradiente[0]}cc, ${way.world.caminhoMudanca.gradiente[0]}cc)`,
+          border: "1px solid rgba(255,255,255,0.5)",
+          boxShadow: "0 16px 48px rgba(30,60,100,0.10)",
+        }}
+        whileHover={{ translateY: -4 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+        onClick={() =>
+          navigate({
+            to: "/ways/$sessionId",
+            params: { sessionId: way.id },
+            search: way.launchToken ? { token: way.launchToken } : {},
+          })
+        }
+      >
+        <p className="text-xs font-medium uppercase tracking-widest text-sky-950/45">Dilema</p>
+        <p className="text-base font-medium text-sky-950/85 leading-6 line-clamp-3">
+          {way.rawInput}
+        </p>
 
-      <div className="flex gap-3">
-        <div
-          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
-          style={{
-            background: `${way.world.caminhoParado.corDominante}20`,
-            border: `1px solid ${way.world.caminhoParado.corDominante}30`,
-          }}
-        >
-          <p className="font-medium text-sky-950/70">{way.world.caminhoParado.nome}</p>
-          <p
-            className="mt-0.5 font-semibold"
-            style={{ color: way.world.caminhoParado.corDominante }}
+        <div className="flex gap-3">
+          <div
+            className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
+            style={{
+              background: `${way.world.caminhoParado.corDominante}20`,
+              border: `1px solid ${way.world.caminhoParado.corDominante}30`,
+            }}
           >
-            {way.world.caminhoParado.titulo}
-          </p>
-        </div>
-        <div
-          className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
-          style={{
-            background: `${way.world.caminhoMudanca.corDominante}20`,
-            border: `1px solid ${way.world.caminhoMudanca.corDominante}30`,
-          }}
-        >
-          <p className="font-medium text-sky-950/70">{way.world.caminhoMudanca.nome}</p>
-          <p
-            className="mt-0.5 font-semibold"
-            style={{ color: way.world.caminhoMudanca.corDominante }}
+            <p className="font-medium text-sky-950/70">{way.world.caminhoParado.nome}</p>
+            <p
+              className="mt-0.5 font-semibold"
+              style={{ color: way.world.caminhoParado.corDominante }}
+            >
+              {way.world.caminhoParado.titulo}
+            </p>
+          </div>
+          <div
+            className="flex-1 rounded-[1.25rem] p-3 text-center text-xs"
+            style={{
+              background: `${way.world.caminhoMudanca.corDominante}20`,
+              border: `1px solid ${way.world.caminhoMudanca.corDominante}30`,
+            }}
           >
-            {way.world.caminhoMudanca.titulo}
-          </p>
+            <p className="font-medium text-sky-950/70">{way.world.caminhoMudanca.nome}</p>
+            <p
+              className="mt-0.5 font-semibold"
+              style={{ color: way.world.caminhoMudanca.corDominante }}
+            >
+              {way.world.caminhoMudanca.titulo}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <p className="text-xs text-sky-950/40">
-        {new Date(way.createdAt).toLocaleDateString("pt-BR", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}
-      </p>
-    </motion.button>
-  </motion.div>
-))}
+        <p className="text-xs text-sky-950/40">
+          {new Date(way.createdAt).toLocaleDateString("pt-BR", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </p>
+      </motion.button>
+    </motion.div>
+  ));
+}
 ```
 
 - [ ] **Verificar: cards entram em cascata suave ao abrir /ways**
@@ -426,6 +489,7 @@ git commit -m "feat: stagger entrance and press feedback on ways gallery cards"
 ## Task 6: Reveal do Mundo — Sequência Orquestrada
 
 **Files:**
+
 - Modify: `src/routes/ways/$sessionId.tsx`
 
 - [ ] **Adicionar import do motion e AnimatePresence**
@@ -450,35 +514,39 @@ import { motion, AnimatePresence } from "motion/react";
 Substituir:
 
 ```tsx
-{isLoading && (
-  <section className="glass-panel rounded-[2rem] p-6">
-    <div className="flex items-center gap-3 text-sky-950/75">
-      <LoaderCircle className="h-5 w-5 animate-spin" />
-      <span>Construindo seu mundo...</span>
-    </div>
-  </section>
-)}
+{
+  isLoading && (
+    <section className="glass-panel rounded-[2rem] p-6">
+      <div className="flex items-center gap-3 text-sky-950/75">
+        <LoaderCircle className="h-5 w-5 animate-spin" />
+        <span>Construindo seu mundo...</span>
+      </div>
+    </section>
+  );
+}
 ```
 
 Por:
 
 ```tsx
-{isLoading && (
-  <section className="glass-panel rounded-[2rem] p-6">
-    <div className="flex items-center gap-3 text-sky-950/75">
-      <div className="relative flex h-5 w-5 items-center justify-center">
-        <div
-          className="absolute inset-0 rounded-full bg-sky-400/30"
-          style={{ animation: "content-breathe 1.4s ease-in-out infinite" }}
-        />
-        <LoaderCircle className="h-5 w-5 animate-spin relative z-10" />
+{
+  isLoading && (
+    <section className="glass-panel rounded-[2rem] p-6">
+      <div className="flex items-center gap-3 text-sky-950/75">
+        <div className="relative flex h-5 w-5 items-center justify-center">
+          <div
+            className="absolute inset-0 rounded-full bg-sky-400/30"
+            style={{ animation: "content-breathe 1.4s ease-in-out infinite" }}
+          />
+          <LoaderCircle className="h-5 w-5 animate-spin relative z-10" />
+        </div>
+        <span style={{ animation: "content-breathe 2s ease-in-out infinite" }}>
+          Construindo seu mundo...
+        </span>
       </div>
-      <span style={{ animation: "content-breathe 2s ease-in-out infinite" }}>
-        Construindo seu mundo...
-      </span>
-    </div>
-  </section>
-)}
+    </section>
+  );
+}
 ```
 
 - [ ] **Substituir o bloco `{way && !isLoading && (...)}` pela sequência orquestrada**
@@ -486,32 +554,34 @@ Por:
 Substituir:
 
 ```tsx
-{way && !isLoading && (
-  <>
-    <div className="flex flex-wrap items-center gap-3">
-      <div className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-950/72">
-        <Sparkles className="h-4 w-4" />
-        {way.kind === "legacy" ? "Mundo salvo" : "Mundo gerado"}
+{
+  way && !isLoading && (
+    <>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-950/72">
+          <Sparkles className="h-4 w-4" />
+          {way.kind === "legacy" ? "Mundo salvo" : "Mundo gerado"}
+        </div>
       </div>
-    </div>
 
-    <h1 className="app-heading px-1 text-2xl font-semibold text-sky-950 sm:text-3xl">
-      Explore os dois lados do seu dilema.
-    </h1>
+      <h1 className="app-heading px-1 text-2xl font-semibold text-sky-950 sm:text-3xl">
+        Explore os dois lados do seu dilema.
+      </h1>
 
-    <DilemmaWorldView world={way.world} />
+      <DilemmaWorldView world={way.world} />
 
-    <div className="flex justify-center pt-2">
-      <Button
-        variant="glass"
-        className="rounded-full px-6 text-sky-950"
-        onClick={() => navigate({ to: "/ways" })}
-      >
-        Ver todos os meus dilemas
-      </Button>
-    </div>
-  </>
-)}
+      <div className="flex justify-center pt-2">
+        <Button
+          variant="glass"
+          className="rounded-full px-6 text-sky-950"
+          onClick={() => navigate({ to: "/ways" })}
+        >
+          Ver todos os meus dilemas
+        </Button>
+      </div>
+    </>
+  );
+}
 ```
 
 Por:
@@ -521,7 +591,10 @@ Por:
   {way && !isLoading && (
     <>
       {/* Rings de reveal — explodem uma vez ao aparecer */}
-      <div className="pointer-events-none fixed inset-0 flex items-center justify-center" style={{ zIndex: 50 }}>
+      <div
+        className="pointer-events-none fixed inset-0 flex items-center justify-center"
+        style={{ zIndex: 50 }}
+      >
         {[0, 200, 400].map((delay) => (
           <div
             key={delay}
@@ -584,6 +657,7 @@ Por:
 - [ ] **Verificar: ao gerar um mundo novo, a sequência de reveal acontece corretamente**
 
 Criar um dilema de teste e observar:
+
 1. Os 3 rings de luz aparecem e expandem
 2. O label "Mundo gerado" aparece
 3. O título aparece com blur→nítido
@@ -602,6 +676,7 @@ git commit -m "feat: orchestrated world reveal sequence with expanding light rin
 ## Task 7: Path Selector — Spring e Press Feedback
 
 **Files:**
+
 - Modify: `src/components/dilemma-world.tsx`
 
 - [ ] **Substituir os botões do seletor de caminho por motion.button com layout animation**
@@ -611,7 +686,9 @@ Localizar o bloco do seletor de caminho em `DilemmaWorldView` (começa em `{/* S
 Substituir os dois `<button>` do seletor pelo seguinte (o wrapper `<div>` permanece igual):
 
 ```tsx
-{/* Seletor de caminho */}
+{
+  /* Seletor de caminho */
+}
 <div
   className="relative flex gap-1 rounded-full p-1"
   style={{ background: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.6)" }}
@@ -642,7 +719,7 @@ Substituir os dois `<button>` do seletor pelo seguinte (o wrapper `<div>` perman
       </motion.button>
     );
   })}
-</div>
+</div>;
 ```
 
 - [ ] **Verificar: o background desliza com spring entre os botões ao clicar**
@@ -659,6 +736,7 @@ git commit -m "feat: spring layout animation on path selector"
 ## Task 8: CaminhoView Transition — Spring Physics
 
 **Files:**
+
 - Modify: `src/components/dilemma-world.tsx`
 
 - [ ] **Melhorar a transição do CaminhoView para spring**
@@ -705,6 +783,7 @@ git commit -m "feat: spring physics on path transition"
 ## Task 9: AmbientePanel — Spring Enter/Exit
 
 **Files:**
+
 - Modify: `src/components/dilemma-world.tsx`
 
 - [ ] **Melhorar as animações de entrada e saída do AmbientePanel**
@@ -760,6 +839,7 @@ git commit -m "feat: spring enter/exit on ambiente panels"
 ## Task 10: Chips de Ambiente — Press Feedback e Ripple
 
 **Files:**
+
 - Modify: `src/components/dilemma-world.tsx`
 
 - [ ] **Substituir os chips de ambiente por motion.button com ripple**
@@ -769,41 +849,44 @@ Localizar o `{/* Indicadores de ambiente */}` em `CaminhoView`.
 Substituir o conteúdo do map (o `<button key={key} ...>`) por:
 
 ```tsx
-{AMBIENTE_ORDER.map((key) => {
-  const { Icon } = AMBIENTE_META[key];
-  const isActive = key === ambienteAtivo;
-  return (
-    <motion.button
-      key={key}
-      onClick={() => onAmbienteChange(key)}
-      className={cn(
-        "relative flex items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium",
-        isActive ? "text-sky-950" : "text-sky-950/40",
-      )}
-      style={{
-        background: isActive ? `${caminho.corDominante}25` : "rgba(255,255,255,0.35)",
-        border: isActive ? `1px solid ${caminho.corDominante}50` : "1px solid transparent",
-        transition: "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
-      }}
-      whileTap={{ scale: 0.93 }}
-      transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
-      aria-label={AMBIENTE_META[key].label}
-    >
-      {/* Ripple */}
-      {isActive && (
-        <span
-          className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 rounded-full"
-          style={{
-            background: `${caminho.corDominante}40`,
-            animation: "chip-ripple 500ms var(--ease-out-strong) both",
-          }}
-        />
-      )}
-      <Icon className="h-3 w-3 relative z-10" />
-      <span className="hidden sm:inline relative z-10">{AMBIENTE_META[key].label}</span>
-    </motion.button>
-  );
-})}
+{
+  AMBIENTE_ORDER.map((key) => {
+    const { Icon } = AMBIENTE_META[key];
+    const isActive = key === ambienteAtivo;
+    return (
+      <motion.button
+        key={key}
+        onClick={() => onAmbienteChange(key)}
+        className={cn(
+          "relative flex items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium",
+          isActive ? "text-sky-950" : "text-sky-950/40",
+        )}
+        style={{
+          background: isActive ? `${caminho.corDominante}25` : "rgba(255,255,255,0.35)",
+          border: isActive ? `1px solid ${caminho.corDominante}50` : "1px solid transparent",
+          transition:
+            "background 200ms cubic-bezier(0.23,1,0.32,1), border-color 200ms cubic-bezier(0.23,1,0.32,1), color 200ms cubic-bezier(0.23,1,0.32,1)",
+        }}
+        whileTap={{ scale: 0.93 }}
+        transition={{ duration: 0.12, ease: [0.23, 1, 0.32, 1] }}
+        aria-label={AMBIENTE_META[key].label}
+      >
+        {/* Ripple */}
+        {isActive && (
+          <span
+            className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 rounded-full"
+            style={{
+              background: `${caminho.corDominante}40`,
+              animation: "chip-ripple 500ms var(--ease-out-strong) both",
+            }}
+          />
+        )}
+        <Icon className="h-3 w-3 relative z-10" />
+        <span className="hidden sm:inline relative z-10">{AMBIENTE_META[key].label}</span>
+      </motion.button>
+    );
+  });
+}
 ```
 
 - [ ] **Verificar: cada clique no chip mostra o ripple expandindo e o chip pressiona**
@@ -820,6 +903,7 @@ git commit -m "feat: ripple effect and press feedback on ambiente chips"
 ## Task 11: Nav Arrows — Press Feedback
 
 **Files:**
+
 - Modify: `src/components/dilemma-world.tsx`
 
 - [ ] **Substituir os botões de navegação (prev/next ambiente) por motion.button**
@@ -868,6 +952,7 @@ git commit -m "feat: press feedback on ambiente navigation arrows"
 ## Task 12: prefers-reduced-motion Global
 
 **Files:**
+
 - Modify: `src/styles.css`
 
 - [ ] **Adicionar media query de reduced motion ao final do `src/styles.css`**
@@ -875,7 +960,9 @@ git commit -m "feat: press feedback on ambiente navigation arrows"
 ```css
 /* ── Acessibilidade: respeitar preferência de movimento reduzido ── */
 @media (prefers-reduced-motion: reduce) {
-  .orb-1, .orb-2, .orb-3,
+  .orb-1,
+  .orb-2,
+  .orb-3,
   [style*="orb-float"],
   [style*="reveal-ring"],
   [style*="chip-ripple"],
@@ -903,6 +990,7 @@ git commit -m "feat: respect prefers-reduced-motion for all living design animat
 ## Checklist de Self-Review
 
 ### Cobertura do spec
+
 - [x] Camada base orbes → Tasks 1, 2, 3
 - [x] Reveal do mundo → Task 6
 - [x] Troca de caminho (spring + whileTap) → Tasks 7, 8
@@ -914,6 +1002,7 @@ git commit -m "feat: respect prefers-reduced-motion for all living design animat
 - [x] `transition-all` → fix via `motion` e `transition` inline nos Tasks 7–11
 
 ### Tipos e imports consistentes
+
 - Todos os `motion` imports são de `"motion/react"` (biblioteca já instalada como `motion` v12)
 - `AnimatePresence` importado em `ways/$sessionId.tsx` Task 6
 - `cn` já importado em `dilemma-world.tsx`

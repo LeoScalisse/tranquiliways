@@ -1,15 +1,10 @@
 ﻿import { Capacitor, registerPlugin } from "@capacitor/core";
 
 interface TranquiliNativePlugin {
-  transcribeOnce(options?: {
-    language?: string;
-    prompt?: string;
-  }): Promise<{
+  transcribeOnce(options?: { language?: string; prompt?: string }): Promise<{
     transcript: string;
   }>;
-  openExternalUrl(options: {
-    url: string;
-  }): Promise<{
+  openExternalUrl(options: { url: string }): Promise<{
     opened: boolean;
     url: string;
   }>;

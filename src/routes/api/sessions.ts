@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { generateJourneyWorld } from "@/lib/generate-journey-world";
 import { issueJourneySession } from "@/lib/journey-session";
+import { resolveCreateJourneySessionError } from "@/lib/session-request-error";
 
 const createJourneySessionSchema = z.object({
   rawInput: z.string().trim().min(1).max(1200),
@@ -49,14 +50,10 @@ export const Route = createFileRoute("/api/sessions")({
           });
 
           return Response.json(session, { status: 201 });
-        } catch {
-          return Response.json(
-            {
-              error: "invalid_json",
-              message: "Nao foi possivel processar o dilema enviado.",
-            },
-            { status: 400 },
-          );
+        } catch (error) {
+          console.error("Falha ao criar sessao da jornada.", error);
+          const response = resolveCreateJourneySessionError(error);
+          return Response.json(response.body, { status: response.status });
         }
       },
     },

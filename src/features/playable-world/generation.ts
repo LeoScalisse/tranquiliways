@@ -12,6 +12,7 @@ import {
   ROOM_IDS,
   ROOM_LAYOUTS,
   WorldIntentSchema,
+  type PropKind,
   type WorldIntent,
 } from "./model.ts";
 
@@ -21,6 +22,91 @@ export const GeminiPlayableGuardrailSchema = z.object({
 
 function list(values: readonly string[]) {
   return values.map((value) => `"${value}"`).join(", ");
+}
+
+const PROP_KIND_SET = new Set<string>(PROP_KINDS);
+
+const PROP_KIND_ALIASES: Record<string, PropKind> = {
+  computer: "notebook",
+  laptop: "notebook",
+  monitor: "desk",
+  screen: "desk",
+  keyboard: "desk",
+  mouse: "desk",
+  phone: "notebook",
+  smartphone: "notebook",
+  cellphone: "notebook",
+  calendar: "notebook",
+  papers: "notebook",
+  documents: "notebook",
+};
+
+function normalizeToken(value: string) {
+  return value.trim().toLowerCase().replace(/[\s_]+/g, "-");
+}
+
+function normalizePropKind(value: unknown): unknown {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const token = normalizeToken(value);
+
+  if (PROP_KIND_SET.has(token)) {
+    return token;
+  }
+
+  return PROP_KIND_ALIASES[token] ?? value;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function unwrapWorldIntentCandidate(value: unknown): unknown {
+  if (!isRecord(value)) {
+    return value;
+  }
+
+  if (value.version === "world-intent-v1") {
+    return value;
+  }
+
+  const wrappedCandidate =
+    value.worldIntent ?? value.intent ?? value.world ?? value.blueprint ?? value.data;
+
+  return wrappedCandidate ?? value;
+}
+
+function normalizeWorldIntentCandidate(value: unknown): unknown {
+  const candidate = unwrapWorldIntentCandidate(value);
+
+  if (!isRecord(candidate) || !Array.isArray(candidate.paths)) {
+    return candidate;
+  }
+
+  return {
+    ...candidate,
+    paths: candidate.paths.map((path) => {
+      if (!isRecord(path) || !Array.isArray(path.rooms)) {
+        return path;
+      }
+
+      return {
+        ...path,
+        rooms: path.rooms.map((room) => {
+          if (!isRecord(room) || !Array.isArray(room.propStory)) {
+            return room;
+          }
+
+          return {
+            ...room,
+            propStory: room.propStory.map(normalizePropKind),
+          };
+        }),
+      };
+    }),
+  };
 }
 
 export function buildPlayableWorldPrompt(
@@ -87,7 +173,8 @@ RETORNE APENAS JSON VALIDO NESTE SHAPE:
   "card": {
     "badge": "<curto>",
     "title": "<curto>",
-    "subtitle": "<curto e concreto>"
+    "subtitle": "<curto e concreto>",
+    "cardImageQuery": "<3 to 5 English keywords describing the emotional scene, used for image search>"
   },
   "hub": {
     "title": "<curto>",
@@ -139,7 +226,7 @@ RETORNE APENAS JSON VALIDO NESTE SHAPE:
 export function parsePlayableWorldIntent(raw: string): WorldIntent | null {
   try {
     const parsed: unknown = JSON.parse(raw);
-    const result = WorldIntentSchema.safeParse(parsed);
+    const result = WorldIntentSchema.safeParse(normalizeWorldIntentCandidate(parsed));
     return result.success ? result.data : null;
   } catch {
     return null;

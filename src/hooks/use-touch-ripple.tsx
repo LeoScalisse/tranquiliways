@@ -8,10 +8,7 @@ interface Ripple {
   y: number;
 }
 
-export function useTouchRipple(
-  color = "rgba(255, 255, 255, 0.55)",
-  size = 80,
-) {
+export function useTouchRipple(color = "rgba(255, 255, 255, 0.55)", size = 80) {
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const idRef = useRef(0);
 
@@ -32,9 +29,7 @@ export function useTouchRipple(
           animate={{ width: size, height: size, opacity: 0 }}
           exit={{}}
           transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-          onAnimationComplete={() =>
-            setRipples((prev) => prev.filter((item) => item.id !== r.id))
-          }
+          onAnimationComplete={() => setRipples((prev) => prev.filter((item) => item.id !== r.id))}
           style={{
             position: "absolute",
             left: r.x,

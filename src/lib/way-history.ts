@@ -23,12 +23,12 @@ export interface WayHistoryEntry {
 }
 
 type LegacyWayHistoryEntry = Omit<WayHistoryEntry, "generationSource" | "generationWarning"> & {
-  generationSource?: JourneyGenerationSource | "gemini";
+  generationSource?: JourneyGenerationSource | "groq";
   generationWarning?:
     | JourneyGenerationWarning
-    | "gemini_quota_exhausted"
-    | "gemini_unavailable"
-    | "gemini_invalid_response";
+    | "groq_quota_exhausted"
+    | "groq_unavailable"
+    | "groq_invalid_response";
 };
 
 interface LegacySavedWay {
@@ -62,9 +62,9 @@ function toTimestamp(value: string) {
 function isLegacyJourneyGenerationWarning(value: unknown) {
   return (
     isJourneyGenerationWarning(value) ||
-    value === "gemini_quota_exhausted" ||
-    value === "gemini_unavailable" ||
-    value === "gemini_invalid_response"
+    value === "groq_quota_exhausted" ||
+    value === "groq_unavailable" ||
+    value === "groq_invalid_response"
   );
 }
 
@@ -129,7 +129,7 @@ function normalizeLegacyGenerationMeta(entry: WayHistoryEntry) {
 
   if (legacyEntry.generationSource === "groq" || legacyEntry.generationSource === "gemini") {
     return {
-      generationSource: "groq" as const,
+      generationSource: "gemini" as const,
       generationWarning: undefined,
     };
   }
@@ -304,6 +304,17 @@ export function upsertWayHistoryEntry(entry: WayHistoryEntry) {
 export function saveJourneySessionHistory(session: JourneySession) {
   const entry = createWayHistoryEntryFromSession(session);
   return upsertWayHistoryEntry(entry);
+}
+
+export function removeWayHistoryEntry(id: string) {
+  const existing = getWayHistoryEntry(id);
+
+  if (!existing) {
+    return null;
+  }
+
+  writeWayHistory(ensureWayHistoryLoaded().filter((entry) => entry.id !== id));
+  return existing;
 }
 
 export function clearWayHistory() {

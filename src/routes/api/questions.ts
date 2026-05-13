@@ -2,11 +2,8 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import {
-  GroqQuestionsResponseSchema,
-  GroqGuardrailSchema,
-} from "@/lib/interpret-dilemma";
-import { callGroq, isGroqAvailable } from "@/lib/groq";
+import { GeminiQuestionsResponseSchema, GeminiGuardrailSchema } from "@/lib/interpret-dilemma";
+import { callGemini, isGeminiAvailable } from "@/lib/gemini";
 
 const fetchQuestionsSchema = z.object({
   dilemma: z.string().trim().min(1).max(1200),
@@ -42,19 +39,19 @@ export const Route = createFileRoute("/api/questions")({
             return Response.json({ perguntas: [] }, { status: 200 });
           }
 
-          if (!isGroqAvailable()) {
+          if (!isGeminiAvailable()) {
             return Response.json({ perguntas: [] }, { status: 200 });
           }
 
-          const raw = await callGroq(buildQuestionsPrompt(result.data.dilemma), 256);
+          const raw = await callGemini(buildQuestionsPrompt(result.data.dilemma), 256);
           const parsed: unknown = JSON.parse(raw);
 
-          const guardrailCheck = GroqGuardrailSchema.safeParse(parsed);
+          const guardrailCheck = GeminiGuardrailSchema.safeParse(parsed);
           if (guardrailCheck.success) {
             return Response.json({ guardrail: true }, { status: 200 });
           }
 
-          const questionsCheck = GroqQuestionsResponseSchema.safeParse(parsed);
+          const questionsCheck = GeminiQuestionsResponseSchema.safeParse(parsed);
           if (!questionsCheck.success) {
             return Response.json({ perguntas: [] }, { status: 200 });
           }

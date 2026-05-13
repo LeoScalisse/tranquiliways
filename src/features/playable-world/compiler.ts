@@ -485,6 +485,7 @@ function createCardMeta(
       title: paths[1].title,
       color: paths[1].palette.accent,
     },
+    ...(intent.card.cardImageQuery ? { cardImageQuery: intent.card.cardImageQuery } : {}),
   };
 }
 

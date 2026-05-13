@@ -34,9 +34,7 @@ export async function fetchDilemmaQuestions(
 
     if (!response.ok) return { perguntas: [] };
 
-    const data = (await response.json()) as
-      | DilemmaQuestionsResult
-      | { guardrail: true };
+    const data = (await response.json()) as DilemmaQuestionsResult | { guardrail: true };
 
     if ("guardrail" in data && data.guardrail) {
       return {
@@ -77,9 +75,7 @@ export async function createJourneySession(
   return data as JourneySession;
 }
 
-export async function getJourneySession(
-  lookup: JourneySessionLookup,
-): Promise<JourneySession> {
+export async function getJourneySession(lookup: JourneySessionLookup): Promise<JourneySession> {
   const response = await fetch(`/api/sessions/${encodeURIComponent(lookup.id)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

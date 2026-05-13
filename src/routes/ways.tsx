@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -13,92 +13,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { CircularGallery } from "@/components/ui/circular-gallery";
+import { WayLandscapeCard } from "@/components/way-landscape-card";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { useWays } from "@/hooks/use-ways";
-import { getWorldCardMeta } from "@/lib/journey-world";
 
 export const Route = createFileRoute("/ways")({
   component: WaysPage,
 });
-
-interface CylinderCardProps {
-  way: ReturnType<typeof useWays>["ways"][number];
-  index: number;
-  count: number;
-  onOpen: () => void;
-  onDelete: () => void;
-}
-
-function CylinderCard({ way, index, count, onOpen, onDelete }: CylinderCardProps) {
-  const card = getWorldCardMeta(way.world);
-
-  return (
-    <div
-      className="tw-cylinder-item"
-      style={
-        {
-          "--quantity": count,
-          "--index": index,
-          border: `1.5px solid ${card.accentGradient[0]}88`,
-        } as React.CSSProperties
-      }
-      onClick={onOpen}
-    >
-      {/* Radial gradient background — mirrors the reference */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background: `#0000 radial-gradient(circle, ${card.accentGradient[0]}33 0%, ${card.accentGradient[1]}99 80%, ${card.accentGradient[1]}ee 100%)`,
-        }}
-      />
-
-      {/* Delete button */}
-      <button
-        className="absolute right-1.5 top-1.5 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-black/20 text-white/70 transition-colors hover:bg-rose-500/70 hover:text-white"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        onPointerDown={(e) => e.stopPropagation()}
-        aria-label={`Excluir dilema: ${way.rawInput}`}
-      >
-        <X className="h-2.5 w-2.5" />
-      </button>
-
-      {/* Content */}
-      <div className="relative z-10 flex h-full flex-col gap-2 p-2.5">
-        <p className="text-[9px] font-medium uppercase tracking-widest text-sky-950/50">Dilema</p>
-
-        <p className="flex-1 text-[11px] font-medium leading-[1.4] text-sky-950/85 line-clamp-4">
-          {way.rawInput}
-        </p>
-
-        <div className="flex flex-col gap-1">
-          <div
-            className="rounded-lg px-2 py-1 text-center text-[9px] font-semibold"
-            style={{ background: `${card.leftPath.color}25`, color: card.leftPath.color }}
-          >
-            {card.leftPath.title}
-          </div>
-          <div
-            className="rounded-lg px-2 py-1 text-center text-[9px] font-semibold"
-            style={{ background: `${card.rightPath.color}25`, color: card.rightPath.color }}
-          >
-            {card.rightPath.title}
-          </div>
-        </div>
-
-        <p className="text-[8px] text-sky-950/40">
-          {new Date(way.createdAt).toLocaleDateString("pt-BR", {
-            day: "numeric",
-            month: "short",
-          })}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function WaysPage() {
   const { ways, removeWay } = useWays();
@@ -144,33 +66,33 @@ function WaysPage() {
             </motion.div>
           ) : (
             <motion.div
-              key="cylinder"
+              key="carousel"
               className="flex w-full flex-col items-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="tw-cylinder-scene">
-                <div
-                  className="tw-cylinder-wrapper"
-                  style={{ "--quantity": ways.length } as React.CSSProperties}
-                >
-                  {ways.map((way, index) => (
-                    <CylinderCard
-                      key={way.id}
-                      way={way}
-                      index={index}
-                      count={ways.length}
-                      onOpen={() =>
+              <div className="w-full" style={{ height: "480px" }}>
+                <CircularGallery
+                  items={ways}
+                  cardWidth={160}
+                  cardHeight={220}
+                  tiltX={-12}
+                  className="w-full h-full"
+                  renderItem={(way) => (
+                    <div
+                      style={{ width: "100%", height: "100%", cursor: "pointer" }}
+                      onClick={() =>
                         navigate({
                           to: "/ways/$sessionId",
                           params: { sessionId: way.id },
                         })
                       }
-                      onDelete={() => setWayToDelete(way)}
-                    />
-                  ))}
-                </div>
+                    >
+                      <WayLandscapeCard way={way} onDelete={() => setWayToDelete(way)} />
+                    </div>
+                  )}
+                />
               </div>
 
               <p className="text-center text-xs text-sky-950/50">

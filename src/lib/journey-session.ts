@@ -2,18 +2,18 @@ import { isJourneyWorld, type JourneyWorld } from "./journey-world.ts";
 
 export type JourneyInputMode = "text" | "voice";
 export type JourneySessionStatus = "ready" | "error";
-export type JourneyGenerationSource = "groq" | "fallback";
+export type JourneyGenerationSource = "gemini" | "fallback";
 export type JourneyGenerationWarning =
-  | "groq_quota_exhausted"
-  | "groq_unavailable"
-  | "groq_invalid_response";
-
-type LegacyJourneyGenerationSource = JourneyGenerationSource | "gemini";
-type LegacyJourneyGenerationWarning =
-  | JourneyGenerationWarning
   | "gemini_quota_exhausted"
   | "gemini_unavailable"
   | "gemini_invalid_response";
+
+type LegacyJourneyGenerationSource = JourneyGenerationSource | "groq";
+type LegacyJourneyGenerationWarning =
+  | JourneyGenerationWarning
+  | "groq_quota_exhausted"
+  | "groq_unavailable"
+  | "groq_invalid_response";
 
 export interface JourneyGenerationMeta {
   generationSource: JourneyGenerationSource;
@@ -177,42 +177,40 @@ export function normalizeJourneyGenerationMeta(
   }
 
   return {
-    generationSource: "groq",
+    generationSource: "gemini",
   };
 }
 
 export function isJourneyGenerationWarning(value: unknown): value is JourneyGenerationWarning {
   return (
-    value === "groq_quota_exhausted" ||
-    value === "groq_unavailable" ||
-    value === "groq_invalid_response"
-  );
-}
-
-function isLegacyJourneyGenerationWarning(value: unknown): value is LegacyJourneyGenerationWarning {
-  return (
-    isJourneyGenerationWarning(value) ||
     value === "gemini_quota_exhausted" ||
     value === "gemini_unavailable" ||
     value === "gemini_invalid_response"
   );
 }
 
+function isLegacyJourneyGenerationWarning(value: unknown): value is LegacyJourneyGenerationWarning {
+  return (
+    isJourneyGenerationWarning(value) ||
+    value === "groq_quota_exhausted" ||
+    value === "groq_unavailable" ||
+    value === "groq_invalid_response"
+  );
+}
+
 function normalizeLegacyJourneyGenerationWarning(
   value: unknown,
 ): JourneyGenerationWarning | undefined {
-  if (value === "gemini_quota_exhausted") return "groq_quota_exhausted";
-  if (value === "gemini_unavailable") return "groq_unavailable";
-  if (value === "gemini_invalid_response") return "groq_invalid_response";
+  if (value === "groq_quota_exhausted") return "gemini_quota_exhausted";
+  if (value === "groq_unavailable") return "gemini_unavailable";
+  if (value === "groq_invalid_response") return "gemini_invalid_response";
   return isJourneyGenerationWarning(value) ? value : undefined;
 }
 
-function isJourneyGenerationMetaPayload(
-  value: {
-    generationSource?: unknown;
-    generationWarning?: unknown;
-  },
-): value is {
+function isJourneyGenerationMetaPayload(value: {
+  generationSource?: unknown;
+  generationWarning?: unknown;
+}): value is {
   generationSource?: LegacyJourneyGenerationSource;
   generationWarning?: LegacyJourneyGenerationWarning;
 } {

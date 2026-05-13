@@ -5,7 +5,11 @@
       "Bash(npx tsc *)",
       "Bash(npx skills *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(ls \"/c/Users/Erika Scalisse/.claude/projects/c--Users-Erika-Scalisse-onedrive--rea-de-trabalho-tranquiliways/memory/\" 2>/dev/null)",
+      "Read(//c/Users/Erika Scalisse/.claude/projects/c--Users-Erika-Scalisse-onedrive--rea-de-trabalho-tranquiliways/memory//**)",
+      "Bash(npm run *)",
+      "Bash(SKILLS_CLONE_TIMEOUT_MS=600000 npx skills add OpusGameLabs/game-creator -g -y)"
     ]
   }
 }

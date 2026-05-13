@@ -9,6 +9,7 @@ import {
   clearWayHistory,
   getWayHistoryEntry,
   getWayHistorySnapshot,
+  removeWayHistoryEntry,
   saveJourneySessionHistory,
   WAY_HISTORY_LEGACY_STORAGE_KEY,
   WAY_HISTORY_STORAGE_KEY,
@@ -117,11 +118,11 @@ const stubWorld: DilemmaWorld = {
 function installBrowserStorage(storage: Storage) {
   const target = globalThis as typeof globalThis & {
     localStorage?: Storage;
-    window?: { localStorage: Storage };
+    window?: Window & typeof globalThis;
   };
 
   target.localStorage = storage;
-  target.window = { localStorage: storage };
+  target.window = { localStorage: storage } as Window & typeof globalThis;
 }
 
 function createSession(overrides: Partial<JourneySession> = {}): JourneySession {
@@ -133,7 +134,7 @@ function createSession(overrides: Partial<JourneySession> = {}): JourneySession 
     inputMode: overrides.inputMode ?? "text",
     status: overrides.status ?? "ready",
     world: overrides.world ?? stubWorld,
-    generationSource: overrides.generationSource ?? "groq",
+    generationSource: overrides.generationSource ?? "gemini",
     generationWarning: overrides.generationWarning,
   };
 }
@@ -193,7 +194,7 @@ run("saveJourneySessionHistory persiste sessoes novas com token e input mode", (
   assert.equal(entry?.kind, "session");
   assert.equal(entry?.launchToken, "launch-token-abc");
   assert.equal(entry?.inputMode, "voice");
-  assert.equal(entry?.generationSource, "groq");
+  assert.equal(entry?.generationSource, "gemini");
   assert.equal(entry?.generationWarning, undefined);
   assert.deepEqual(getWayHistoryEntry("session-abc"), entry);
 });
@@ -207,17 +208,17 @@ run("saveJourneySessionHistory persiste aviso de fallback para reabertura", () =
     createSession({
       id: "session-fallback",
       generationSource: "fallback",
-      generationWarning: "groq_quota_exhausted",
+      generationWarning: "gemini_quota_exhausted",
     }),
   );
 
   const restored = getWayHistoryEntry("session-fallback");
 
   assert.equal(restored?.generationSource, "fallback");
-  assert.equal(restored?.generationWarning, "groq_quota_exhausted");
+  assert.equal(restored?.generationWarning, "gemini_quota_exhausted");
 });
 
-run("getWayHistorySnapshot normaliza metadata legada da Gemini ao carregar storage novo", () => {
+run("getWayHistorySnapshot normaliza metadata legada da Groq ao carregar storage novo", () => {
   const storage = new MemoryStorage();
   installBrowserStorage(storage);
   __resetWayHistoryForTests();
@@ -229,16 +230,16 @@ run("getWayHistorySnapshot normaliza metadata legada da Gemini ao carregar stora
         kind: "session",
         ...createSession({
           id: "session-legacy-provider",
-          generationSource: "gemini",
         }),
+        generationSource: "groq",
       },
       {
         kind: "session",
         ...createSession({
           id: "session-legacy-fallback",
           generationSource: "fallback",
-          generationWarning: "gemini_unavailable",
         }),
+        generationWarning: "groq_unavailable",
       },
     ]),
   );
@@ -247,10 +248,10 @@ run("getWayHistorySnapshot normaliza metadata legada da Gemini ao carregar stora
   const providerEntry = snapshot.find((entry) => entry.id === "session-legacy-provider");
   const fallbackEntry = snapshot.find((entry) => entry.id === "session-legacy-fallback");
 
-  assert.equal(providerEntry?.generationSource, "groq");
+  assert.equal(providerEntry?.generationSource, "gemini");
   assert.equal(providerEntry?.generationWarning, undefined);
   assert.equal(fallbackEntry?.generationSource, "fallback");
-  assert.equal(fallbackEntry?.generationWarning, "groq_unavailable");
+  assert.equal(fallbackEntry?.generationWarning, "gemini_unavailable");
 });
 
 run("saveJourneySessionHistory mantem o historico ordenado do mais novo para o mais antigo", () => {
@@ -280,6 +281,41 @@ run("saveJourneySessionHistory mantem o historico ordenado do mais novo para o m
     snapshot.map((entry) => entry.id),
     ["session-new", "session-old"],
   );
+});
+
+run("removeWayHistoryEntry exclui apenas a way pedida e preserva as demais", () => {
+  const storage = new MemoryStorage();
+  installBrowserStorage(storage);
+  __resetWayHistoryForTests();
+  clearWayHistory();
+
+  saveJourneySessionHistory(
+    createSession({
+      id: "session-old",
+      createdAt: "2026-04-17T18:00:00.000Z",
+      launchToken: "token-old",
+    }),
+  );
+  saveJourneySessionHistory(
+    createSession({
+      id: "session-new",
+      createdAt: "2026-04-17T21:00:00.000Z",
+      launchToken: "token-new",
+    }),
+  );
+
+  const removed = removeWayHistoryEntry("session-old");
+  const snapshot = getWayHistorySnapshot();
+  const persisted = storage.getItem(WAY_HISTORY_STORAGE_KEY) ?? "";
+
+  assert.equal(removed?.id, "session-old");
+  assert.equal(getWayHistoryEntry("session-old"), null);
+  assert.deepEqual(
+    snapshot.map((entry) => entry.id),
+    ["session-new"],
+  );
+  assert.equal(persisted.includes("session-old"), false);
+  assert.equal(persisted.includes("session-new"), true);
 });
 
 run("saveJourneySessionHistory reabre sessoes jogaveis sem quebrar o historico", () => {

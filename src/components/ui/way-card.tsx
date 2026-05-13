@@ -37,40 +37,92 @@ const WeatherIcon = ({ kind }: { kind: WeatherKind }) => {
   switch (kind) {
     case "sunny":
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={stroke} strokeWidth="1.5">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke={stroke}
+          strokeWidth="1.5"
+        >
           <circle cx="12" cy="12" r="4" />
-          <path strokeLinecap="round" d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+          <path
+            strokeLinecap="round"
+            d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          />
         </svg>
       );
     case "night":
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={stroke} strokeWidth="1.5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke={stroke}
+          strokeWidth="1.5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"
+          />
         </svg>
       );
     case "sunset":
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={stroke} strokeWidth="1.5">
-          <path strokeLinecap="round" d="M3 18h18M5 14a7 7 0 0114 0M12 4v3M5.6 7.6l2.1 2.1M18.4 7.6l-2.1 2.1" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke={stroke}
+          strokeWidth="1.5"
+        >
+          <path
+            strokeLinecap="round"
+            d="M3 18h18M5 14a7 7 0 0114 0M12 4v3M5.6 7.6l2.1 2.1M18.4 7.6l-2.1 2.1"
+          />
         </svg>
       );
     case "misty":
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={stroke} strokeWidth="1.5">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke={stroke}
+          strokeWidth="1.5"
+        >
           <path strokeLinecap="round" d="M3 8h14M5 12h14M3 16h12M7 20h10" />
         </svg>
       );
     case "calm":
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={stroke} strokeWidth="1.5">
-          <path strokeLinecap="round" d="M3 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke={stroke}
+          strokeWidth="1.5"
+        >
+          <path
+            strokeLinecap="round"
+            d="M3 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"
+          />
         </svg>
       );
     case "cloudy":
     default:
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={stroke} strokeWidth="1.5">
-          <path strokeLinecap="round" d="M22 14.35C22 17.47 19.44 20 16.29 20H6.29C3.92 20 2 18.1 2 15.76S3.92 11.53 6.29 11.53c.28 0 .56.03.83.08C7.68 8.59 10.16 6.5 13.14 6.5c3.27 0 5.96 2.51 6.27 5.7C20.99 12.47 22 13.31 22 14.35z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke={stroke}
+          strokeWidth="1.5"
+        >
+          <path
+            strokeLinecap="round"
+            d="M22 14.35C22 17.47 19.44 20 16.29 20H6.29C3.92 20 2 18.1 2 15.76S3.92 11.53 6.29 11.53c.28 0 .56.03.83.08C7.68 8.59 10.16 6.5 13.14 6.5c3.27 0 5.96 2.51 6.27 5.7C20.99 12.47 22 13.31 22 14.35z"
+          />
         </svg>
       );
   }
@@ -146,7 +198,10 @@ export function WayCard({
             <div className="way-location">
               <div>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffffff">
-                  <path fill="#ffffff" d="M32,0C18.746,0,8,10.746,8,24c0,5.219,1.711,10.008,4.555,13.93c0.051,0.094,0.059,0.199,0.117,0.289l16,24 C29.414,63.332,30.664,64,32,64s2.586-0.668,3.328-1.781l16-24c0.059-0.09,0.066-0.195,0.117-0.289C54.289,34.008,56,29.219,56,24 C56,10.746,45.254,0,32,0z M32,32c-4.418,0-8-3.582-8-8s3.582-8,8-8s8,3.582,8,8S36.418,32,32,32z" />
+                  <path
+                    fill="#ffffff"
+                    d="M32,0C18.746,0,8,10.746,8,24c0,5.219,1.711,10.008,4.555,13.93c0.051,0.094,0.059,0.199,0.117,0.289l16,24 C29.414,63.332,30.664,64,32,64s2.586-0.668,3.328-1.781l16-24c0.059-0.09,0.066-0.195,0.117-0.289C54.289,34.008,56,29.219,56,24 C56,10.746,45.254,0,32,0z M32,32c-4.418,0-8-3.582-8-8s3.582-8,8-8s8,3.582,8,8S36.418,32,32,32z"
+                  />
                 </svg>
                 <span>{location}</span>
               </div>

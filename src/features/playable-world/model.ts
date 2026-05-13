@@ -106,6 +106,7 @@ export interface WorldCardMeta {
     title: string;
     color: string;
   };
+  cardImageQuery?: string;
 }
 
 export interface HotspotIntent {
@@ -145,6 +146,7 @@ export interface WorldIntent {
     badge: string;
     title: string;
     subtitle: string;
+    cardImageQuery?: string;
   };
   hub: {
     title: string;
@@ -275,6 +277,7 @@ export const WorldCardMetaSchema = z.object({
     title: shortText,
     color: z.string(),
   }),
+  cardImageQuery: z.string().optional(),
 });
 
 export const HotspotIntentSchema = z.object({
@@ -316,6 +319,7 @@ export const WorldIntentSchema = z.object({
     badge: shortText,
     title: shortText,
     subtitle: mediumText,
+    cardImageQuery: z.string().optional(),
   }),
   hub: z.object({
     title: shortText,

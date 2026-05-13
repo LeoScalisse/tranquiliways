@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Sparkles } from "lucide-react";
 import {
@@ -6,17 +6,46 @@ import {
   SpinnerBlocksLoader,
   EarthLoader,
   LoadingTextLoader,
+  PencilLoader,
 } from "@/components/ui/loading-animations";
 
-const STAGES = [
-  "Lendo o que você está vivendo...",
-  "Identificando os dois caminhos...",
-  "Construindo o primeiro mundo...",
-  "Dando vida ao segundo caminho...",
-  "Finalizando os detalhes...",
+export const WORLD_CREATION_STAGES = [
+  {
+    id: "preparing",
+    label: "Preparando o dilema...",
+    detail: "Separando o contexto antes de chamar o motor de mundo.",
+  },
+  {
+    id: "generating",
+    label: "Modelando seus dois futuros...",
+    detail: "Aguardando a IA devolver o blueprint jogável completo.",
+  },
+  {
+    id: "receiving",
+    label: "Validando o blueprint...",
+    detail: "Conferindo paths, salas, objetos e hotspots antes de abrir.",
+  },
+  {
+    id: "saving",
+    label: "Salvando sua sessão...",
+    detail: "Guardando o mundo e o token para reabrir depois.",
+  },
+  {
+    id: "opening",
+    label: "Abrindo o mundo jogável...",
+    detail: "Levando você para a exploração dos dois caminhos.",
+  },
 ] as const;
 
-const LOADERS = [HourglassLoader, SpinnerBlocksLoader, EarthLoader, LoadingTextLoader] as const;
+export type WorldCreationStageId = (typeof WORLD_CREATION_STAGES)[number]["id"];
+
+const LOADERS = [
+  HourglassLoader,
+  SpinnerBlocksLoader,
+  EarthLoader,
+  LoadingTextLoader,
+  PencilLoader,
+] as const;
 
 const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
   id: i,
@@ -30,26 +59,46 @@ const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
 
 interface WorldCreationLoaderProps {
   dilemma: string;
+  stage?: WorldCreationStageId;
+  startedAt?: number;
 }
 
-export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
-  const [stageIndex, setStageIndex] = useState(0);
-  const shouldReduce = useReducedMotion();
+export function getWorldCreationStageIndex(stage: WorldCreationStageId) {
+  return Math.max(
+    0,
+    WORLD_CREATION_STAGES.findIndex((candidate) => candidate.id === stage),
+  );
+}
+
+function formatElapsed(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+}
+
+function useElapsedSeconds(startedAt?: number) {
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStageIndex((prev) => {
-        const next = prev + 1;
-        if (next >= STAGES.length - 1) {
-          clearInterval(interval);
-          return STAGES.length - 1;
-        }
-        return next;
-      });
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!startedAt) return undefined;
 
+    setNow(Date.now());
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [startedAt]);
+
+  return startedAt ? Math.max(0, Math.floor((now - startedAt) / 1000)) : 0;
+}
+
+export function WorldCreationLoader({
+  dilemma,
+  stage = "preparing",
+  startedAt,
+}: WorldCreationLoaderProps) {
+  const shouldReduce = useReducedMotion();
+  const elapsedSeconds = useElapsedSeconds(startedAt);
+  const stageIndex = getWorldCreationStageIndex(stage);
+  const activeStage = useMemo(() => WORLD_CREATION_STAGES[stageIndex], [stageIndex]);
   const LoaderComponent = LOADERS[stageIndex % LOADERS.length];
 
   return (
@@ -57,7 +106,7 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
       className="safe-screen relative flex flex-col items-center justify-center overflow-hidden px-6"
       style={{ perspective: "1200px" }}
     >
-      {/* Atmospheric particles — CSS-only, no JS loop */}
+      {/* Atmospheric particles: CSS-only, no JS loop */}
       {!shouldReduce &&
         PARTICLES.map((p) => (
           <span
@@ -83,7 +132,6 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
           />
         ))}
 
-      {/* Background glass orbs — keep existing ambient aesthetic */}
       <div
         className="glass-orb absolute left-[15%] top-[20%] h-48 w-48 opacity-60"
         style={{ animation: "content-breathe 3s ease-in-out infinite", willChange: "transform" }}
@@ -94,7 +142,6 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
       />
 
       <div className="relative z-10 flex w-full max-w-sm flex-col items-center gap-8">
-        {/* Dilemma echo */}
         <motion.p
           className="line-clamp-3 text-center text-base italic leading-7 text-sky-950/55"
           initial={{ opacity: 0 }}
@@ -104,7 +151,6 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
           "{dilemma}"
         </motion.p>
 
-        {/* Cycling loader — swaps with each stage, enters/exits from depth */}
         <AnimatePresence mode="wait">
           <motion.div
             key={stageIndex % LOADERS.length}
@@ -118,7 +164,6 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Stage icon + message */}
         <div className="flex flex-col items-center gap-3" role="status" aria-live="polite">
           <div
             className="flex h-10 w-10 items-center justify-center rounded-full"
@@ -145,14 +190,22 @@ export function WorldCreationLoader({ dilemma }: WorldCreationLoaderProps) {
               }
               style={{ transformStyle: "preserve-3d" }}
             >
-              {STAGES[stageIndex]}
+              {activeStage.label}
             </motion.p>
           </AnimatePresence>
+
+          <p className="max-w-xs text-center text-sm leading-6 text-sky-950/48">
+            {activeStage.detail}
+          </p>
+          {startedAt ? (
+            <div className="rounded-full border border-white/35 bg-white/45 px-3 py-1 text-xs font-medium text-sky-950/55">
+              {formatElapsed(elapsedSeconds)} em construção real
+            </div>
+          ) : null}
         </div>
 
-        {/* Progress dots */}
         <div className="flex items-center gap-2">
-          {STAGES.map((_, i) => (
+          {WORLD_CREATION_STAGES.map((_, i) => (
             <motion.div
               key={i}
               className="rounded-full"

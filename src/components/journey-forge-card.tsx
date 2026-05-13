@@ -156,7 +156,11 @@ export function JourneyForgeCard() {
             disabled={!canForge}
             className="rounded-full px-6 text-sm font-semibold"
           >
-            {isForging ? <LoaderCircle className="animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {isForging ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             {isForging ? "Forjando..." : "Forjar TranquiliWay"}
           </Button>
         </div>

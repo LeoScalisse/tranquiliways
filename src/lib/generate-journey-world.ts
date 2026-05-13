@@ -2,17 +2,18 @@ import { compileWorldIntent } from "../features/playable-world/compiler.ts";
 import { buildFallbackWorldIntent } from "../features/playable-world/fallback.ts";
 import {
   buildPlayableWorldPrompt,
-  GroqPlayableGuardrailSchema,
+  GeminiPlayableGuardrailSchema,
   parsePlayableWorldIntent,
 } from "../features/playable-world/generation.ts";
-import { callGroq, isGroqAvailable } from "./groq.ts";
-import type {
-  JourneyGenerationSource,
-  JourneyGenerationWarning,
-} from "./journey-session.ts";
+import { callGemini, isGeminiAvailable } from "./gemini.ts";
+import type { JourneyGenerationSource, JourneyGenerationWarning } from "./journey-session.ts";
 import type { JourneyWorld } from "./journey-world.ts";
 
-const GROQ_MAX_OUTPUT_TOKENS = 4096;
+const GEMINI_WORLD_GENERATION_OPTIONS = {
+  maxOutputTokens: 24576,
+  temperature: 0.45,
+  thinkingBudget: 0,
+} as const;
 
 export const JOURNEY_GUARDRAIL_MESSAGE =
   "Esse momento parece maior do que o TranquiliWays consegue acompanhar. " +
@@ -32,20 +33,16 @@ export interface JourneyWorldGenerationResult {
 }
 
 interface GenerateJourneyWorldDependencies {
-  isGroqAvailable: typeof isGroqAvailable;
-  callGroq: typeof callGroq;
+  isGeminiAvailable: typeof isGeminiAvailable;
+  callGemini: typeof callGemini;
 }
 
 const defaultDependencies: GenerateJourneyWorldDependencies = {
-  isGroqAvailable,
-  callGroq,
+  isGeminiAvailable,
+  callGemini,
 };
 
-function buildFallbackWorld(
-  dilema: string,
-  id: string,
-  geradoEm: string,
-): JourneyWorld {
+function buildFallbackWorld(dilema: string, id: string, geradoEm: string): JourneyWorld {
   const fallbackIntent = buildFallbackWorldIntent(dilema);
   return compileWorldIntent({ id, dilema, geradoEm, intent: fallbackIntent });
 }
@@ -61,16 +58,16 @@ function fallbackResult(
   };
 }
 
-function classifyGroqFailure(error: unknown): JourneyGenerationWarning {
+function classifyGeminiFailure(error: unknown): JourneyGenerationWarning {
   if (!(error instanceof Error)) {
-    return "groq_unavailable";
+    return "gemini_unavailable";
   }
 
-  if (error.message.includes("Groq API 429")) {
-    return "groq_quota_exhausted";
+  if (error.message.includes("Gemini API 429")) {
+    return "gemini_quota_exhausted";
   }
 
-  return "groq_unavailable";
+  return "gemini_unavailable";
 }
 
 export async function generateJourneyWorld(
@@ -82,42 +79,45 @@ export async function generateJourneyWorld(
   const geradoEm = new Date().toISOString();
   const fallbackWorld = buildFallbackWorld(dilema, id, geradoEm);
 
-  if (!dependencies.isGroqAvailable()) {
-    return fallbackResult("groq_unavailable", fallbackWorld);
+  if (!dependencies.isGeminiAvailable()) {
+    return fallbackResult("gemini_unavailable", fallbackWorld);
   }
 
   let raw: string;
   try {
-    raw = await dependencies.callGroq(
+    raw = await dependencies.callGemini(
       buildPlayableWorldPrompt(dilema, answers),
-      GROQ_MAX_OUTPUT_TOKENS,
+      GEMINI_WORLD_GENERATION_OPTIONS,
     );
   } catch (error) {
-    console.error("Erro ao chamar Groq:", error);
-    return fallbackResult(classifyGroqFailure(error), fallbackWorld);
+    console.error("[generateJourneyWorld] Gemini failed:", error);
+    return fallbackResult(classifyGeminiFailure(error), fallbackWorld);
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (error) {
-    console.error("Resposta da Groq nao retornou JSON valido.", error);
-    return fallbackResult("groq_invalid_response", fallbackWorld);
+    console.error("Resposta da Gemini nao retornou JSON valido.", error);
+    return fallbackResult("gemini_invalid_response", fallbackWorld);
   }
 
-  const guardrailCheck = GroqPlayableGuardrailSchema.safeParse(parsed);
+  const guardrailCheck = GeminiPlayableGuardrailSchema.safeParse(parsed);
   if (guardrailCheck.success) {
     return { guardrail: true, mensagem: JOURNEY_GUARDRAIL_MESSAGE };
   }
 
   const intent = parsePlayableWorldIntent(raw);
   if (!intent) {
-    console.error("Resposta da Groq fora do schema esperado para WorldIntent.");
-    return fallbackResult("groq_invalid_response", fallbackWorld);
+    console.error(
+      "[generateJourneyWorld] Gemini response failed WorldIntent schema validation. First 500 chars:",
+      raw.slice(0, 500),
+    );
+    return fallbackResult("gemini_invalid_response", fallbackWorld);
   }
 
   return {
     world: compileWorldIntent({ id, dilema, geradoEm, intent }),
-    generationSource: "groq",
+    generationSource: "gemini",
   };
 }

@@ -119,8 +119,7 @@ function Panel({
         style={{
           position: "absolute",
           inset: 0,
-          background:
-            "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.35) 100%)",
+          background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.35) 100%)",
         }}
       />
 
@@ -131,8 +130,7 @@ function Panel({
           inset: 0,
           borderRadius: 18,
           border: "1.5px solid rgba(255,255,255,0.18)",
-          boxShadow:
-            "0 8px 32px rgba(0,0,0,0.25), inset 0 0 0 0.5px rgba(255,255,255,0.1)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.25), inset 0 0 0 0.5px rgba(255,255,255,0.1)",
         }}
       />
     </motion.div>
@@ -146,12 +144,12 @@ export default function StackedPanels() {
 
   const waveYSprings = Array.from({ length: PANEL_COUNT }, () =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useSpring(0, WAVE_SPRING)
+    useSpring(0, WAVE_SPRING),
   );
 
   const scaleYSprings = Array.from({ length: PANEL_COUNT }, () =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useSpring(1, WAVE_SPRING)
+    useSpring(1, WAVE_SPRING),
   );
 
   const rotY = useSpring(-42, SCENE_SPRING);
@@ -183,7 +181,7 @@ export default function StackedPanels() {
         spring.set(0.35 + influence * 0.65);
       });
     },
-    [isMobile, rotY, rotX, waveYSprings, scaleYSprings]
+    [isMobile, rotY, rotX, waveYSprings, scaleYSprings],
   );
 
   const handlePointerLeave = useCallback(() => {
