@@ -111,7 +111,7 @@ function DilemmaSessionPage() {
           <LiquidGlassButton to="/ways" icon={ArrowLeft} compact />
         </div>
         <div className="absolute right-4 top-4 z-20">
-          <Link to="/ways/$sessionId/world" params={{ sessionId }}>
+          <Link to="/ways/$sessionId/world" params={{ sessionId }} search={{ path: undefined }}>
             <button
               type="button"
               className="rounded-full bg-white/20 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm hover:bg-white/30"

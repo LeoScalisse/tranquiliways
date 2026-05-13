@@ -7,11 +7,18 @@ import { isPlayableWorld } from "@/lib/journey-world";
 import { getWayHistoryEntry, type WayHistoryEntry } from "@/lib/way-history";
 
 export const Route = createFileRoute("/ways/$sessionId/world")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    path:
+      search.path === "parado" || search.path === "mudanca"
+        ? (search.path as "parado" | "mudanca")
+        : undefined,
+  }),
   component: WorldExplorationPage,
 });
 
 function WorldExplorationPage() {
   const { sessionId } = Route.useParams();
+  const { path: initialPathId } = Route.useSearch();
   const navigate = useNavigate();
   const [entry, setEntry] = useState<WayHistoryEntry | null>(null);
 
@@ -45,6 +52,7 @@ function WorldExplorationPage() {
       </div>
       <PlayableWorldExperience
         world={entry.world}
+        initialPathId={initialPathId}
         onBrowseWays={() => void navigate({ to: "/ways" })}
       />
     </div>

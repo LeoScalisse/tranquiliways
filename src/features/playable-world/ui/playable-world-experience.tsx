@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface PlayableWorldExperienceProps {
   world: PlayableWorldV1;
   onBrowseWays?: () => void;
+  initialPathId?: PathId;
 }
 
 function shellBackground(palette: RoomPalette) {
@@ -39,8 +40,12 @@ function shellBackground(palette: RoomPalette) {
   };
 }
 
-export function PlayableWorldExperience({ world, onBrowseWays }: PlayableWorldExperienceProps) {
-  const [state, setState] = useState<PlayableWorldState>(() => createPlayableWorldState());
+export function PlayableWorldExperience({ world, onBrowseWays, initialPathId }: PlayableWorldExperienceProps) {
+  const [state, setState] = useState<PlayableWorldState>(() => {
+    const base = createPlayableWorldState();
+    if (initialPathId) return enterPath(world, base, initialPathId);
+    return base;
+  });
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
