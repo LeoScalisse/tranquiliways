@@ -93,3 +93,59 @@ assert.ok(result.success, `WorldIntentSchema should accept hubDescription: ${JSO
 assert.equal(result.data?.paths[0].hubDescription, "Escritório familiar com luz amarelada e papéis empilhados — o peso da rotina.");
 assert.equal(result.data?.paths[1].hubDescription, "Novo espaço desconhecido com luz diferente — a antessala do possível.");
 console.log("✓ WorldIntentSchema accepts hubDescription on paths");
+
+// Verify hubDescription is truly optional
+const minimalPath = (id: "parado" | "mudanca", colorHint: string, closureLine: string) => ({
+  id,
+  label: "L",
+  title: "T",
+  summary: "S",
+  colorHint,
+  closureLine,
+  // no hubDescription
+  rooms: [
+    {
+      id: "quarto",
+      title: "Q",
+      summary: "S",
+      mood: "m",
+      layout: "sanctuary",
+      climate: "dawn",
+      propStory: ["bed", "lamp", "plant"],
+      hotspots: [
+        { kind: "memory", label: "A", prompt: "P", insight: "I" },
+        { kind: "choice", label: "B", prompt: "Q", insight: "J" },
+      ],
+    },
+    {
+      id: "sala",
+      title: "Sa",
+      summary: "Ss",
+      mood: "mm",
+      layout: "corridor",
+      climate: "overcast",
+      propStory: ["sofa", "lamp", "mug"],
+      hotspots: [
+        { kind: "body", label: "C", prompt: "R", insight: "K" },
+        { kind: "relationship", label: "D", prompt: "T2", insight: "L" },
+      ],
+    },
+  ],
+});
+
+const intentWithoutHub = {
+  version: "world-intent-v1",
+  theme: "career",
+  dilemmaType: "tradeoff",
+  cameraPreset: "isometric-calm",
+  card: { badge: "X", title: "X", subtitle: "X" },
+  hub: { title: "X", subtitle: "X" },
+  reflectionPrompt: "O que ficou vivo em você?",
+  paths: [minimalPath("parado", "mist", "ok"), minimalPath("mudanca", "ember", "ok")],
+};
+
+const resultNoHub = WorldIntentSchema.safeParse(intentWithoutHub);
+assert.ok(resultNoHub.success, `WorldIntentSchema should accept paths without hubDescription: ${JSON.stringify(resultNoHub.error?.issues)}`);
+assert.equal(resultNoHub.data?.paths[0].hubDescription, undefined);
+assert.equal(resultNoHub.data?.paths[1].hubDescription, undefined);
+console.log("✓ WorldIntentSchema accepts paths without hubDescription (optional confirmed)");

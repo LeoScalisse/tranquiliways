@@ -409,7 +409,7 @@ const PathBlueprintSchema = z.object({
   summary: mediumText,
   closureLine: shortText,
   colorHint: z.enum(COLOR_HINTS),
-  hubDescription: z.string().optional(),
+  hubDescription: z.string().trim().max(220).optional(),
   palette: RoomPaletteSchema,
   rooms: RoomBlueprintArraySchema,
 });
