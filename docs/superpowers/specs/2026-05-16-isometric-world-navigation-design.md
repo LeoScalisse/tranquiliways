@@ -8,7 +8,7 @@
 
 ## 1. Visão Geral
 
-Substituir o sistema atual de seleção de caminho por botões por um mundo 2.5D isométrico navegável via D-pad (+) no mobile e WASD/setas no desktop. O usuário controla um avatar customizável que explora hubs e ambientes gerados por IA, representando os possíveis futuros do seu dilema.
+Substituir o sistema atual de seleção de caminho por botões por um mundo 2.5D isométrico navegável via D-pad (+) no mobile e WASD/setas no desktop. O usuário controla um avatar customizável que explora hubs e ambientes gerados por IA em Three.js, representando os possíveis futuros do seu dilema.
 
 ---
 
@@ -224,18 +224,78 @@ Botão liquid glass pill no canto superior direito da home (`/`), espelhando o b
 
 ---
 
-## 9. Visual Target
+## 9. Stack Técnico — Three.js + World Labs + Meshy AI
 
-- Estilo: 2.5D low-poly 3D renderizado, paleta suave
-- Referência: imagem fornecida pelo usuário (hub isométrico com personagem, duas portas, caminhos de pedra, árvores)
-- Hub nuvem: branco/etéreo, sem elementos de mundo real
-- Implementação: CSS 3D transform + SVG isométrico (sem Three.js nesta fase)
+### Engine: Three.js
+
+- **Renderer**: `THREE.WebGLRenderer({ antialias: false })` — `antialias: false` porque SparkJS tem AA próprio
+- **Loop**: `renderer.setAnimationLoop()` — pausa em aba escondida, compatível com WebXR
+- **Delta cap**: `Math.min(clock.getDelta(), 0.1)` — evita death spirals
+- **Pixel ratio**: `Math.min(devicePixelRatio, 2)` — protege GPU em high-DPI
+
+**Arquitetura obrigatória (threejs-game skill):**
+
+```text
+src/features/playable-world/
+  core/
+    EventBus.ts       — pub/sub entre módulos (nunca import direto)
+    GameState.ts      — estado centralizado + reset()
+    Constants.ts      — zero magic numbers no código
+  systems/
+    InputSystem.ts    — WASD/arrows + touch D-pad → dx/dy unificado
+  level/
+    AssetLoader.ts    — GLTFLoader + SkeletonUtils.clone()
+    WorldLoader.ts    — SparkRenderer + SplatMesh (World Labs)
+  ui/
+    IsometricWorld.tsx
+    DirectionalPad.tsx
+```
+
+### Ambientes: World Labs (Gaussian Splat)
+
+- **API**: World Labs Marble API → gera `.spz` (visual) + `.glb` (collider) por cena
+- **Renderer**: `@sparkjsdev/spark@^2.0.0` — `SparkRenderer` + `SplatMesh`
+- **Cenas geradas por IA**: hub de cada caminho + cada ambiente (2–5 por caminho)
+- **Hub Nuvem**: cena Three.js manual (branco/etéreo, nuvens volumétricas) — não usa World Labs
+- **Input para geração**: `hubDescription` e `visualDescription` do `DilemmaWorld` viram prompts da World Labs API
+- **Resolução**: 500k SPZ (desktop) / 100k SPZ (mobile via Capacitor)
+- **Collider**: malha GLB invisível para raycasting de ground/paredes
+
+### Personagem: Meshy AI
+
+- **Geração**: `meshy-generate.mjs --mode text-to-3d` → personagem base low-poly
+- **Rig**: `--mode rig` → skeleton humanóide automático
+- **Animações**: idle, walk (geradas via pipeline Meshy)
+- **Customização de cor/material**: `MeshStandardMaterial.color` por parte do corpo (cabeça, torso, pernas, pés) — sem regenerar o GLB
+- **Variantes de estilo** (hairStyle, shirt, pants): conjunto pequeno de GLBs pré-gerados
+- **Clone**: `SkeletonUtils.clone()` — nunca `.clone()` direto em modelo animado
+
+### Skills a invocar durante implementação
+
+| Fase                    | Skill                          |
+| ----------------------- | ------------------------------ |
+| Arquitetura Three.js    | `threejs-game`                 |
+| Geração de ambientes    | `worldlabs`                    |
+| Geração/rig do avatar   | `meshyai` → `add-3d-assets`    |
+| Performance             | `threejs-perf`                 |
+| Polimento visual        | `improve-game`                 |
+| QA do mundo             | `game-qa`                      |
 
 ---
 
-## 10. Fora de Escopo (MVP)
+## 10. Visual Target
 
-- Som ambiente (deferido)
-- Animações avançadas do personagem (walk cycle completo)
-- Three.js / WebGL (avaliado em fase posterior)
+- Estilo: 2.5D isométrico low-poly 3D, paleta suave, iluminação quente
+- Referência: imagem fornecida (hub com personagem, duas portas com glow, caminhos de pedra, árvores)
+- Hub Nuvem: branco/etéreo — Three.js puro (fog, PointLight branco, plano de nuvens)
+- Hubs de caminho + ambientes: Gaussian Splat via World Labs
+
+---
+
+## 11. Fora de Escopo (MVP)
+
+- Som ambiente (deferido — skill `game-audio` na próxima fase)
+- Walk cycle completo (idle + walk suficientes agora)
+- WebGPURenderer / TSL shaders (avaliado após MVP)
 - Interações com objetos dentro dos ambientes
+- Postprocessing (bloom, SSAO) — apenas após validar perf mobile
