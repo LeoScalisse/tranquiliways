@@ -134,6 +134,7 @@ export interface PathIntent {
   summary: string;
   colorHint: ColorHint;
   closureLine: string;
+  hubDescription?: string;
   rooms: RoomIntent[];
 }
 
@@ -219,6 +220,7 @@ export interface PathBlueprint {
   summary: string;
   closureLine: string;
   colorHint: ColorHint;
+  hubDescription?: string;
   palette: RoomPalette;
   rooms: RoomBlueprint[];
 }
@@ -308,6 +310,7 @@ const BasePathIntentSchema = z.object({
   summary: mediumText,
   colorHint: z.enum(COLOR_HINTS),
   closureLine: shortText,
+  hubDescription: z.string().trim().max(220).optional(),
 });
 
 export const WorldIntentSchema = z.object({
@@ -406,6 +409,7 @@ const PathBlueprintSchema = z.object({
   summary: mediumText,
   closureLine: shortText,
   colorHint: z.enum(COLOR_HINTS),
+  hubDescription: z.string().optional(),
   palette: RoomPaletteSchema,
   rooms: RoomBlueprintArraySchema,
 });
