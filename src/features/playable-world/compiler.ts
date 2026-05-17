@@ -461,6 +461,7 @@ function createPathBlueprint(
     summary: intent.summary,
     closureLine: intent.closureLine,
     colorHint: intent.colorHint,
+    hubDescription: intent.hubDescription,
     palette,
     rooms,
   };
