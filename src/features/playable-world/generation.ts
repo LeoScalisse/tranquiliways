@@ -163,6 +163,7 @@ CONTRATO:
 - cada room precisa de 2 ou 3 hotspots
 - label e title curtos
 - summary e insight concretos, sem abstracao vazia
+- cada path DEVE ter um campo "hubDescription": string de 1-2 linhas descrevendo o ambiente físico e emocional da antessala desse caminho (ex: "escritório familiar com papéis velhos e luz amarelada — o peso da rotina cotidiana"; "espaço desconhecido cheio de luz nova — a antessala do possível")
 
 RETORNE APENAS JSON VALIDO NESTE SHAPE:
 {
@@ -189,6 +190,7 @@ RETORNE APENAS JSON VALIDO NESTE SHAPE:
       "summary": "<resumo concreto do custo ou textura desse caminho>",
       "colorHint": "mist" | "ember" | "aqua" | "gold" | "rose" | "sage" | "slate" | "violet",
       "closureLine": "<frase curta>",
+      "hubDescription": "<descricao da antessala desse caminho, 1-2 linhas concretas>",
       "rooms": [
         {
           "id": "<room id do pool permitido>",
@@ -217,6 +219,7 @@ RETORNE APENAS JSON VALIDO NESTE SHAPE:
       "summary": "<resumo concreto do custo ou textura desse caminho>",
       "colorHint": "mist" | "ember" | "aqua" | "gold" | "rose" | "sage" | "slate" | "violet",
       "closureLine": "<frase curta>",
+      "hubDescription": "<descricao da antessala desse caminho, 1-2 linhas concretas>",
       "rooms": [{ "...": "2 a 5 rooms por path, ids escolhidos pelo contexto" }]
     }
   ]
