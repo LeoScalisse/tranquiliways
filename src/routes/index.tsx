@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { AnimatePresence } from "motion/react";
 import { useRef, useState } from "react";
 
 import {
@@ -8,6 +9,7 @@ import {
 import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button";
 import { TranquiliWaysTitle } from "@/components/ui/tranquili-ways-title";
+import { CharacterCustomizer } from "@/components/character-customizer.tsx";
 import { useWays } from "@/hooks/use-ways";
 import { createJourneySession } from "@/lib/journey-api";
 
@@ -25,6 +27,7 @@ function Index() {
   const [creationStage, setCreationStage] = useState<WorldCreationStageId>("preparing");
   const [generationStartedAt, setGenerationStartedAt] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [showCustomizer, setShowCustomizer] = useState(false);
   const rawInputRef = useRef("");
   const { saveWaySession } = useWays();
   const navigate = useNavigate();
@@ -94,6 +97,16 @@ function Index() {
         <LiquidGlassButton to="/ways" label="Ways" />
       </div>
 
+      <div className="absolute right-4 top-4 z-10">
+        <button
+          type="button"
+          onClick={() => setShowCustomizer(true)}
+          className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-sky-950/72 transition hover:bg-white/80"
+        >
+          Personagem
+        </button>
+      </div>
+
       <div className="mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-3xl flex-col items-center justify-start gap-8 px-4 pt-[20svh]">
         <div style={{ animation: "stagger-reveal 0.5s var(--ease-out-strong) both" }}>
           <TranquiliWaysTitle shimmerActive={!interacting} />
@@ -134,6 +147,12 @@ function Index() {
           3 gerações gratuitas por semana
         </p>
       </div>
+
+      <AnimatePresence>
+        {showCustomizer && (
+          <CharacterCustomizer onClose={() => setShowCustomizer(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
