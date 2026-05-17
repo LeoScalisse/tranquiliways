@@ -4,10 +4,13 @@ import { GameState, type Scene } from "../core/GameState.ts";
 import { CAMERA, CHARACTER, PORTAL } from "../core/Constants.ts";
 import type { PathId, PlayableWorldV1 } from "../model.ts";
 import { useDirectionalInput, type DirectionalInput } from "@/hooks/use-directional-input.ts";
+import { useCharacterCustomization } from "@/hooks/use-character-customization.ts";
 import { DirectionalPad } from "./directional-pad.tsx";
 import { createHubNuvemScene, type PortalCallback } from "./scene-hub-nuvem.ts";
 import { createHubCaminhoScene } from "./scene-hub-caminho.ts";
 import { createAmbienteScene } from "./scene-ambiente.ts";
+import { loadSplatScene } from "../level/WorldLoader.ts";
+import { loadCharacterWithAnimations, applyMeshColor } from "../level/AssetLoader.ts";
 
 interface Props {
   world: PlayableWorldV1;
@@ -17,7 +20,9 @@ interface Props {
 export function IsometricWorld({ world, onBrowseWays }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef<DirectionalInput>({ dx: 0, dy: 0 });
+  const realMeshRef = useRef<THREE.Object3D | null>(null);
   const [scene, setScene] = useState<Scene>({ type: "hub-nuvem" });
+  const { customization } = useCharacterCustomization();
 
   useDirectionalInput(inputRef);
 
@@ -45,6 +50,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     const scene3d = new THREE.Scene();
     scene3d.fog = new THREE.Fog(0xf0f4f8, 10, 22);
 
+    // Placeholder character box — replaced by Meshy GLB once loaded
     const charMesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.38, 0.9, 0.38),
       new THREE.MeshStandardMaterial({ color: "#f5c5a3" }),
@@ -56,10 +62,13 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     const TRIGGER = PORTAL.TRIGGER_RADIUS;
 
     let activeGroup: THREE.Group | null = null;
+    let mixer: THREE.AnimationMixer | null = null;
+    let walkAction: THREE.AnimationAction | null = null;
 
     function loadScene(s: Scene) {
       if (activeGroup) scene3d.remove(activeGroup);
-      charMesh.position.set(0, 0.45, 0);
+      const activeMesh = realMeshRef.current ?? charMesh;
+      activeMesh.position.set(0, 0.45, 0);
 
       if (s.type === "hub-nuvem") {
         scene3d.fog = new THREE.Fog(0xf0f4f8, 12, 26);
@@ -105,24 +114,59 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
 
     loadScene({ type: "hub-nuvem" });
 
+    // Pre-load World Labs Gaussian Splat environments (graceful — no-ops if files absent)
+    const isMobile = window.innerWidth < 768;
+    loadSplatScene("hub-parado", scene3d, renderer, isMobile).catch(() => undefined);
+    loadSplatScene("hub-mudanca", scene3d, renderer, isMobile).catch(() => undefined);
+
+    // Load Meshy AI character (graceful — placeholder box stays if GLB absent)
+    loadCharacterWithAnimations(CHARACTER.MODEL_PATH, CHARACTER.WALK_ANIM_PATH)
+      .then(({ mesh, mixer: m, walkAction: w }) => {
+        mesh.scale.setScalar(CHARACTER.SCALE);
+        mesh.rotation.y = CHARACTER.ROTATION_OFFSET;
+        mesh.position.copy(charMesh.position);
+        scene3d.remove(charMesh);
+        scene3d.add(mesh);
+        realMeshRef.current = mesh;
+        mixer = m;
+        walkAction = w;
+        applyMeshColor(mesh, "head", customization.skinColor);
+        applyMeshColor(mesh, "hair", customization.hairColor);
+        applyMeshColor(mesh, "shirt", customization.shirtColor);
+        applyMeshColor(mesh, "pants", customization.pantsColor);
+        applyMeshColor(mesh, "shoe", customization.shoeColor);
+      })
+      .catch(() => undefined);
+
     renderer.setAnimationLoop(() => {
       const delta = Math.min(clock.getDelta(), 0.1);
       const { dx, dy } = inputRef.current;
+      const activeMesh = realMeshRef.current ?? charMesh;
 
       if (dx !== 0 || dy !== 0) {
         const speed = CHARACTER.MOVE_SPEED * delta;
         const wx = (dx - dy) * 0.7071;
         const wz = (-dx - dy) * 0.7071;
-        charMesh.position.x = Math.max(-7, Math.min(7, charMesh.position.x + wx * speed));
-        charMesh.position.z = Math.max(-7, Math.min(7, charMesh.position.z + wz * speed));
-        charMesh.rotation.y = Math.atan2(wx, wz);
+        activeMesh.position.x = Math.max(-7, Math.min(7, activeMesh.position.x + wx * speed));
+        activeMesh.position.z = Math.max(-7, Math.min(7, activeMesh.position.z + wz * speed));
+        activeMesh.rotation.y = Math.atan2(wx, wz);
       }
 
+      // Animation
+      mixer?.update(delta);
+      if (walkAction) {
+        const target = dx !== 0 || dy !== 0 ? 1 : 0;
+        walkAction.setEffectiveWeight(
+          THREE.MathUtils.lerp(walkAction.getEffectiveWeight(), target, delta * 8),
+        );
+      }
+
+      // Collision
       if (activeGroup) {
         const portals = activeGroup.userData.portals as THREE.Group[] | undefined;
         if (portals) {
           for (const p of portals) {
-            if (charMesh.position.distanceTo(p.position) < TRIGGER) {
+            if (activeMesh.position.distanceTo(p.position) < TRIGGER) {
               (activeGroup.userData.onPortal as PortalCallback)(p.userData.pathId as PathId);
               break;
             }
@@ -132,7 +176,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
         const doors = activeGroup.userData.doors as THREE.Group[] | undefined;
         if (doors) {
           for (const d of doors) {
-            if (charMesh.position.distanceTo(d.position) < TRIGGER) {
+            if (activeMesh.position.distanceTo(d.position) < TRIGGER) {
               (activeGroup.userData.onAmbiente as (i: number) => void)(d.userData.roomIndex as number);
               break;
             }
@@ -140,7 +184,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
         }
 
         const returnDoor = activeGroup.userData.returnDoor as THREE.Group | undefined;
-        if (returnDoor && charMesh.position.distanceTo(returnDoor.position) < TRIGGER) {
+        if (returnDoor && activeMesh.position.distanceTo(returnDoor.position) < TRIGGER) {
           const onHN = activeGroup.userData.onHubNuvem as (() => void) | undefined;
           const onHC = activeGroup.userData.onHubCaminho as (() => void) | undefined;
           onHN?.();
@@ -162,8 +206,20 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
       renderer.setAnimationLoop(null);
       renderer.dispose();
       ro.disconnect();
+      realMeshRef.current = null;
     };
-  }, [world]);
+  }, [world]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync customization colors whenever they change
+  useEffect(() => {
+    const mesh = realMeshRef.current;
+    if (!mesh) return;
+    applyMeshColor(mesh, "head", customization.skinColor);
+    applyMeshColor(mesh, "hair", customization.hairColor);
+    applyMeshColor(mesh, "shirt", customization.shirtColor);
+    applyMeshColor(mesh, "pants", customization.pantsColor);
+    applyMeshColor(mesh, "shoe", customization.shoeColor);
+  }, [customization]);
 
   const sceneLabel =
     scene.type === "hub-nuvem"
