@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import type { RoomBlueprint } from "../model.ts";
+import { PropFactory } from "../level/PropFactory.ts";
 
 export type HubCaminhoCallback = () => void;
 
@@ -13,28 +14,43 @@ const LIGHTING_DIR: Record<string, number> = {
 export function createAmbienteScene(room: RoomBlueprint, onHubCaminho: HubCaminhoCallback): THREE.Group {
   const group = new THREE.Group();
 
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(14, 14),
-    new THREE.MeshStandardMaterial({ color: room.palette.ground, roughness: 0.88 }),
-  );
-  ground.rotation.x = -Math.PI / 2;
-  group.add(ground);
+  const baseColor = new THREE.Color(room.palette.ground);
+  for (let i = 0; i < 7; i++) {
+    for (let j = 0; j < 7; j++) {
+      const tileColor = baseColor.clone();
+      if ((i + j) % 2 === 0) tileColor.lerp(new THREE.Color(0xffffff), 0.06);
+      const tile = new THREE.Mesh(
+        new THREE.PlaneGeometry(2, 2),
+        new THREE.MeshStandardMaterial({ color: tileColor, roughness: 0.88 }),
+      );
+      tile.rotation.x = -Math.PI / 2;
+      tile.position.set(-6 + i * 2, 0, -6 + j * 2);
+      tile.receiveShadow = true;
+      group.add(tile);
+    }
+  }
 
   const ambientIntensity = LIGHTING_AMBIENT[room.lighting] ?? 0.85;
   const dirIntensity = LIGHTING_DIR[room.lighting] ?? 1.0;
-  group.add(new THREE.AmbientLight(room.palette.skyTop, ambientIntensity));
-  const dir = new THREE.DirectionalLight(room.palette.glow, dirIntensity);
-  dir.position.set(5, 10, 5);
-  group.add(dir);
+  group.add(new THREE.HemisphereLight(room.palette.skyTop, room.palette.ground, ambientIntensity));
+  const sun = new THREE.DirectionalLight(room.palette.glow, dirIntensity);
+  sun.position.set(6, 10, 4);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.normalBias = 0.1;
+  sun.shadow.camera.left = -8;
+  sun.shadow.camera.right = 8;
+  sun.shadow.camera.top = 8;
+  sun.shadow.camera.bottom = -8;
+  sun.shadow.camera.updateProjectionMatrix();
+  group.add(sun);
 
   room.props.forEach((prop) => {
-    const h = 0.4 + Math.random() * 0.4;
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.35, h, 0.35),
-      new THREE.MeshStandardMaterial({ color: prop.tint ?? room.palette.prop }),
-    );
-    mesh.position.set(prop.position[0], h / 2, prop.position[2]);
-    group.add(mesh);
+    const propGroup = PropFactory.create(prop.kind, room.palette, prop.tint);
+    propGroup.position.set(prop.position[0], 0, prop.position[2]);
+    propGroup.rotation.y = prop.rotationY;
+    propGroup.scale.setScalar(prop.scale);
+    group.add(propGroup);
   });
 
   group.add(makeTextSprite(room.title,   room.palette.highlight, 256, 48, 3.8));
