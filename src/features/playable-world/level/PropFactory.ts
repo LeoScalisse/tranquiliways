@@ -26,18 +26,21 @@ function mat(color: THREE.ColorRepresentation, opts?: MatOpts): THREE.MeshStanda
 function box(w: number, h: number, d: number, color: THREE.ColorRepresentation, opts?: MatOpts): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color, opts));
   m.castShadow = true;
+  m.receiveShadow = true;
   return m;
 }
 
 function sphere(r: number, color: THREE.ColorRepresentation, opts?: MatOpts): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.SphereGeometry(r, 7, 6), mat(color, opts));
   m.castShadow = true;
+  m.receiveShadow = true;
   return m;
 }
 
 function cyl(rt: number, rb: number, h: number, color: THREE.ColorRepresentation): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 8), mat(color));
   m.castShadow = true;
+  m.receiveShadow = true;
   return m;
 }
 
@@ -115,7 +118,9 @@ function makeLamp(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation, gl
 function makeMirror(p: THREE.ColorRepresentation): THREE.Group {
   const g = new THREE.Group();
   add(g, box(0.1, 1.2, 0.8, p), 0, 0.6, 0);
-  add(g, box(0.02, 0.9, 0.6, 0x8899aa, { metalness: 0.8, roughness: 0.1 }), 0.06, 0.6, 0);
+  const mirrorGlass = box(0.02, 0.9, 0.6, 0x8899aa, { metalness: 0.8, roughness: 0.1 });
+  mirrorGlass.castShadow = false;
+  add(g, mirrorGlass, 0.06, 0.6, 0);
   return g;
 }
 
@@ -146,7 +151,9 @@ function makeFrame(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): 
 function makeWindow(p: THREE.ColorRepresentation, fog: string): THREE.Group {
   const g = new THREE.Group();
   add(g, box(0.1, 1.4, 1.0, p), 0, 0.7, 0);
-  add(g, box(0.02, 1.1, 0.7, fog, { transparent: true, opacity: 0.3 }), 0.06, 0.7, 0);
+  const glass = box(0.02, 1.1, 0.7, fog, { transparent: true, opacity: 0.3 });
+  glass.castShadow = false;
+  add(g, glass, 0.06, 0.7, 0);
   return g;
 }
 

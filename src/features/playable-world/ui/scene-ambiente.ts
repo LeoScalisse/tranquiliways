@@ -36,7 +36,8 @@ export function createAmbienteScene(room: RoomBlueprint, onHubCaminho: HubCaminh
   const sun = new THREE.DirectionalLight(room.palette.glow, dirIntensity);
   sun.position.set(6, 10, 4);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  const shadowRes = window.devicePixelRatio <= 1.5 ? 512 : 1024;
+  sun.shadow.mapSize.set(shadowRes, shadowRes);
   sun.shadow.normalBias = 0.1;
   sun.shadow.camera.left = -8;
   sun.shadow.camera.right = 8;
