@@ -34,6 +34,10 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(new THREE.Color(world.hub.palette.fog));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.4;
 
     const frustum = CAMERA.FRUSTUM_SIZE;
     function makeCamera(w: number, h: number) {
