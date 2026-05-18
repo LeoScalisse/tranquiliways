@@ -9,7 +9,6 @@ import { DirectionalPad } from "./directional-pad.tsx";
 import { createHubNuvemScene, type PortalCallback } from "./scene-hub-nuvem.ts";
 import { createHubCaminhoScene } from "./scene-hub-caminho.ts";
 import { createAmbienteScene } from "./scene-ambiente.ts";
-import { loadSplatScene } from "../level/WorldLoader.ts";
 import { loadCharacterWithAnimations, applyMeshColor } from "../level/AssetLoader.ts";
 
 interface Props {
@@ -34,7 +33,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0xf0f4f8);
+    renderer.setClearColor(new THREE.Color(world.hub.palette.fog));
 
     const frustum = CAMERA.FRUSTUM_SIZE;
     function makeCamera(w: number, h: number) {
@@ -71,7 +70,8 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
       activeMesh.position.set(0, 0.45, 0);
 
       if (s.type === "hub-nuvem") {
-        scene3d.fog = new THREE.Fog(0xf0f4f8, 12, 26);
+        scene3d.fog = new THREE.Fog(new THREE.Color(world.hub.palette.fog), 12, 26);
+        renderer.setClearColor(new THREE.Color(world.hub.palette.fog));
         activeGroup = createHubNuvemScene(world, (pathId: PathId) => {
           const next: Scene = { type: "hub-caminho", path: pathId };
           GameState.setScene(next);
@@ -82,6 +82,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
         const path = world.paths.find((p) => p.id === s.path)!;
         const fogColor = new THREE.Color(path.palette.skyBottom);
         scene3d.fog = new THREE.Fog(fogColor, 10, 22);
+        renderer.setClearColor(fogColor);
         activeGroup = createHubCaminhoScene(
           path,
           (index: number) => {
@@ -100,7 +101,9 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
       } else {
         const path = world.paths.find((p) => p.id === s.path)!;
         const room = path.rooms[s.index];
-        scene3d.fog = new THREE.Fog(new THREE.Color(room.palette.skyBottom), 8, 18);
+        const roomFogColor = new THREE.Color(room.palette.skyBottom);
+        scene3d.fog = new THREE.Fog(roomFogColor, 8, 18);
+        renderer.setClearColor(roomFogColor);
         activeGroup = createAmbienteScene(room, () => {
           const next: Scene = { type: "hub-caminho", path: s.path };
           GameState.setScene(next);
@@ -113,11 +116,6 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     }
 
     loadScene({ type: "hub-nuvem" });
-
-    // Pre-load World Labs Gaussian Splat environments (graceful — no-ops if files absent)
-    const isMobile = window.innerWidth < 768;
-    loadSplatScene("hub-parado", scene3d, renderer, isMobile).catch(() => undefined);
-    loadSplatScene("hub-mudanca", scene3d, renderer, isMobile).catch(() => undefined);
 
     // Load Meshy AI character (graceful — placeholder box stays if GLB absent)
     loadCharacterWithAnimations(CHARACTER.MODEL_PATH, CHARACTER.WALK_ANIM_PATH)

@@ -3,6 +3,13 @@ import type { RoomBlueprint } from "../model.ts";
 
 export type HubCaminhoCallback = () => void;
 
+const LIGHTING_AMBIENT: Record<string, number> = {
+  soft: 0.85, misty: 0.7, warm: 0.9, moonlit: 0.4,
+};
+const LIGHTING_DIR: Record<string, number> = {
+  soft: 0.8, misty: 0.45, warm: 1.2, moonlit: 0.35,
+};
+
 export function createAmbienteScene(room: RoomBlueprint, onHubCaminho: HubCaminhoCallback): THREE.Group {
   const group = new THREE.Group();
 
@@ -13,8 +20,10 @@ export function createAmbienteScene(room: RoomBlueprint, onHubCaminho: HubCaminh
   ground.rotation.x = -Math.PI / 2;
   group.add(ground);
 
-  group.add(new THREE.AmbientLight(room.palette.skyTop, 0.85));
-  const dir = new THREE.DirectionalLight(room.palette.glow, 1.0);
+  const ambientIntensity = LIGHTING_AMBIENT[room.lighting] ?? 0.85;
+  const dirIntensity = LIGHTING_DIR[room.lighting] ?? 1.0;
+  group.add(new THREE.AmbientLight(room.palette.skyTop, ambientIntensity));
+  const dir = new THREE.DirectionalLight(room.palette.glow, dirIntensity);
   dir.position.set(5, 10, 5);
   group.add(dir);
 

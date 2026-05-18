@@ -6,41 +6,34 @@ export type PortalCallback = (pathId: PathId) => void;
 
 export function createHubNuvemScene(world: PlayableWorldV1, onPortal: PortalCallback): THREE.Group {
   const group = new THREE.Group();
+  const { palette, portals } = world.hub;
 
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(24, 24),
-    new THREE.MeshStandardMaterial({ color: "#f8fafc", roughness: 1 }),
+    new THREE.MeshStandardMaterial({ color: palette.ground, roughness: 1 }),
   );
   ground.rotation.x = -Math.PI / 2;
   group.add(ground);
 
-  group.add(new THREE.AmbientLight(0xffffff, 1.4));
-  const ptLight = new THREE.PointLight(0xdde8ff, 1.8, 20);
+  group.add(new THREE.AmbientLight(palette.skyTop, 1.4));
+  const ptLight = new THREE.PointLight(palette.glow, 1.8, 20);
   ptLight.position.set(0, 6, 0);
   group.add(ptLight);
 
   for (let i = 0; i < 16; i++) {
     const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(Math.random() * 0.7 + 0.3, 6, 5),
-      new THREE.MeshStandardMaterial({ color: "#ffffff", transparent: true, opacity: 0.65 }),
+      new THREE.MeshStandardMaterial({ color: palette.fog, transparent: true, opacity: 0.65 }),
     );
     mesh.position.set((Math.random() - 0.5) * 18, Math.random() * 2.5 + 0.8, (Math.random() - 0.5) * 18);
     group.add(mesh);
   }
 
-  const paradoGroup = buildPortal(
-    world.paths[0].label,
-    PORTAL.GLOW_PARADO,
-    PORTAL.PARADO_POSITION,
-  );
+  const paradoGroup = buildPortal(portals[0].label, portals[0].glow, portals[0].accent, PORTAL.PARADO_POSITION);
   paradoGroup.userData.pathId = "parado" satisfies PathId;
   group.add(paradoGroup);
 
-  const mudancaGroup = buildPortal(
-    world.paths[1].label,
-    PORTAL.GLOW_MUDANCA,
-    PORTAL.MUDANCA_POSITION,
-  );
+  const mudancaGroup = buildPortal(portals[1].label, portals[1].glow, portals[1].accent, PORTAL.MUDANCA_POSITION);
   mudancaGroup.userData.pathId = "mudanca" satisfies PathId;
   group.add(mudancaGroup);
 
@@ -52,7 +45,8 @@ export function createHubNuvemScene(world: PlayableWorldV1, onPortal: PortalCall
 
 function buildPortal(
   label: string,
-  color: string,
+  glowColor: string,
+  labelColor: string,
   pos: readonly [number, number, number],
 ): THREE.Group {
   const g = new THREE.Group();
@@ -60,7 +54,7 @@ function buildPortal(
 
   const arch = new THREE.Mesh(
     new THREE.TorusGeometry(0.85, 0.09, 8, 32, Math.PI),
-    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.7 }),
+    new THREE.MeshStandardMaterial({ color: glowColor, emissive: glowColor, emissiveIntensity: 0.7 }),
   );
   arch.rotation.z = -Math.PI / 2;
   arch.position.y = 0.85;
@@ -68,16 +62,16 @@ function buildPortal(
 
   const door = new THREE.Mesh(
     new THREE.PlaneGeometry(1.5, 2),
-    new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.18, side: THREE.DoubleSide }),
+    new THREE.MeshStandardMaterial({ color: glowColor, transparent: true, opacity: 0.18, side: THREE.DoubleSide }),
   );
   door.position.y = 1;
   g.add(door);
 
-  const glow = new THREE.PointLight(color, 1.4, 4);
+  const glow = new THREE.PointLight(glowColor, 1.4, 4);
   glow.position.y = 1;
   g.add(glow);
 
-  g.add(makeTextSprite(label, color, 256, 56));
+  g.add(makeTextSprite(label, labelColor, 256, 56));
 
   return g;
 }
