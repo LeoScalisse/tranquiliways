@@ -13,7 +13,7 @@ async function run(name: string, fn: () => Promise<void> | void) {
 }
 
 function installProcessEnv(env: Record<string, string | undefined>) {
-  const target = globalThis as typeof globalThis & {
+  const target = globalThis as Omit<typeof globalThis, "process"> & {
     process?: { env?: Record<string, string | undefined> };
   };
   const previousProcess = target.process;

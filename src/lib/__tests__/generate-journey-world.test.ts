@@ -169,7 +169,7 @@ await run("generateJourneyWorld normaliza props comuns que a Gemini devolve fora
 
   assert.equal(result.generationSource, "gemini");
   assert.equal(result.generationWarning, undefined);
-  assert.equal(isPlayableWorld(result.world), true);
+  assert(isPlayableWorld(result.world));
   assert.equal(
     result.world.paths.some((path) =>
       path.rooms.some((room) => room.props.some((prop) => prop.kind === ("computer" as never))),
