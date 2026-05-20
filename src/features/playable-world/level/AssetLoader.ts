@@ -41,6 +41,48 @@ export async function loadCharacterWithAnimations(
 
   const mixer = new THREE.AnimationMixer(mesh);
   const walkClip = THREE.AnimationClip.findByName(walkClips, walkClips[0]?.name ?? "");
+  if (!walkClip) {
+    throw new Error("[AssetLoader] no walk animation clip found in GLB");
+  }
+
+  // Retarget walk animation tracks to the character's actual bone prefix.
+  // Mixamo exports use a session-specific prefix (e.g. "mixamorig5_"); when the
+  // model and animation come from different sessions, their prefixes differ and
+  // every track fails to bind ("No target node found for track: mixamorig5_…").
+  let meshBonePrefix = "";
+  mesh.traverse((c) => {
+    if (!meshBonePrefix && c.type === "Bone") {
+      const m = c.name.match(/^(mixamorig\d*_)/);
+      if (m) meshBonePrefix = m[1];
+    }
+  });
+  if (meshBonePrefix) {
+    walkClip.tracks.forEach((track) => {
+      track.name = track.name.replace(/^mixamorig\d*_/, meshBonePrefix);
+    });
+  }
+
+  // Drop tracks targeting bones that don't exist on the mesh — Mixamo's
+  // simplified skeleton omits finger joints that the walk animation still
+  // references, which produces a wall of harmless "No target node found"
+  // warnings during playback.
+  const meshBoneNames = new Set<string>();
+  mesh.traverse((c) => {
+    if (c.type === "Bone") meshBoneNames.add(c.name);
+  });
+  const totalTracks = walkClip.tracks.length;
+  walkClip.tracks = walkClip.tracks.filter((track) => {
+    const boneName = track.name.split(".")[0];
+    return meshBoneNames.has(boneName);
+  });
+
+  console.log(
+    "[AssetLoader] character clips:",
+    walkClips.map((c) => c.name),
+    "bone prefix:",
+    meshBonePrefix || "(none)",
+    `tracks: ${walkClip.tracks.length}/${totalTracks}`,
+  );
   const walkAction = mixer.clipAction(walkClip);
   walkAction.play();
   walkAction.setEffectiveWeight(0);

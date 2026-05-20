@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
 import { GameState, type Scene } from "../core/GameState.ts";
-import { CAMERA, CHARACTER, PORTAL } from "../core/Constants.ts";
+import { CAMERA, CHARACTER, FOG, PORTAL } from "../core/Constants.ts";
 import type { PathId, PlayableWorldV1 } from "../model.ts";
 import { useDirectionalInput, type DirectionalInput } from "@/hooks/use-directional-input.ts";
 import { useCharacterCustomization } from "@/hooks/use-character-customization.ts";
@@ -51,7 +51,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
 
     const scene3d = new THREE.Scene();
-    scene3d.fog = new THREE.Fog(0xf0f4f8, 10, 22);
+    scene3d.fog = new THREE.Fog(0xf0f4f8, FOG.NEAR, FOG.FAR);
 
     // Placeholder character box — replaced by Meshy GLB once loaded
     const charMesh = new THREE.Mesh(
@@ -74,7 +74,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
       activeMesh.position.set(0, 0.45, 0);
 
       if (s.type === "hub-nuvem") {
-        scene3d.fog = new THREE.Fog(new THREE.Color(world.hub.palette.fog), 12, 26);
+        scene3d.fog = new THREE.Fog(new THREE.Color(world.hub.palette.fog), FOG.NEAR, FOG.FAR);
         renderer.setClearColor(new THREE.Color(world.hub.palette.fog));
         activeGroup = createHubNuvemScene(world, (pathId: PathId) => {
           const next: Scene = { type: "hub-caminho", path: pathId };
@@ -85,7 +85,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
       } else if (s.type === "hub-caminho") {
         const path = world.paths.find((p) => p.id === s.path)!;
         const fogColor = new THREE.Color(path.palette.skyBottom);
-        scene3d.fog = new THREE.Fog(fogColor, 10, 22);
+        scene3d.fog = new THREE.Fog(fogColor, FOG.NEAR, FOG.FAR);
         renderer.setClearColor(fogColor);
         activeGroup = createHubCaminhoScene(
           path,
@@ -106,7 +106,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
         const path = world.paths.find((p) => p.id === s.path)!;
         const room = path.rooms[s.index];
         const roomFogColor = new THREE.Color(room.palette.skyBottom);
-        scene3d.fog = new THREE.Fog(roomFogColor, 8, 18);
+        scene3d.fog = new THREE.Fog(roomFogColor, FOG.NEAR, FOG.FAR);
         renderer.setClearColor(roomFogColor);
         activeGroup = createAmbienteScene(room, () => {
           const next: Scene = { type: "hub-caminho", path: s.path };
