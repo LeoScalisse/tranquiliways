@@ -59,7 +59,7 @@ These rules are mandatory. Claude must apply the correct skill automatically —
 ### Always active
 
 - **Every response:** invoke `caveman` to compress context and keep token usage lean before writing substantive answers or code.
-- **Every new task:** invoke `find-skills` first to discover whether a more specific skill applies, then invoke that skill if found.
+- **Every step (mandatory, no exceptions):** invoke `find-skills` to discover whether a more specific skill applies, then invoke that skill if found. After using any skill, invoke `skill-creator` to evaluate whether the skill used (or the task itself) warrants creating or improving a custom skill for this project.
 
 ### Trigger map (invoke the skill when the condition matches)
 
