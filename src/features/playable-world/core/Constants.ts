@@ -21,7 +21,6 @@ export const CHARACTER = {
   SCALE: 2.0,
   ROTATION_OFFSET: Math.PI,
   MODEL_PATH: "/assets/models/character.glb",
-  WALK_ANIM_PATH: "/assets/models/character-walk.glb",
 } as const;
 
 export const PORTAL = {

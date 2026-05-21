@@ -9,7 +9,7 @@ import { DirectionalPad } from "./directional-pad.tsx";
 import { createHubNuvemScene, type PortalCallback } from "./scene-hub-nuvem.ts";
 import { createHubCaminhoScene } from "./scene-hub-caminho.ts";
 import { createAmbienteScene } from "./scene-ambiente.ts";
-import { loadCharacterWithAnimations, applyMeshColor } from "../level/AssetLoader.ts";
+import { loadCharacter, applyMeshColor } from "../level/AssetLoader.ts";
 
 interface Props {
   world: PlayableWorldV1;
@@ -65,8 +65,6 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     const TRIGGER = PORTAL.TRIGGER_RADIUS;
 
     let activeGroup: THREE.Group | null = null;
-    let mixer: THREE.AnimationMixer | null = null;
-    let walkAction: THREE.AnimationAction | null = null;
 
     function loadScene(s: Scene) {
       if (activeGroup) scene3d.remove(activeGroup);
@@ -121,17 +119,16 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
 
     loadScene({ type: "hub-nuvem" });
 
-    // Load Meshy AI character (graceful — placeholder box stays if GLB absent)
-    loadCharacterWithAnimations(CHARACTER.MODEL_PATH, CHARACTER.WALK_ANIM_PATH)
-      .then(({ mesh, mixer: m, walkAction: w }) => {
+    // Load the character GLB (graceful — placeholder box stays if GLB absent).
+    // Static model only; walk/idle animations will be rebuilt separately.
+    loadCharacter(CHARACTER.MODEL_PATH)
+      .then((mesh) => {
         mesh.scale.setScalar(CHARACTER.SCALE);
         mesh.rotation.y = CHARACTER.ROTATION_OFFSET;
         mesh.position.copy(charMesh.position);
         scene3d.remove(charMesh);
         scene3d.add(mesh);
         realMeshRef.current = mesh;
-        mixer = m;
-        walkAction = w;
         applyMeshColor(mesh, "head", customization.skinColor);
         applyMeshColor(mesh, "hair", customization.hairColor);
         applyMeshColor(mesh, "shirt", customization.shirtColor);
@@ -152,15 +149,6 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
         activeMesh.position.x = Math.max(-7, Math.min(7, activeMesh.position.x + wx * speed));
         activeMesh.position.z = Math.max(-7, Math.min(7, activeMesh.position.z + wz * speed));
         activeMesh.rotation.y = Math.atan2(wx, wz);
-      }
-
-      // Animation
-      mixer?.update(delta);
-      if (walkAction) {
-        const target = dx !== 0 || dy !== 0 ? 1 : 0;
-        walkAction.setEffectiveWeight(
-          THREE.MathUtils.lerp(walkAction.getEffectiveWeight(), target, delta * 8),
-        );
       }
 
       // Collision
