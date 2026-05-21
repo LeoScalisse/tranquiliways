@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 interface CircularGalleryProps<T> {
@@ -19,6 +19,16 @@ interface CircularGalleryProps<T> {
 }
 
 const MAX_CARD_TILT = 12;
+
+// Scene rotation angle for a given frame counter — its meaning differs by n:
+//   n≥3  → tick IS the cumulative degrees of rotation
+//   n=2  → pendulum −45 − 45·sin(t) sweeps −90°↔0°, both cards always visible
+//   n≤1  → gentle ±7° rock so the lone card feels alive
+function computeSceneRotation(tick: number, n: number): number {
+  if (n >= 3) return tick;
+  if (n === 2) return -45 - 45 * Math.sin(tick * 0.004);
+  return Math.sin(tick * 0.006) * 7;
+}
 
 // Per-card 3D tilt that follows pointer/touch position with lerp smoothing.
 // Uses direct DOM manipulation (no state) to stay off the React render cycle.
@@ -94,15 +104,17 @@ export function CircularGallery<T>({
   className,
   style,
 }: CircularGalleryProps<T>) {
-  // `tick` is a universal frame counter — its meaning differs by n:
-  //   n≥3  → cumulative degrees of rotation
-  //   n≤2  → raw frame count (sin/cos derive the animation angle)
-  const [tick, setTick] = useState(0);
   const isHoveredRef = useRef(false);
   const rafRef = useRef<number | null>(null);
+  // Rotation lives in a ref — never state. The RAF loop mutates the DOM
+  // directly (same pattern as CardTiltWrapper) so the heavy landscape cards
+  // are NOT re-rendered by React 60×/second.
+  const tickRef = useRef(0);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const cardRefsRef = useRef<(HTMLDivElement | null)[]>([]);
   // Keep latest config in a ref so the RAF closure never goes stale
-  const configRef = useRef({ n: items.length, autoRotateSpeed, hoverRotateSpeed });
-  configRef.current = { n: items.length, autoRotateSpeed, hoverRotateSpeed };
+  const configRef = useRef({ n: items.length, autoRotateSpeed, hoverRotateSpeed, tiltX });
+  configRef.current = { n: items.length, autoRotateSpeed, hoverRotateSpeed, tiltX };
 
   // Touch swipe state for carousel navigation
   const swipeVelocityRef = useRef(0);
@@ -125,27 +137,36 @@ export function CircularGallery<T>({
       ? 200
       : Math.max(250, (cardWidth + 24) / (2 * Math.sin(Math.PI / n))));
 
-  // ── Scene rotation per frame count ───────────────────────────────────────
-  // n=1  : gentle ±7° rock so the card feels alive
-  // n=2  : pendulum −45 − 45·sin(t) → sweeps −90°↔0°, starting symmetric
-  //         • at t=0 → −45° (both cards equally visible, each at 45° from front)
-  //         • trough → −90° (card 2 at front)
-  //         • peak   →   0° (card 1 at front)
-  //         neither card ever exceeds 90° from viewer → both always visible
-  // n≥3  : continuous rotation (tick IS the cumulative degrees)
-  const sceneRotation =
-    n >= 3
-      ? tick
-      : n === 2
-      ? -45 - 45 * Math.sin(tick * 0.004)
-      : Math.sin(tick * 0.006) * 7;
+  // First-paint rotation; the RAF takes over and mutates the DOM from here.
+  // Computed from the live tick so a re-render (e.g. items changed) never
+  // snaps the scene back to 0.
+  const initialRotation = computeSceneRotation(tickRef.current, n);
 
   useEffect(() => {
     const animate = () => {
-      const { n: cn, autoRotateSpeed: spd, hoverRotateSpeed: hspd } = configRef.current;
+      const cfg = configRef.current;
       const swipe = swipeVelocityRef.current;
       swipeVelocityRef.current *= 0.88; // momentum damping
-      setTick((t) => t + (cn >= 3 ? (isHoveredRef.current ? hspd : spd) + swipe : 1));
+      tickRef.current +=
+        cfg.n >= 3
+          ? (isHoveredRef.current ? cfg.hoverRotateSpeed : cfg.autoRotateSpeed) + swipe
+          : 1;
+
+      const rotation = computeSceneRotation(tickRef.current, cfg.n);
+      if (sceneRef.current) {
+        sceneRef.current.style.transform = `rotateX(${cfg.tiltX}deg) rotateY(${rotation}deg)`;
+      }
+
+      const anglePer = cfg.n <= 1 ? 0 : cfg.n === 2 ? 90 : 360 / cfg.n;
+      const cards = cardRefsRef.current;
+      for (let i = 0; i < cards.length; i++) {
+        const el = cards[i];
+        if (!el) continue;
+        const rel = ((((i * anglePer + rotation) % 360) + 360) % 360);
+        const norm = rel > 180 ? 360 - rel : rel;
+        el.style.opacity = String(Math.max(0.35, 1 - (norm / 180) * 0.65));
+      }
+
       rafRef.current = requestAnimationFrame(animate);
     };
     rafRef.current = requestAnimationFrame(animate);
@@ -194,12 +215,14 @@ export function CircularGallery<T>({
       onTouchEnd={onTouchEnd}
     >
       <div
+        ref={sceneRef}
         style={{
           position: "relative",
           width: "100%",
           height: "100%",
           transformStyle: "preserve-3d",
-          transform: `rotateX(${tiltX}deg) rotateY(${sceneRotation}deg)`,
+          transform: `rotateX(${tiltX}deg) rotateY(${initialRotation}deg)`,
+          willChange: "transform",
         }}
         // Capture-phase handler: intercept clicks before they reach card content
         // so a swipe gesture never accidentally triggers navigation.
@@ -212,13 +235,16 @@ export function CircularGallery<T>({
       >
         {items.map((item, i) => {
           const itemAngle = i * anglePerItem;
-          const rel = ((itemAngle + sceneRotation) % 360 + 360) % 360;
+          const rel = ((itemAngle + initialRotation) % 360 + 360) % 360;
           const norm = rel > 180 ? 360 - rel : rel;
           const opacity = Math.max(0.35, 1 - (norm / 180) * 0.65);
 
           return (
             <div
               key={i}
+              ref={(el) => {
+                cardRefsRef.current[i] = el;
+              }}
               style={{
                 position: "absolute",
                 width: `${cardWidth}px`,
@@ -229,7 +255,6 @@ export function CircularGallery<T>({
                 marginTop: `-${cardHeight / 2}px`,
                 transform: `rotateY(${itemAngle}deg) translateZ(${radius}px)`,
                 opacity,
-                transition: "opacity 0.3s linear",
               }}
             >
               <CardTiltWrapper>

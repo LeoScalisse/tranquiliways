@@ -83,7 +83,7 @@ export function WayLandscapeCard({ way, onDelete, onChoosePath }: Props) {
           style={{
             position: "relative",
             width: "100%",
-            height: "76px",
+            height: "90px",
             borderRadius: "3px",
             overflow: "hidden",
             background: `linear-gradient(135deg, ${card.accentGradient[0]}, ${card.accentGradient[1]})`,
@@ -265,15 +265,17 @@ export function WayLandscapeCard({ way, onDelete, onChoosePath }: Props) {
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
-            width: deleteHovered ? "82px" : "30px",
-            height: "30px",
-            border: "none",
+            width: deleteHovered ? "86px" : "34px",
+            height: "34px",
+            border: "2px solid rgba(255,255,255,0.6)",
             borderRadius: deleteHovered ? "26px" : "50%",
             cursor: "pointer",
             position: "relative",
             overflow: "hidden",
-            transition: "width 0.3s, border-radius 0.3s",
-            boxShadow: "2px 2px 10px rgba(0,0,0,0.199)",
+            transition: "width 0.3s, border-radius 0.3s, box-shadow 0.2s",
+            boxShadow: deleteHovered
+              ? "0 4px 16px rgba(255,65,65,0.45), 2px 2px 0 rgba(0,0,0,0.15)"
+              : "0 2px 8px rgba(255,65,65,0.35), 2px 2px 0 rgba(0,0,0,0.12)",
             background: "linear-gradient(250deg, rgba(255,135,65,1) 15%, rgba(255,65,65,1) 65%)",
           }}
           onClick={(e) => {
@@ -305,8 +307,8 @@ export function WayLandscapeCard({ way, onDelete, onChoosePath }: Props) {
             <svg
               viewBox="0 0 16 16"
               fill="white"
-              height={12}
-              width={12}
+              height={14}
+              width={14}
               xmlns="http://www.w3.org/2000/svg"
               aria-hidden="true"
             >
@@ -321,14 +323,14 @@ export function WayLandscapeCard({ way, onDelete, onChoosePath }: Props) {
               opacity: deleteHovered ? 1 : 0,
               color: "white",
               fontSize: "0.7em",
-              fontWeight: 600,
+              fontWeight: 700,
               transition: "opacity 0.3s, width 0.3s, padding-right 0.3s",
-              paddingRight: deleteHovered ? "8px" : "0",
+              paddingRight: deleteHovered ? "10px" : "0",
               whiteSpace: "nowrap",
               overflow: "hidden",
             }}
           >
-            Deletar
+            Excluir
           </div>
         </button>
       </div>
