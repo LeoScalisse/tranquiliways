@@ -9,7 +9,8 @@ import { DirectionalPad } from "./directional-pad.tsx";
 import { createHubNuvemScene, type PortalCallback } from "./scene-hub-nuvem.ts";
 import { createHubCaminhoScene } from "./scene-hub-caminho.ts";
 import { createAmbienteScene } from "./scene-ambiente.ts";
-import { loadCharacter, applyMeshColor } from "../level/AssetLoader.ts";
+import { loadCharacter, applyMeshColor, preloadAssets } from "../level/AssetLoader.ts";
+import { disposeGroup } from "../level/disposeGroup.ts";
 
 interface Props {
   world: PlayableWorldV1;
@@ -21,6 +22,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
   const inputRef = useRef<DirectionalInput>({ dx: 0, dy: 0 });
   const realMeshRef = useRef<THREE.Object3D | null>(null);
   const [scene, setScene] = useState<Scene>({ type: "hub-nuvem" });
+  const [transitioning, setTransitioning] = useState(false);
   const { customization } = useCharacterCustomization();
 
   useDirectionalInput(inputRef);
@@ -42,7 +44,14 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     const frustum = CAMERA.FRUSTUM_SIZE;
     function makeCamera(w: number, h: number) {
       const a = w / h;
-      const cam = new THREE.OrthographicCamera(-frustum * a, frustum * a, frustum, -frustum, CAMERA.NEAR, CAMERA.FAR);
+      const cam = new THREE.OrthographicCamera(
+        -frustum * a,
+        frustum * a,
+        frustum,
+        -frustum,
+        CAMERA.NEAR,
+        CAMERA.FAR,
+      );
       cam.position.set(CAMERA.POSITION[0], CAMERA.POSITION[1], CAMERA.POSITION[2]);
       cam.lookAt(0, 0, 0);
       return cam;
@@ -65,59 +74,81 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     const TRIGGER = PORTAL.TRIGGER_RADIUS;
 
     let activeGroup: THREE.Group | null = null;
+    let loadingScene = false;
 
-    function loadScene(s: Scene) {
-      if (activeGroup) scene3d.remove(activeGroup);
-      const activeMesh = realMeshRef.current ?? charMesh;
-      activeMesh.position.set(0, 0.45, 0);
-
+    function buildSceneFor(s: Scene): THREE.Group {
       if (s.type === "hub-nuvem") {
         scene3d.fog = new THREE.Fog(new THREE.Color(world.hub.palette.fog), FOG.NEAR, FOG.FAR);
         renderer.setClearColor(new THREE.Color(world.hub.palette.fog));
-        activeGroup = createHubNuvemScene(world, (pathId: PathId) => {
+        return createHubNuvemScene(world, (pathId: PathId) => {
           const next: Scene = { type: "hub-caminho", path: pathId };
           GameState.setScene(next);
           setScene(next);
-          loadScene(next);
+          void loadScene(next);
         });
-      } else if (s.type === "hub-caminho") {
+      }
+      if (s.type === "hub-caminho") {
         const path = world.paths.find((p) => p.id === s.path)!;
         const fogColor = new THREE.Color(path.palette.skyBottom);
         scene3d.fog = new THREE.Fog(fogColor, FOG.NEAR, FOG.FAR);
         renderer.setClearColor(fogColor);
-        activeGroup = createHubCaminhoScene(
+        return createHubCaminhoScene(
           path,
           (index: number) => {
             const next: Scene = { type: "ambiente", path: s.path, index };
             GameState.setScene(next);
             setScene(next);
-            loadScene(next);
+            void loadScene(next);
           },
           () => {
             const next: Scene = { type: "hub-nuvem" };
             GameState.setScene(next);
             setScene(next);
-            loadScene(next);
+            void loadScene(next);
           },
         );
-      } else {
-        const path = world.paths.find((p) => p.id === s.path)!;
-        const room = path.rooms[s.index];
-        const roomFogColor = new THREE.Color(room.palette.skyBottom);
-        scene3d.fog = new THREE.Fog(roomFogColor, FOG.NEAR, FOG.FAR);
-        renderer.setClearColor(roomFogColor);
-        activeGroup = createAmbienteScene(room, () => {
-          const next: Scene = { type: "hub-caminho", path: s.path };
-          GameState.setScene(next);
-          setScene(next);
-          loadScene(next);
-        });
       }
-
-      if (activeGroup) scene3d.add(activeGroup);
+      const path = world.paths.find((p) => p.id === s.path)!;
+      const room = path.rooms[s.index];
+      const roomFogColor = new THREE.Color(room.palette.skyBottom);
+      scene3d.fog = new THREE.Fog(roomFogColor, FOG.NEAR, FOG.FAR);
+      renderer.setClearColor(roomFogColor);
+      return createAmbienteScene(room, () => {
+        const next: Scene = { type: "hub-caminho", path: s.path };
+        GameState.setScene(next);
+        setScene(next);
+        void loadScene(next);
+      });
     }
 
-    loadScene({ type: "hub-nuvem" });
+    async function loadScene(s: Scene): Promise<void> {
+      // Concurrent guards: if the user double-taps a portal we ignore the
+      // second trigger until the first transition settles.
+      if (loadingScene) return;
+      loadingScene = true;
+      setTransitioning(true);
+      try {
+        // PR 2+ will populate this with the GLB paths required by `s`.
+        await preloadAssets([]);
+
+        const newGroup = buildSceneFor(s);
+        const oldGroup = activeGroup;
+        activeGroup = newGroup;
+        scene3d.add(newGroup);
+        if (oldGroup) {
+          scene3d.remove(oldGroup);
+          disposeGroup(oldGroup);
+        }
+
+        const activeMesh = realMeshRef.current ?? charMesh;
+        activeMesh.position.set(0, 0.45, 0);
+      } finally {
+        loadingScene = false;
+        setTransitioning(false);
+      }
+    }
+
+    void loadScene({ type: "hub-nuvem" });
 
     // Load the character GLB (graceful — placeholder box stays if GLB absent).
     // Static model only; walk/idle animations will be rebuilt separately.
@@ -167,7 +198,9 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
         if (doors) {
           for (const d of doors) {
             if (activeMesh.position.distanceTo(d.position) < TRIGGER) {
-              (activeGroup.userData.onAmbiente as (i: number) => void)(d.userData.roomIndex as number);
+              (activeGroup.userData.onAmbiente as (i: number) => void)(
+                d.userData.roomIndex as number,
+              );
               break;
             }
           }
@@ -221,6 +254,13 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
   return (
     <div className="relative h-full w-full overflow-hidden">
       <canvas ref={canvasRef} className="h-full w-full" />
+
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 z-20 bg-white transition-opacity duration-300 ease-out ${
+          transitioning ? "opacity-20" : "opacity-0"
+        }`}
+      />
 
       <div className="pointer-events-none absolute left-4 top-4 z-10">
         <div className="rounded-full bg-white/55 px-4 py-2 text-xs uppercase tracking-[0.2em] text-sky-950/65 backdrop-blur-sm">
