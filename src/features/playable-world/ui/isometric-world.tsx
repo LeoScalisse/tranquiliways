@@ -11,6 +11,7 @@ import { createHubCaminhoScene } from "./scene-hub-caminho.ts";
 import { createAmbienteScene } from "./scene-ambiente.ts";
 import { loadCharacter, applyMeshColor, preloadAssets } from "../level/AssetLoader.ts";
 import { disposeGroup } from "../level/disposeGroup.ts";
+import { findAssetByKind, getAssetPath } from "../level/AssetRegistry.ts";
 
 interface Props {
   world: PlayableWorldV1;
@@ -76,6 +77,24 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
     let activeGroup: THREE.Group | null = null;
     let loadingScene = false;
 
+    // Collects the public URLs of every GLB the new scene will reach for via
+    // the registry's PropKind auto-resolution. Empty list = nothing to fetch,
+    // every prop falls back to procedural.
+    function getRequiredAssetPathsFor(s: Scene): string[] {
+      if (s.type !== "ambiente") return [];
+      const path = world.paths.find((p) => p.id === s.path);
+      const room = path?.rooms[s.index];
+      if (!room) return [];
+      const paths = new Set<string>();
+      for (const prop of room.props) {
+        const descriptor = findAssetByKind(prop.kind);
+        if (!descriptor) continue;
+        const filePath = getAssetPath(descriptor.id);
+        if (filePath) paths.add(filePath);
+      }
+      return [...paths];
+    }
+
     function buildSceneFor(s: Scene): THREE.Group {
       if (s.type === "hub-nuvem") {
         scene3d.fog = new THREE.Fog(new THREE.Color(world.hub.palette.fog), FOG.NEAR, FOG.FAR);
@@ -128,8 +147,7 @@ export function IsometricWorld({ world, onBrowseWays }: Props) {
       loadingScene = true;
       setTransitioning(true);
       try {
-        // PR 2+ will populate this with the GLB paths required by `s`.
-        await preloadAssets([]);
+        await preloadAssets(getRequiredAssetPathsFor(s));
 
         const newGroup = buildSceneFor(s);
         const oldGroup = activeGroup;

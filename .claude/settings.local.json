@@ -9,7 +9,8 @@
       "Bash(ls \"/c/Users/Erika Scalisse/.claude/projects/c--Users-Erika-Scalisse-onedrive--rea-de-trabalho-tranquiliways/memory/\" 2>/dev/null)",
       "Read(//c/Users/Erika Scalisse/.claude/projects/c--Users-Erika-Scalisse-onedrive--rea-de-trabalho-tranquiliways/memory//**)",
       "Bash(npm run *)",
-      "Bash(SKILLS_CLONE_TIMEOUT_MS=600000 npx skills add OpusGameLabs/game-creator -g -y)"
+      "Bash(SKILLS_CLONE_TIMEOUT_MS=600000 npx skills add OpusGameLabs/game-creator -g -y)",
+      "Bash(bash \"C:/Users/Erika Scalisse/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh\" --project-dir \"c:/Users/Erika Scalisse/onedrive/Área de trabalho/tranquiliways\")"
     ]
   }
 }

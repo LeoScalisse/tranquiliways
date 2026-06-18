@@ -1,5 +1,7 @@
 import * as THREE from "three";
-import type { RoomPalette } from "../model.ts";
+import type { PropKind, RoomPalette } from "../model.ts";
+import { findAssetById, findAssetByKind, getAssetPath } from "./AssetRegistry.ts";
+import { getCachedClone } from "./AssetLoader.ts";
 
 type MatOpts = {
   transparent?: boolean;
@@ -23,7 +25,13 @@ function mat(color: THREE.ColorRepresentation, opts?: MatOpts): THREE.MeshStanda
   });
 }
 
-function box(w: number, h: number, d: number, color: THREE.ColorRepresentation, opts?: MatOpts): THREE.Mesh {
+function box(
+  w: number,
+  h: number,
+  d: number,
+  color: THREE.ColorRepresentation,
+  opts?: MatOpts,
+): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color, opts));
   m.castShadow = true;
   m.receiveShadow = true;
@@ -61,7 +69,12 @@ function makeBed(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): TH
 
 function makeDesk(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): THREE.Group {
   const g = new THREE.Group();
-  for (const [x, z] of [[-0.4, -0.2], [0.4, -0.2], [-0.4, 0.2], [0.4, 0.2]] as [number, number][]) {
+  for (const [x, z] of [
+    [-0.4, -0.2],
+    [0.4, -0.2],
+    [-0.4, 0.2],
+    [0.4, 0.2],
+  ] as [number, number][]) {
     add(g, box(0.06, 0.65, 0.06, a), x, 0.325, z);
   }
   add(g, box(0.9, 0.07, 0.5, p), 0, 0.685, 0);
@@ -79,7 +92,12 @@ function makeSofa(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): T
 
 function makeTable(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): THREE.Group {
   const g = new THREE.Group();
-  for (const [x, z] of [[-0.35, -0.35], [0.35, -0.35], [-0.35, 0.35], [0.35, 0.35]] as [number, number][]) {
+  for (const [x, z] of [
+    [-0.35, -0.35],
+    [0.35, -0.35],
+    [-0.35, 0.35],
+    [0.35, 0.35],
+  ] as [number, number][]) {
     add(g, box(0.06, 0.55, 0.06, a), x, 0.275, z);
   }
   add(g, box(0.8, 0.07, 0.8, p), 0, 0.585, 0);
@@ -105,7 +123,11 @@ function makePlant(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): 
   return g;
 }
 
-function makeLamp(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation, glow: string): THREE.Group {
+function makeLamp(
+  p: THREE.ColorRepresentation,
+  a: THREE.ColorRepresentation,
+  glow: string,
+): THREE.Group {
   const g = new THREE.Group();
   add(g, box(0.07, 1.4, 0.07, a), 0, 0.7, 0);
   add(g, box(0.25, 0.2, 0.25, p), 0, 1.5, 0);
@@ -159,7 +181,12 @@ function makeWindow(p: THREE.ColorRepresentation, fog: string): THREE.Group {
 
 function makeChair(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): THREE.Group {
   const g = new THREE.Group();
-  for (const [x, z] of [[-0.17, -0.17], [0.17, -0.17], [-0.17, 0.17], [0.17, 0.17]] as [number, number][]) {
+  for (const [x, z] of [
+    [-0.17, -0.17],
+    [0.17, -0.17],
+    [-0.17, 0.17],
+    [0.17, 0.17],
+  ] as [number, number][]) {
     add(g, box(0.06, 0.35, 0.06, a), x, 0.175, z);
   }
   add(g, box(0.4, 0.07, 0.4, p), 0, 0.385, 0);
@@ -177,7 +204,11 @@ function makeWardrobe(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation
   return g;
 }
 
-function makeAltar(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation, glow: string): THREE.Group {
+function makeAltar(
+  p: THREE.ColorRepresentation,
+  a: THREE.ColorRepresentation,
+  glow: string,
+): THREE.Group {
   const g = new THREE.Group();
   add(g, box(0.4, 0.6, 0.4, p), 0, 0.3, 0);
   add(g, sphere(0.2, a, { emissive: glow, emissiveIntensity: 0.6 }), 0, 0.8, 0);
@@ -211,7 +242,12 @@ function makeMusicPlayer(p: THREE.ColorRepresentation, a: THREE.ColorRepresentat
 
 function makeDiningTable(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): THREE.Group {
   const g = new THREE.Group();
-  for (const [x, z] of [[-0.65, -0.4], [0.65, -0.4], [-0.65, 0.4], [0.65, 0.4]] as [number, number][]) {
+  for (const [x, z] of [
+    [-0.65, -0.4],
+    [0.65, -0.4],
+    [-0.65, 0.4],
+    [0.65, 0.4],
+  ] as [number, number][]) {
     add(g, box(0.08, 0.7, 0.08, a), x, 0.35, z);
   }
   add(g, box(1.4, 0.07, 0.9, p), 0, 0.735, 0);
@@ -226,30 +262,73 @@ function makeDoor(p: THREE.ColorRepresentation, a: THREE.ColorRepresentation): T
 }
 
 export const PropFactory = {
-  create(kind: string, palette: RoomPalette, tint?: string): THREE.Group {
+  create(kind: string, palette: RoomPalette, tint?: string, assetId?: string): THREE.Group {
+    // Asset-library path: an explicit assetId, or a kind-based auto-resolve.
+    // Returns the cached GLB clone if the asset is registered AND preloaded
+    // (loadScene awaits preloadAssets before composing). On any miss, falls
+    // through to the procedural recipe — scenes always render.
+    const descriptor = assetId ? findAssetById(assetId) : findAssetByKind(kind as PropKind);
+    if (descriptor) {
+      const path = getAssetPath(descriptor.id);
+      if (path) {
+        const cached = getCachedClone(path);
+        if (cached) {
+          const group = new THREE.Group();
+          cached.traverse((node) => {
+            if ("isMesh" in node && node.isMesh) {
+              (node as THREE.Mesh).castShadow = true;
+              (node as THREE.Mesh).receiveShadow = true;
+            }
+          });
+          group.add(cached);
+          return group;
+        }
+      }
+    }
+
     const p: THREE.ColorRepresentation = tint ?? palette.prop;
     const a: THREE.ColorRepresentation = palette.accent;
     switch (kind) {
-      case "bed":           return makeBed(p, a);
-      case "desk":          return makeDesk(p, a);
-      case "sofa":          return makeSofa(p, a);
-      case "table":         return makeTable(p, a);
-      case "bookshelf":     return makeBookshelf(p, a);
-      case "plant":         return makePlant(p, a);
-      case "lamp":          return makeLamp(p, a, palette.glow);
-      case "mirror":        return makeMirror(p);
-      case "suitcase":      return makeSuitcase(p, a);
-      case "notebook":      return makeNotebook(p, a);
-      case "frame":         return makeFrame(p, a);
-      case "window":        return makeWindow(p, palette.fog);
-      case "chair":         return makeChair(p, a);
-      case "wardrobe":      return makeWardrobe(p, a);
-      case "altar":         return makeAltar(p, a, palette.glow);
-      case "mug":           return makeMug(p, a);
-      case "laundry":       return makeLaundry(p, a);
-      case "music-player":  return makeMusicPlayer(p, a);
-      case "dining-table":  return makeDiningTable(p, a);
-      case "door":          return makeDoor(p, a);
+      case "bed":
+        return makeBed(p, a);
+      case "desk":
+        return makeDesk(p, a);
+      case "sofa":
+        return makeSofa(p, a);
+      case "table":
+        return makeTable(p, a);
+      case "bookshelf":
+        return makeBookshelf(p, a);
+      case "plant":
+        return makePlant(p, a);
+      case "lamp":
+        return makeLamp(p, a, palette.glow);
+      case "mirror":
+        return makeMirror(p);
+      case "suitcase":
+        return makeSuitcase(p, a);
+      case "notebook":
+        return makeNotebook(p, a);
+      case "frame":
+        return makeFrame(p, a);
+      case "window":
+        return makeWindow(p, palette.fog);
+      case "chair":
+        return makeChair(p, a);
+      case "wardrobe":
+        return makeWardrobe(p, a);
+      case "altar":
+        return makeAltar(p, a, palette.glow);
+      case "mug":
+        return makeMug(p, a);
+      case "laundry":
+        return makeLaundry(p, a);
+      case "music-player":
+        return makeMusicPlayer(p, a);
+      case "dining-table":
+        return makeDiningTable(p, a);
+      case "door":
+        return makeDoor(p, a);
       default: {
         const g = new THREE.Group();
         const m = box(0.3, 0.5, 0.3, p);
